@@ -20,7 +20,31 @@ import org.json.JSONObject;
  * @author ebianchi
  */
 public class CommandFile {
-    
+    /*
+     * TODO: write code for using FlexJSON library
+     *       Example:
+     * 
+     *  FileAttrs f = new FileAttrs();
+        FileAcl acl = new FileAcl();
+
+        f.setPosixOwner("pippo");
+        f.setType("file");
+        f.setPosixAttrs("r--r--r--");
+        
+        acl.setName("pippo");
+        acl.setAttrs("r--r--r--");
+        acl.setAclType(FileAcl.OWNER);
+        
+        ArrayList<FileAcl> acls = new ArrayList<>();
+        acls.add(acl);
+        
+        f.setAcl(acls);
+        
+        JSONSerializer serializer = new JSONSerializer();
+        
+        System.out.println(serializer.exclude("*.class").deepSerialize(f));
+     * 
+     */
     private JSONObject json;
 
     public CommandFile(String aDirectory, Boolean acl) throws JSONException, IOException {
