@@ -46,6 +46,9 @@ public class Serve implements AutoCloseable {
 
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         try {
+            // TODO: Deserialize with FlexJSON
+            // Context inJSON = new JSONDeserializer<Context>().deserialize(in.readLine()); 
+
             inJSON = new JSONObject(in.readLine());
             switch (inJSON.getString("context")) {
                 case "file":
