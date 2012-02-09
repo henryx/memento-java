@@ -12,6 +12,11 @@ import java.net.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class ContextSystem extends AbstractContext {
 
     public ContextSystem(Socket connection) {

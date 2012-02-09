@@ -15,6 +15,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class ContextFile extends AbstractContext {
     public ContextFile(Socket connection) {
         this.connection = connection;

@@ -12,6 +12,11 @@ import java.net.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ *
+ * @author enrico
+ */
+
 public abstract class AbstractContext {
     
     protected Socket connection;

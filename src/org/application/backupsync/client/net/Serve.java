@@ -20,6 +20,11 @@ import org.application.backupsync.client.context.ContextSystem;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class Serve implements AutoCloseable {
 
     private Integer port;

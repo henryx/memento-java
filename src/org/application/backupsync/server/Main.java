@@ -23,6 +23,11 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.ini4j.Wini;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class Main {
     private Options opts;
     private Wini cfg;

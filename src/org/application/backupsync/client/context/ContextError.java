@@ -13,6 +13,11 @@ import java.net.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class ContextError extends AbstractContext {
     public ContextError(Socket connection) {
         this.connection = connection;

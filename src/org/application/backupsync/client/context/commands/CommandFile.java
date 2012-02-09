@@ -17,7 +17,7 @@ import org.json.JSONObject;
 
 /**
  *
- * @author ebianchi
+ * @author enrico
  */
 public class CommandFile {
     /*

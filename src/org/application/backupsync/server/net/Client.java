@@ -7,6 +7,11 @@
 
 package org.application.backupsync.server.net;
 
+/**
+ *
+ * @author enrico
+ */
+
 public class Client {
     
     private String host;

@@ -7,6 +7,11 @@
 
 package org.application.backupsync.server;
 
+/**
+ *
+ * @author enrico
+ */
+
 import org.ini4j.Wini;
 
 public class Sync {
