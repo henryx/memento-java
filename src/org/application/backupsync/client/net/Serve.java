@@ -25,7 +25,6 @@ import org.application.backupsync.client.context.ContextSystem;
  *
  * @author enrico
  */
-
 public class Serve implements AutoCloseable {
 
     private Integer port;
@@ -55,7 +54,7 @@ public class Serve implements AutoCloseable {
                     break;
                 case "system":
                     context = new ContextSystem(connection);
-                    exit = context.parse(inJSON.get("command"));
+                    exit = context.parse((HashMap) inJSON.get("command"));
                     break;
                 default:
                     context = new ContextError(connection);

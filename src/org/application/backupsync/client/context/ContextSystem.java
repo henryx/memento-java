@@ -9,8 +9,7 @@ package org.application.backupsync.client.context;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
 
 /**
  *
@@ -22,19 +21,23 @@ public class ContextSystem extends AbstractContext {
     public ContextSystem(Socket connection) {
         this.connection = connection;
     }
-    
+
     @Override
-    public Boolean parse(JSONObject command) throws IOException {
+    public Boolean parse(HashMap command) throws IOException {
         Boolean exit;
         ContextError error;
-        
-        switch (command.getString("name")) {
+        HashMap result;
+
+        switch (command.get("name").toString()) {
             case "exit":
                 exit = Boolean.TRUE;
                 break;
             default:
+                result = new HashMap();
                 error = new ContextError(this.connection);
-                error.parse(new JSONObject().append("message", "Command not found"));
+
+                result.put("message", "Command not found");
+                error.parse(result);
                 exit = Boolean.FALSE;
                 break;
         }
