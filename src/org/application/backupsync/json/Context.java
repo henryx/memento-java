@@ -7,15 +7,13 @@ License       GPL version 2 (see GPL.txt for details)
 
 package org.application.backupsync.json;
 
-import java.util.HashMap;
-
 /**
  *
  * @author enrico
  */
 public class Context {
     private String context;
-    private HashMap<String, String> command;
+    CommandFile command;
 
     /**
      * @return the context
@@ -34,14 +32,14 @@ public class Context {
     /**
      * @return the command
      */
-    public HashMap<String, String> getCommand() {
+    public CommandFile getCommand() {
         return command;
     }
 
     /**
      * @param command the command to set
      */
-    public void setCommand(HashMap<String, String> command) {
+    public void setCommand(CommandFile command) {
         this.command = command;
     }
 }

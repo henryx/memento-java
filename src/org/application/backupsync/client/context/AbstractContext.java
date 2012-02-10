@@ -9,8 +9,7 @@ package org.application.backupsync.client.context;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
 
 /**
  *
@@ -21,5 +20,5 @@ public abstract class AbstractContext {
     
     protected Socket connection;
     
-    public abstract Boolean parse(JSONObject command) throws JSONException, IOException;
+    public abstract Boolean parse(HashMap command) throws IOException;
 }

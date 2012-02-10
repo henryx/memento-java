@@ -24,7 +24,7 @@ public class ContextSystem extends AbstractContext {
     }
     
     @Override
-    public Boolean parse(JSONObject command) throws JSONException, IOException {
+    public Boolean parse(JSONObject command) throws IOException {
         Boolean exit;
         ContextError error;
         

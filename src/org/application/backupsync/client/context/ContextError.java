@@ -7,11 +7,11 @@
 
 package org.application.backupsync.client.context;
 
+import flexjson.JSONSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
 
 /**
  *
@@ -24,18 +24,19 @@ public class ContextError extends AbstractContext {
     }
 
     @Override
-    public Boolean parse(JSONObject command) throws JSONException, IOException {
+    public Boolean parse(HashMap command) throws IOException {
         Boolean exit;
-        JSONObject result;
+        HashMap result;
+        JSONSerializer serializer;
         PrintWriter out;
 
         out = new PrintWriter(connection.getOutputStream(), true);
-        result = new JSONObject();
+        result = command;
         exit = Boolean.FALSE;
+        serializer = new JSONSerializer();
 
-        result.append("result", "error");
-        result.append("message", command.get("message"));
-        out.println(result.toString());
+        result.put("result", "error");
+        out.println(serializer.exclude("*.class").serialize(result));
 
         return exit;
     }

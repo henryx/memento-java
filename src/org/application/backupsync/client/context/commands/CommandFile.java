@@ -11,76 +11,49 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import org.application.backupsync.PathName;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.application.backupsync.json.FileAttrs;
 
 /**
  *
  * @author enrico
  */
 public class CommandFile {
-    /*
-     * TODO: write code for using FlexJSON library
-     *       Example:
-     * 
-     *  FileAttrs f = new FileAttrs();
-        FileAcl acl = new FileAcl();
+    private HashMap<String, FileAttrs> json;
 
-        f.setPosixOwner("pippo");
-        f.setType("file");
-        f.setPosixAttrs("r--r--r--");
-        
-        acl.setName("pippo");
-        acl.setAttrs("r--r--r--");
-        acl.setAclType(FileAcl.OWNER);
-        
-        ArrayList<FileAcl> acls = new ArrayList<>();
-        acls.add(acl);
-        
-        f.setAcl(acls);
-        
-        JSONSerializer serializer = new JSONSerializer();
-        
-        System.out.println(serializer.exclude("*.class").deepSerialize(f));
-     * 
-     */
-    private JSONObject json;
-
-    public CommandFile(String aDirectory, Boolean acl) throws JSONException, IOException {
-        this.json = new JSONObject();
+    public CommandFile(String aDirectory, Boolean acl) throws IOException {
         this.json = this.list(aDirectory, acl);
     }
 
-    private JSONObject list(String directory, Boolean acl) throws JSONException, FileNotFoundException, IOException {
-        JSONObject result;
-        JSONObject data;
+    private HashMap<String, FileAttrs> list(String directory, Boolean acl) throws FileNotFoundException, IOException {
+        FileAttrs data;
+        HashMap<String, FileAttrs> result;
 
-        result = new JSONObject();
+        result = new HashMap<>();
         for (PathName item : new PathName(Paths.get(directory)).walk()) {
-            data = new JSONObject();
+            data = item.getAttrs();
 
             if (item.isDirectory()) {
-                data.append("type", "directory");
+                data.setType("directory");
             } else {
-                data.append("type", "file");
+                data.setType("file");
                 try {
-                    data.append("hash", item.hash());
+                    data.setHash(item.hash());
                 } catch (NoSuchAlgorithmException | IOException ex) {
-                    data.append("hash", "");
+                    data.setHash("");
                 }
             }
-            data.append("attrs", item.getAttrs());
 
             if (acl) {
-                data.append("acl", item.getAcl());
+                data.setAcl(item.getAcl());
             }
-            result.append(item.getAbsolutePath(), data.toString());
+            result.put(item.getAbsolutePath(), data);
         }
         return result;
     }
 
-    public JSONObject get() {
+    public HashMap<String, FileAttrs> get() {
         return this.json;
     }
 }

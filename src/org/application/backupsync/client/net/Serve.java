@@ -6,6 +6,8 @@ License       GPL version 2 (see GPL.txt for details)
  */
 package org.application.backupsync.client.net;
 
+import flexjson.JSONDeserializer;
+import flexjson.JSONException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,12 +15,11 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import org.application.backupsync.client.context.AbstractContext;
 import org.application.backupsync.client.context.ContextError;
 import org.application.backupsync.client.context.ContextFile;
 import org.application.backupsync.client.context.ContextSystem;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  *
@@ -38,49 +39,44 @@ public class Serve implements AutoCloseable {
         AbstractContext context;
         Boolean exit;
         BufferedReader in;
+        HashMap errMsg;
+        HashMap inJSON;
         Socket connection;
-        JSONObject inJSON;
-        JSONObject mex;
 
         connection = socket.accept();
 
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         try {
-            // TODO: Deserialize with FlexJSON
-            // Context inJSON = new JSONDeserializer<Context>().deserialize(in.readLine()); 
-
-            inJSON = new JSONObject(in.readLine());
-            switch (inJSON.getString("context")) {
+            inJSON = new JSONDeserializer<HashMap>().deserialize(in.readLine());
+            switch (inJSON.get("context").toString()) {
                 case "file":
                     context = new ContextFile(connection);
-                    exit = context.parse(inJSON.getJSONObject("command"));
+                    exit = context.parse((HashMap) inJSON.get("command"));
                     break;
                 case "system":
                     context = new ContextSystem(connection);
-                    exit = context.parse(inJSON.getJSONObject("command"));
+                    exit = context.parse(inJSON.get("command"));
                     break;
                 default:
                     context = new ContextError(connection);
-                    exit = context.parse(new JSONObject().append("message", "Context not found"));
+                    errMsg = new HashMap();
+                    errMsg.put("message", "Command not found");
+                    exit = context.parse(errMsg);
                     break;
             }
-        } catch (JSONException | FileNotFoundException | IllegalArgumentException | NullPointerException ex) {
-            try {
-                context = new ContextError(connection);
-                mex = new JSONObject();
+        } catch (FileNotFoundException | IllegalArgumentException | NullPointerException ex) {
+            context = new ContextError(connection);
+            errMsg = new HashMap();
 
-                if (ex instanceof FileNotFoundException
-                        || ex instanceof IllegalArgumentException) {
-                    mex.append("message", "Context not found");
-                } else if (ex instanceof NullPointerException) {
-                    mex.append("message", "Buffer error");
-                } else {
-                    mex.append("message", "Malformed command");
-                }
-                exit = context.parse(mex);
-            } catch (JSONException ex2) {
-                exit = Boolean.FALSE;
+            if (ex instanceof FileNotFoundException
+                    || ex instanceof IllegalArgumentException) {
+                errMsg.put("message", "Context not found");
+            } else if (ex instanceof NullPointerException) {
+                errMsg.put("message", "Buffer error");
+            } else {
+                errMsg.put("message", "Malformed command");
             }
+            exit = context.parse(errMsg);
         }
         connection.close();
 
@@ -91,6 +87,7 @@ public class Serve implements AutoCloseable {
         this.socket = new ServerSocket(port);
     }
 
+    @Override
     public void close() throws IOException {
         this.socket.close();
     }

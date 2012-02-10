@@ -23,8 +23,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.application.backupsync.json.FileAcl;
+import org.application.backupsync.json.FileAttrs;
 
 /**
  *
@@ -38,37 +38,40 @@ public class PathName {
         this.path = aPath;
     }
 
-    private JSONObject aclFromWindows() throws JSONException {
+    private ArrayList<FileAcl> aclFromWindows() throws IOException, InterruptedException {
         // TODO: write code for Windows ACL extraction
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private JSONObject aclFromLinux() throws JSONException, IOException, InterruptedException {
+    private ArrayList<FileAcl> aclFromLinux() throws IOException, InterruptedException {
         // NOTE: Need to manage case when external command fail
         BufferedReader bri;
         //BufferedReader bre;
-        JSONObject groups;
-        JSONObject users;
-        JSONObject result;
+        FileAcl acl;
+        ArrayList<FileAcl> result;
         Process p;
         String line;
 
-        result = new JSONObject();
-        users = new JSONObject();
-        groups = new JSONObject();
+        result = new ArrayList<>();
 
+        // FIXME: it doesn't work if the filename contain spaces
         p = Runtime.getRuntime().exec("getfacl " + this.path.toString());
         bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
         //bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
         while ((line = bri.readLine()) != null) {
+            acl = new FileAcl();
+
             if (line.startsWith("user") && !line.contains("::")) {
-                users.append("uid", line.split(":")[1]);
-                users.append("attrs", line.split(":")[2]);
+                acl.setAclType(FileAcl.OWNER);
             } else if (line.startsWith("group") && !line.contains("::")) {
-                groups.append("gid", line.split(":")[1]);
-                groups.append("attrs", line.split(":")[2]);
+                acl.setAclType(FileAcl.GROUP);
             }
+
+            acl.setName(line.split(":")[1]);
+            acl.setAttrs(line.split(":")[2]);
+
+            result.add(acl);
         }
         bri.close();
 
@@ -81,9 +84,6 @@ public class PathName {
 
         p.waitFor();
         //p.exitValue()
-
-        result.append("users", users);
-        result.append("groups", groups);
 
         return result;
     }
@@ -150,41 +150,41 @@ public class PathName {
         return result;
     }
 
-    public JSONObject getAttrs() throws IOException, JSONException {
-        JSONObject result;
+    public FileAttrs getAttrs() throws IOException {
+        FileAttrs result;
         BasicFileAttributes attr;
         DosFileAttributes dosAttr;
         PosixFileAttributes posixAttr;
 
-        result = new JSONObject();
+        result = new FileAttrs();
         attr = Files.readAttributes(this.path, BasicFileAttributes.class);
 
-        result.append("ctime", attr.creationTime().toMillis());
-        result.append("mtime", attr.lastModifiedTime().toMillis());
+        result.setCtime(attr.creationTime().toMillis());
+        result.setMtime(attr.lastModifiedTime().toMillis());
         //result.append("symlink", attr.isSymbolicLink()); //Redundant
-        result.append("size", attr.size());
+        result.setSize(attr.size());
 
         if (System.getProperty("os.name").startsWith("Windows")) {
             dosAttr = Files.readAttributes(this.path, DosFileAttributes.class);
 
-            result.append("dos:archive", dosAttr.isArchive());
-            result.append("dos:hidden", dosAttr.isHidden());
-            result.append("dos:readonly", dosAttr.isReadOnly());
-            result.append("dos:system", dosAttr.isSystem());
+            result.setDosArchive(dosAttr.isArchive());
+            result.setDosHidden(dosAttr.isHidden());
+            result.setDosReadonly(dosAttr.isReadOnly());
+            result.setDosSystem(dosAttr.isSystem());
         } else {
             posixAttr = Files.readAttributes(this.path, PosixFileAttributes.class);
 
-            result.append("posix:symlink", posixAttr.isSymbolicLink());
-            result.append("posix:owner", posixAttr.owner());
-            result.append("posix:group", posixAttr.group());
-            result.append("posix:permission", PosixFilePermissions.toString(posixAttr.permissions()));
+            result.setPosixSymlink(posixAttr.isSymbolicLink());
+            result.setPosixOwner(posixAttr.owner().getName());
+            result.setPosixGroup(posixAttr.group().getName());
+            result.setPosixPermission(PosixFilePermissions.toString(posixAttr.permissions()));
         }
 
         return result;
     }
 
-    public JSONObject getAcl() throws JSONException, IOException {
-        JSONObject result;
+    public ArrayList<FileAcl> getAcl() throws IOException {
+        ArrayList<FileAcl> result;
 
         try {
             if (System.getProperty("os.name").startsWith("Windows")) {

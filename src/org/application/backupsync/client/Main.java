@@ -82,7 +82,7 @@ public class Main {
             System.err.println("Error when passing command: " + ex.getMessage());
             System.exit(2);
         } catch (ClassCastException ex) {
-            System.err.println("Port not valid");
+            System.err.println(ex.getMessage());
             System.exit(3);
         }
     }

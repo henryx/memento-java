@@ -23,9 +23,10 @@ public class FileAttrs {
     private String hash;
 
     // Posix attributes
+    private Boolean posixSymlink;
     private String posixOwner;
     private String posixGroup;
-    private String posixAttrs;
+    private String posixPermission;
     
     // Dos attributes
     private Boolean dosArchive;
@@ -137,15 +138,15 @@ public class FileAttrs {
     /**
      * @return the posixAttrs
      */
-    public String getPosixAttrs() {
-        return posixAttrs;
+    public String getPosixPermission() {
+        return posixPermission;
     }
 
     /**
      * @param posixAttrs the posixAttrs to set
      */
-    public void setPosixAttrs(String posixAttrs) {
-        this.posixAttrs = posixAttrs;
+    public void setPosixPermission(String posixPermission) {
+        this.posixPermission = posixPermission;
     }
 
     /**
@@ -216,5 +217,19 @@ public class FileAttrs {
      */
     public void setAcl(ArrayList<FileAcl> acl) {
         this.acl = acl;
+    }
+
+    /**
+     * @return the posixSymlink
+     */
+    public Boolean getPosixSymlink() {
+        return posixSymlink;
+    }
+
+    /**
+     * @param posixSymlink the posixSymlink to set
+     */
+    public void setPosixSymlink(Boolean posixSymlink) {
+        this.posixSymlink = posixSymlink;
     }
 }
