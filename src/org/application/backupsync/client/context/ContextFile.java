@@ -35,7 +35,7 @@ public class ContextFile extends AbstractContext {
         
         out = new PrintWriter(this.connection.getOutputStream(), true);
         result = new CommandFile(directory, acl).get();
-        out.println(serializer.exclude("*.class").serialize(result));
+        out.println(serializer.exclude("*.class").deepSerialize(result));
     }
     
     private void cmdGetFile(String fileName) {

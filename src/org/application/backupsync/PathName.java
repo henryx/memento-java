@@ -60,18 +60,20 @@ public class PathName {
         //bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
         while ((line = bri.readLine()) != null) {
-            acl = new FileAcl();
+            if (!line.startsWith("#") && !line.contains("::") && !line.isEmpty()) {
+                acl = new FileAcl();
 
-            if (line.startsWith("user") && !line.contains("::")) {
-                acl.setAclType(FileAcl.OWNER);
-            } else if (line.startsWith("group") && !line.contains("::")) {
-                acl.setAclType(FileAcl.GROUP);
+                if (line.startsWith("user")) {
+                    acl.setAclType(FileAcl.OWNER);
+                } else if (line.startsWith("group")) {
+                    acl.setAclType(FileAcl.GROUP);
+                }
+
+                acl.setName(line.split(":")[1]);
+                acl.setAttrs(line.split(":")[2]);
+
+                result.add(acl);
             }
-
-            acl.setName(line.split(":")[1]);
-            acl.setAttrs(line.split(":")[2]);
-
-            result.add(acl);
         }
         bri.close();
 
