@@ -5,7 +5,7 @@ Description   A backup system
 License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.json;
+package org.memento.json;
 
 /**
  *

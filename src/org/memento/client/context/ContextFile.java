@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.client.context;
+package org.memento.client.context;
 
 import flexjson.JSONSerializer;
 import java.io.IOException;
@@ -13,8 +13,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.application.backupsync.client.context.commands.CommandFile;
-import org.application.backupsync.json.FileAttrs;
+import org.memento.client.context.commands.CommandFile;
+import org.memento.json.FileAttrs;
 
 /**
  *

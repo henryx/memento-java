@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.client.context;
+package org.memento.client.context;
 
 import flexjson.JSONSerializer;
 import java.io.IOException;

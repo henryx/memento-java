@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.client.context;
+package org.memento.client.context;
 
 import java.io.IOException;
 import java.net.Socket;

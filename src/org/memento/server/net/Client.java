@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.server.net;
+package org.memento.server.net;
 
 /**
  *

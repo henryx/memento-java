@@ -5,15 +5,15 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.client.context.commands;
+package org.memento.client.context.commands;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import org.application.backupsync.PathName;
-import org.application.backupsync.json.FileAttrs;
+import org.memento.PathName;
+import org.memento.json.FileAttrs;
 
 /**
  *

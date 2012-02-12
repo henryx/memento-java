@@ -4,7 +4,7 @@ Project       BackupSYNC
 Description   A backup system
 License       GPL version 2 (see GPL.txt for details)
  */
-package org.application.backupsync;
+package org.memento;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -23,8 +23,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import org.application.backupsync.json.FileAcl;
-import org.application.backupsync.json.FileAttrs;
+import org.memento.json.FileAcl;
+import org.memento.json.FileAttrs;
 
 /**
  *

@@ -4,7 +4,7 @@ Project       BackupSYNC
 Description   A backup system
 License       GPL version 2 (see GPL.txt for details)
  */
-package org.application.backupsync.client.net;
+package org.memento.client.net;
 
 import flexjson.JSONDeserializer;
 import flexjson.JSONException;
@@ -16,10 +16,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import org.application.backupsync.client.context.AbstractContext;
-import org.application.backupsync.client.context.ContextError;
-import org.application.backupsync.client.context.ContextFile;
-import org.application.backupsync.client.context.ContextSystem;
+import org.memento.client.context.AbstractContext;
+import org.memento.client.context.ContextError;
+import org.memento.client.context.ContextFile;
+import org.memento.client.context.ContextSystem;
 
 /**
  *

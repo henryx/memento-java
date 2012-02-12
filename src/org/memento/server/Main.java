@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.application.backupsync.server;
+package org.memento.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -85,7 +85,7 @@ public class Main {
 
     public void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("BackupSYNC", this.opts);
+        formatter.printHelp("Memento", this.opts);
         System.exit(0);
     }
 

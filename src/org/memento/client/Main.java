@@ -4,7 +4,7 @@ Project       BackupSYNC
 Description   A backup system
 License       GPL version 2 (see GPL.txt for details)
  */
-package org.application.backupsync.client;
+package org.memento.client;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -18,7 +18,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.application.backupsync.client.net.Serve;
+import org.memento.client.net.Serve;
 
 /**
  *
@@ -38,7 +38,7 @@ public class Main {
 
     public void printHelp() {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("BackupSYNC", this.opts);
+        formatter.printHelp("Memento", this.opts);
         System.exit(0);
     }
 
