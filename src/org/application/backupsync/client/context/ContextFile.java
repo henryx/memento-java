@@ -30,10 +30,10 @@ public class ContextFile extends AbstractContext {
         HashMap<String, FileAttrs> result;
         JSONSerializer serializer;
         PrintWriter out;
-        
+
         serializer = new JSONSerializer();
-        
         out = new PrintWriter(this.connection.getOutputStream(), true);
+
         result = new CommandFile(directory, acl).get();
         out.println(serializer.exclude("*.class").deepSerialize(result));
     }
@@ -41,7 +41,7 @@ public class ContextFile extends AbstractContext {
     private void cmdGetFile(String fileName) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
-    
+
     @Override
     public Boolean parse(HashMap command) throws IOException {
         ArrayList paths;
@@ -71,9 +71,9 @@ public class ContextFile extends AbstractContext {
             default:
                 errMsg = new HashMap();
                 error = new ContextError(this.connection);
-                
+
                 errMsg.put("message", "Command not found");
-                
+
                 error.parse(errMsg);
                 break;
         }

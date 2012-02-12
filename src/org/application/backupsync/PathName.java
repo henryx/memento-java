@@ -50,12 +50,13 @@ public class PathName {
         FileAcl acl;
         ArrayList<FileAcl> result;
         Process p;
+        String[] command;
         String line;
 
         result = new ArrayList<>();
 
-        // FIXME: it doesn't work if the filename contain spaces
-        p = Runtime.getRuntime().exec("getfacl " + this.path.toString());
+        command = new String[]{"getfacl", this.path.toString()};
+        p = Runtime.getRuntime().exec(command);
         bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
         //bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
