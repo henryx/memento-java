@@ -8,8 +8,7 @@
 package org.memento.client.context;
 
 import flexjson.JSONSerializer;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +37,34 @@ public class ContextFile extends AbstractContext {
         out.println(serializer.exclude("*.class").deepSerialize(result));
     }
     
-    private void cmdGetFile(String fileName) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void cmdGetFile(String fileName) throws FileNotFoundException, IOException {
+        BufferedInputStream buff;
+        BufferedOutputStream outStream;
+        File data;
+        byte[] buffer;
+        int read;
+
+        data = new File(fileName);
+        buffer = new byte[1024];
+
+        if (data.exists()) {
+            throw new FileNotFoundException("File not exist");
+        }
+        
+        if (data.isDirectory()) {
+            throw new FileNotFoundException(fileName + " is not a file");
+        }
+
+        buff = new BufferedInputStream(new FileInputStream(data));
+        outStream = new BufferedOutputStream(this.connection.getOutputStream());
+        
+        while ((read = buff.read(buffer)) != -1) {
+            outStream.write(buffer, 0, read);
+            outStream.flush();
+        }
+
+        outStream.close();
+        buff.close();
     }
 
     @Override
