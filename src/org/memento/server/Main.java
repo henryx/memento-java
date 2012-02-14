@@ -78,7 +78,7 @@ public class Main {
             this.cfg = new Wini();
             this.cfg.load(new FileInputStream(cfgFile));
         } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.FATAL, null, ex);
+            ex.printStackTrace();
             System.exit(2);
         }
     }
@@ -89,7 +89,7 @@ public class Main {
         System.exit(0);
     }
 
-    public void go(String[] args) throws ParseException {
+    public void go(String[] args) throws ParseException, IOException {
         CommandLine cmd;
         CommandLineParser parser;
         Sync sync;
@@ -112,8 +112,7 @@ public class Main {
 
         if (cmd.hasOption("H")) {
             sync.setMode("hour");
-        }
-        else if (cmd.hasOption("D")) {
+        } else if (cmd.hasOption("D")) {
             sync.setMode("day");
         } else if (cmd.hasOption("W")) {
             sync.setMode("week");
@@ -123,7 +122,7 @@ public class Main {
         }
 
         this.setLog();
-        Main.logger.info("BackupSYNC " + VERSION);
+        Main.logger.info("Memento " + VERSION);
 
         sync.go();
     }
@@ -139,7 +138,7 @@ public class Main {
         
         try {
             m.go(args);
-        } catch (ParseException ex) {
+        } catch (ParseException | IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.FATAL, null, ex);
             System.exit(2);
         }
