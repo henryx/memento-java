@@ -52,7 +52,7 @@ public class ContextFile extends AbstractContext {
         }
         
         if (data.isDirectory()) {
-            throw new FileNotFoundException(fileName + " is not a file");
+            throw new IllegalArgumentException(fileName + " is not a file");
         }
 
         buff = new BufferedInputStream(new FileInputStream(data));
