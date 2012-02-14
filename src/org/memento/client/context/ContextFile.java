@@ -47,7 +47,7 @@ public class ContextFile extends AbstractContext {
         data = new File(fileName);
         buffer = new byte[1024];
 
-        if (data.exists()) {
+        if (!data.exists()) {
             throw new FileNotFoundException("File not exist");
         }
         
