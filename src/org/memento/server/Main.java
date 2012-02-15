@@ -7,6 +7,7 @@
 
 package org.memento.server;
 
+import org.memento.server.management.Manager;
 import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
@@ -92,7 +93,7 @@ public class Main {
     public void go(String[] args) throws ParseException, IOException {
         CommandLine cmd;
         CommandLineParser parser;
-        Sync sync;
+        Manager manage;
 
         parser = new PosixParser();
         cmd = parser.parse(this.opts, args);
@@ -108,23 +109,23 @@ public class Main {
             this.setCfg(cmd.getOptionValue("cfg"));
         }
 
-        sync = new Sync(this.cfg);
+        manage = new Manager(this.cfg);
 
         if (cmd.hasOption("H")) {
-            sync.setMode("hour");
+            manage.setMode("hour");
         } else if (cmd.hasOption("D")) {
-            sync.setMode("day");
+            manage.setMode("day");
         } else if (cmd.hasOption("W")) {
-            sync.setMode("week");
+            manage.setMode("week");
         }
         else if (cmd.hasOption("M")) {
-            sync.setMode("month");
+            manage.setMode("month");
         }
 
         this.setLog();
         Main.logger.info("Memento " + VERSION);
 
-        sync.go();
+        manage.go();
     }
     
     public static void main(String[] args) {

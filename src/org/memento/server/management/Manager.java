@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.memento.server;
+package org.memento.server.management;
 
 /**
  *
@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ini4j.Wini;
 
-public class Sync {
+public class Manager {
     private String mode;
     private Wini cfg;
     
@@ -41,7 +41,7 @@ public class Sync {
         }
     }
     
-    public Sync(Wini cfg) {
+    public Manager(Wini cfg) {
         this.cfg = cfg;
     }
 

@@ -5,7 +5,7 @@
     License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.memento.server.net;
+package org.memento.server.management;
 
 /**
  *
