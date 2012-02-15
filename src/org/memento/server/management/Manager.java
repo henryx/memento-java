@@ -41,8 +41,9 @@ public class Manager {
         }
     }
     
-    public Manager(Wini cfg) {
+    public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
+        this.checkStructure();
     }
 
     /**
@@ -59,8 +60,7 @@ public class Manager {
         this.mode = mode;
     }
     
-    public void go() throws IOException {
-        this.checkStructure();
+    public void go() {
         
     }
 }
