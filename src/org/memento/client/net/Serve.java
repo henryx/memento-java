@@ -7,7 +7,6 @@ License       GPL version 2 (see GPL.txt for details)
 package org.memento.client.net;
 
 import flexjson.JSONDeserializer;
-import flexjson.JSONException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;

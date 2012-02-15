@@ -7,9 +7,12 @@
 
 package org.memento.client.context.commands;
 
+import flexjson.JSONSerializer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.PrintWriter;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import org.memento.PathName;
@@ -20,40 +23,139 @@ import org.memento.json.FileAttrs;
  * @author enrico
  */
 public class CommandFile {
-    private HashMap<String, FileAttrs> json;
+    private String directory;
+    private Boolean acl;
+    private PrintWriter writer;
 
-    public CommandFile(String aDirectory, Boolean acl) throws IOException {
-        this.json = this.list(aDirectory, acl);
+    public void go() throws FileNotFoundException, IOException {
+        FileVisitor fileVisitor;
+        Path path;
+
+        fileVisitor = new VisitFile(this.getAcl(), this.getWriter());
+        path = Paths.get(this.directory);
+
+        if (Files.isReadable(path)) {
+            Files.walkFileTree(path, fileVisitor);
+        } else {
+            throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
+        }
     }
 
-    private HashMap<String, FileAttrs> list(String directory, Boolean acl) throws FileNotFoundException, IOException {
-        FileAttrs data;
-        HashMap<String, FileAttrs> result;
+    /**
+     * @return the directory
+     */
+    public String getDirectory() {
+        return directory;
+    }
 
-        result = new HashMap<>();
-        for (PathName item : new PathName(Paths.get(directory)).walk()) {
-            data = item.getAttrs();
+    /**
+     * @param directory the directory to set
+     */
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
 
-            if (item.isDirectory()) {
-                data.setType("directory");
-            } else {
-                data.setType("file");
-                try {
-                    data.setHash(item.hash());
-                } catch (NoSuchAlgorithmException | IOException ex) {
-                    data.setHash("");
-                }
+    /**
+     * @return the acl
+     */
+    public Boolean getAcl() {
+        return acl;
+    }
+
+    /**
+     * @param acl the acl to set
+     */
+    public void setAcl(Boolean acl) {
+        this.acl = acl;
+    }
+    
+    /**
+     * @return the writer
+     */
+    public PrintWriter getWriter() {
+        return writer;
+    }
+
+    /**
+     * @param writer the writer to set
+     */
+    public void setWriter(PrintWriter writer) {
+        this.writer = writer;
+    }
+}
+
+class VisitFile implements FileVisitor<Path> {
+
+    private Boolean acl;
+    private PrintWriter writer;
+
+    public VisitFile(Boolean acl, PrintWriter writer) {
+        this.acl = acl;
+        this.writer = writer;
+    }
+    
+    private FileAttrs compute(PathName aPath) throws IllegalArgumentException, FileNotFoundException, IOException {
+        FileAttrs result;
+
+        result = aPath.getAttrs();
+
+        if (aPath.isDirectory()) {
+            result.setType("directory");
+        } else {
+            result.setType("file");
+            try {
+                result.setHash(aPath.hash());
+            } catch (NoSuchAlgorithmException | IOException ex) {
+                result.setHash("");
             }
-
-            if (acl) {
-                data.setAcl(item.getAcl());
-            }
-            result.put(item.getAbsolutePath(), data);
         }
+
+        if (this.acl) {
+            result.setAcl(aPath.getAcl());
+        }
+
         return result;
     }
 
-    public HashMap<String, FileAttrs> get() {
-        return this.json;
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException, IOException {
+        FileAttrs data;
+        HashMap<String, FileAttrs> result;
+        JSONSerializer serializer;
+
+        serializer = new JSONSerializer();
+        result = new HashMap<>();
+
+        data = this.compute(new PathName(file));
+        result.put(file.toString(), data);
+
+        this.writer.println(serializer.exclude("*.class").deepSerialize(result));
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws FileNotFoundException, IOException {
+        FileAttrs data;
+        HashMap<String, FileAttrs> result;
+        JSONSerializer serializer;
+
+        serializer = new JSONSerializer();
+        result = new HashMap<>();
+
+        data = this.compute(new PathName(dir));
+        result.put(dir.toString(), data);
+
+        this.writer.println(serializer.exclude("*.class").deepSerialize(result));
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult preVisitDirectory(Path t, BasicFileAttributes bfa) throws IOException {
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult visitFileFailed(Path t, IOException ioe) throws IOException {
+        return FileVisitResult.CONTINUE;
     }
 }

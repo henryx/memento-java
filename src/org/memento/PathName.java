@@ -11,10 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.PosixFileAttributes;
@@ -22,7 +20,6 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 import org.memento.json.FileAcl;
 import org.memento.json.FileAttrs;
 
@@ -103,8 +100,7 @@ public class PathName {
         fis = new FileInputStream(this.path.toFile());
         dataBytes = new byte[65536];
         hexString = new StringBuffer();
-
-        nread = 0;
+        
         try {
             while ((nread = fis.read(dataBytes)) != -1) {
                 md.update(dataBytes, 0, nread);
@@ -125,32 +121,6 @@ public class PathName {
         fis.close();
 
         return hexString.toString();
-    }
-
-    public List<PathName> walk() throws IOException {
-        final List<PathName> result;
-
-        result = new ArrayList<>();
-
-        if (Files.isReadable(this.path)) {
-            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>() {
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    result.add(new PathName(file));
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException ex) {
-                    result.add(new PathName(dir));
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } else {
-            throw new IllegalArgumentException("Directory cannot be read: " + this.path.toString());
-        }
-        return result;
     }
 
     public FileAttrs getAttrs() throws IOException {

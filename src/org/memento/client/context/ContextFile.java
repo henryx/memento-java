@@ -1,10 +1,9 @@
 /*
-    Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
-    Project       BackupSYNC
-    Description   A backup system
-    License       GPL version 2 (see GPL.txt for details)
+ Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
+ Project       BackupSYNC
+ Description   A backup system
+ License       GPL version 2 (see GPL.txt for details)
  */
-
 package org.memento.client.context;
 
 import flexjson.JSONSerializer;
@@ -19,24 +18,28 @@ import org.memento.json.FileAttrs;
  *
  * @author enrico
  */
-
 public class ContextFile extends AbstractContext {
+
     public ContextFile(Socket connection) {
         this.connection = connection;
     }
-    
-    private void cmdListFile(String directory, Boolean acl) throws IOException {
+
+    private void cmdListFile(String directory, Boolean acl) throws FileNotFoundException, IOException {
         HashMap<String, FileAttrs> result;
+        CommandFile cmd;
         JSONSerializer serializer;
         PrintWriter out;
 
         serializer = new JSONSerializer();
         out = new PrintWriter(this.connection.getOutputStream(), true);
 
-        result = new CommandFile(directory, acl).get();
-        out.println(serializer.exclude("*.class").deepSerialize(result));
+        cmd = new CommandFile();
+        cmd.setDirectory(directory);
+        cmd.setAcl(acl);
+        cmd.setWriter(out);
+        cmd.go();
     }
-    
+
     private void cmdGetFile(String fileName) throws FileNotFoundException, IOException {
         BufferedInputStream buff;
         BufferedOutputStream outStream;
@@ -50,14 +53,14 @@ public class ContextFile extends AbstractContext {
         if (!data.exists()) {
             throw new FileNotFoundException("File not exist");
         }
-        
+
         if (data.isDirectory()) {
             throw new IllegalArgumentException(fileName + " is not a file");
         }
 
         buff = new BufferedInputStream(new FileInputStream(data));
         outStream = new BufferedOutputStream(this.connection.getOutputStream());
-        
+
         while ((read = buff.read(buffer)) != -1) {
             outStream.write(buffer, 0, read);
             outStream.flush();
@@ -65,6 +68,10 @@ public class ContextFile extends AbstractContext {
 
         outStream.close();
         buff.close();
+    }
+
+    private void cmdPutFile(String toString) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -92,6 +99,9 @@ public class ContextFile extends AbstractContext {
                 break;
             case "get":
                 this.cmdGetFile(command.get("file").toString());
+                break;
+            case "put":
+                this.cmdPutFile(command.get("file").toString());
                 break;
             default:
                 errMsg = new HashMap();
