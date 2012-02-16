@@ -11,7 +11,9 @@ import flexjson.JSONSerializer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -22,77 +24,10 @@ import org.memento.json.FileAttrs;
  *
  * @author enrico
  */
-public class CommandFile {
+public class CommandFile implements FileVisitor<Path> {
     private String directory;
     private Boolean acl;
     private PrintWriter writer;
-
-    public void go() throws FileNotFoundException, IOException {
-        FileVisitor fileVisitor;
-        Path path;
-
-        fileVisitor = new VisitFile(this.getAcl(), this.getWriter());
-        path = Paths.get(this.directory);
-
-        if (Files.isReadable(path)) {
-            Files.walkFileTree(path, fileVisitor);
-        } else {
-            throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
-        }
-    }
-
-    /**
-     * @return the directory
-     */
-    public String getDirectory() {
-        return directory;
-    }
-
-    /**
-     * @param directory the directory to set
-     */
-    public void setDirectory(String directory) {
-        this.directory = directory;
-    }
-
-    /**
-     * @return the acl
-     */
-    public Boolean getAcl() {
-        return acl;
-    }
-
-    /**
-     * @param acl the acl to set
-     */
-    public void setAcl(Boolean acl) {
-        this.acl = acl;
-    }
-    
-    /**
-     * @return the writer
-     */
-    public PrintWriter getWriter() {
-        return writer;
-    }
-
-    /**
-     * @param writer the writer to set
-     */
-    public void setWriter(PrintWriter writer) {
-        this.writer = writer;
-    }
-}
-
-class VisitFile implements FileVisitor<Path> {
-
-    private Boolean acl;
-    private PrintWriter writer;
-
-    public VisitFile(Boolean acl, PrintWriter writer) {
-        this.acl = acl;
-        this.writer = writer;
-    }
     
     private FileAttrs compute(PathName aPath) throws IllegalArgumentException, FileNotFoundException, IOException {
         FileAttrs result;
@@ -157,5 +92,47 @@ class VisitFile implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFileFailed(Path t, IOException ioe) throws IOException {
         return FileVisitResult.CONTINUE;
+    }
+
+    /**
+     * @return the directory
+     */
+    public String getDirectory() {
+        return directory;
+    }
+
+    /**
+     * @param directory the directory to set
+     */
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    /**
+     * @return the acl
+     */
+    public Boolean getAcl() {
+        return acl;
+    }
+
+    /**
+     * @param acl the acl to set
+     */
+    public void setAcl(Boolean acl) {
+        this.acl = acl;
+    }
+    
+    /**
+     * @return the writer
+     */
+    public PrintWriter getWriter() {
+        return writer;
+    }
+
+    /**
+     * @param writer the writer to set
+     */
+    public void setWriter(PrintWriter writer) {
+        this.writer = writer;
     }
 }

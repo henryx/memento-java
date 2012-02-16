@@ -9,6 +9,9 @@ package org.memento.client.context;
 import flexjson.JSONSerializer;
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.memento.client.context.commands.CommandFile;
@@ -27,17 +30,23 @@ public class ContextFile extends AbstractContext {
     private void cmdListFile(String directory, Boolean acl) throws FileNotFoundException, IOException {
         HashMap<String, FileAttrs> result;
         CommandFile cmd;
-        JSONSerializer serializer;
+        Path path;
         PrintWriter out;
 
-        serializer = new JSONSerializer();
         out = new PrintWriter(this.connection.getOutputStream(), true);
 
         cmd = new CommandFile();
+        path = Paths.get(directory);
+
         cmd.setDirectory(directory);
         cmd.setAcl(acl);
         cmd.setWriter(out);
-        cmd.go();
+
+        if (Files.isReadable(path)) {
+            Files.walkFileTree(path, cmd);
+        } else {
+            throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
+        }
     }
 
     private void cmdGetFile(String fileName) throws FileNotFoundException, IOException {
