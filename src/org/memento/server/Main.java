@@ -112,14 +112,14 @@ public class Main {
         manage = new Manager(this.cfg);
 
         if (cmd.hasOption("H")) {
-            manage.setMode("hour");
+            manage.setGrace("hour");
         } else if (cmd.hasOption("D")) {
-            manage.setMode("day");
+            manage.setGrace("day");
         } else if (cmd.hasOption("W")) {
-            manage.setMode("week");
+            manage.setGrace("week");
         }
         else if (cmd.hasOption("M")) {
-            manage.setMode("month");
+            manage.setGrace("month");
         }
 
         this.setLog();
