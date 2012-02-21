@@ -1,10 +1,9 @@
 /*
-    Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
-    Project       BackupSYNC
-    Description   A backup system
-    License       GPL version 2 (see GPL.txt for details)
+ Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
+ Project       BackupSYNC
+ Description   A backup system
+ License       GPL version 2 (see GPL.txt for details)
  */
-
 package org.memento.server.storage;
 
 import java.io.File;
@@ -19,11 +18,12 @@ import org.memento.server.management.Storage;
  * @author enrico
  */
 public class FileStorage implements Storage {
+
     private Integer dataset;
     private String grace;
     private String section;
     private Wini cfg;
-    
+
     public FileStorage(Wini cfg) throws IOException {
         this.cfg = cfg;
         this.checkStructure();
@@ -32,22 +32,22 @@ public class FileStorage implements Storage {
     private void checkStructure() throws IOException {
         File directory;
         String[] subdirectories;
-        
+
         directory = new File(this.cfg.get("general", "repository"));
-        subdirectories = new String[] {"hour", "day", "week", "month"};
-        
+        subdirectories = new String[]{"hour", "day", "week", "month"};
+
         if (directory.isFile()) {
             throw new IllegalArgumentException(directory + " is a file");
         }
-        
+
         if (!directory.exists()) {
-            for (String subdirectory: subdirectories) {
+            for (String subdirectory : subdirectories) {
                 Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
             }
-            
+
         }
     }
-    
+
     /**
      * @return the dataset
      */
@@ -93,11 +93,30 @@ public class FileStorage implements Storage {
      */
     @Override
     public void setSection(String section) {
+        File directory;
+        String structure;
+        String sep;
+        
+        sep = System.getProperty("file.separator");
+
         this.section = section;
+        structure = this.cfg.get("general", "repository")
+                + sep
+                + this.grace
+                + sep
+                + this.dataset
+                + sep
+                + this.section;
+
+        directory = new File(structure);
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
     }
 
     @Override
-    public void go() {
+    public void add() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
