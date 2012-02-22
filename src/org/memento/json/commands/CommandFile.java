@@ -5,46 +5,29 @@ Description   A backup system
 License       GPL version 2 (see GPL.txt for details)
  */
 
-package org.memento.json;
-
-import java.util.ArrayList;
+package org.memento.json.commands;
 
 /**
  *
  * @author enrico
  */
-public class CommandFile {
-    private String name;
-    
+public class CommandFile extends Command {
+
     // For list commands
-    private ArrayList<String> directory;
+    private String[] directory;
     private Boolean acl;
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
 
     /**
      * @return the directory
      */
-    public ArrayList<String> getDirectory() {
+    public String[] getDirectory() {
         return directory;
     }
 
     /**
      * @param directory the directory to set
      */
-    public void setDirectory(ArrayList<String> directory) {
+    public void setDirectory(String[] directory) {
         this.directory = directory;
     }
 

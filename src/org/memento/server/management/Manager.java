@@ -67,7 +67,7 @@ public class Manager {
         dbStorage.setGrace(this.grace);
         
         // TODO: retrieve last dataset used
-        dataset = 1;
+        dataset = Integer.decode(this.cfg.get("dataset", this.grace));
         
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);

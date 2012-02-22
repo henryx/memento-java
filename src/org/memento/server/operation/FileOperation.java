@@ -7,6 +7,7 @@
 package org.memento.server.operation;
 
 import org.ini4j.Wini;
+import org.memento.json.commands.CommandFile;
 import org.memento.server.management.Operation;
 import org.memento.server.management.Storage;
 
@@ -97,12 +98,12 @@ public class FileOperation implements Operation {
 
     @Override
     public void run() {
-        String[] paths;
-        
-        paths = this.cfg.get(section, "path").split(",");
-        
-        for (String path: paths) {
-            
-        }
+        CommandFile command;
+
+        command = new CommandFile();
+
+        command.setName("file");
+        command.setDirectory(this.cfg.get(section, "path").split(","));
+        command.setAcl(Boolean.parseBoolean(this.cfg.get(section, "acl")));
     }
 }
