@@ -6,7 +6,9 @@
  */
 package org.memento.server.operation;
 
+import flexjson.JSONSerializer;
 import org.ini4j.Wini;
+import org.memento.json.Context;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.management.Operation;
 import org.memento.server.management.Storage;
@@ -98,12 +100,20 @@ public class FileOperation implements Operation {
 
     @Override
     public void run() {
+        Context context;
         CommandFile command;
+        JSONSerializer serializer;
 
+        context = new Context();
         command = new CommandFile();
+        serializer = new JSONSerializer();
 
-        command.setName("file");
+        context.setContext("file");
+        command.setName("list");
         command.setDirectory(this.cfg.get(section, "path").split(","));
         command.setAcl(Boolean.parseBoolean(this.cfg.get(section, "acl")));
+        context.setCommand(command);
+
+        //serializer.exclude("*.class").deepSerialize(context)
     }
 }
