@@ -6,7 +6,6 @@
  */
 package org.memento.client.context;
 
-import flexjson.JSONSerializer;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
