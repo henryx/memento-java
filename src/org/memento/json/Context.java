@@ -20,7 +20,7 @@ public class Context {
     /**
      * @return the context
      */
-    public String getContext_() {
+    public String getContext() {
         return context;
     }
 
