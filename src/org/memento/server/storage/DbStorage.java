@@ -4,6 +4,7 @@
  */
 package org.memento.server.storage;
 
+import java.util.HashMap;
 import org.ini4j.Wini;
 import org.memento.server.management.Storage;
 
@@ -71,7 +72,7 @@ public class DbStorage implements Storage {
     }
 
     @Override
-    public void add() {
+    public void add(HashMap json) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

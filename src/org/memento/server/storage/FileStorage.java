@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import org.ini4j.Wini;
 import org.memento.server.management.Storage;
 
@@ -96,7 +97,7 @@ public class FileStorage implements Storage {
         File directory;
         String structure;
         String sep;
-        
+
         sep = System.getProperty("file.separator");
 
         this.section = section;
@@ -116,7 +117,7 @@ public class FileStorage implements Storage {
     }
 
     @Override
-    public void add() {
+    public void add(HashMap json) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

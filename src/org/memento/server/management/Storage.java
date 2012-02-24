@@ -7,10 +7,12 @@
 
 package org.memento.server.management;
 
+import java.util.HashMap;
+
 /**
  *
  * @author enrico
  */
 public interface Storage extends Properties {
-    public void add();
+    public void add(HashMap json);
 }

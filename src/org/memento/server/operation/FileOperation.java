@@ -6,7 +6,17 @@
  */
 package org.memento.server.operation;
 
+import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.commands.CommandFile;
@@ -28,6 +38,47 @@ public class FileOperation implements Operation {
 
     public FileOperation(Wini cfg) {
         this.cfg = cfg;
+    }
+
+    private void sendCommand(Context command) throws UnknownHostException, IOException {
+        BufferedReader in;
+        HashMap inJSON;
+        JSONSerializer serializer;
+        PrintWriter out;
+        Socket conn;
+        String line;
+
+        serializer = new JSONSerializer();
+        in = null;
+        out = null;
+        conn = null;
+
+        try {
+            conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
+
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            out = new PrintWriter(conn.getOutputStream(), true);
+
+            out.println(serializer.exclude("*.class").deepSerialize(command));
+
+            while (!(line = in.readLine()).equals("")) {
+                inJSON = new JSONDeserializer<HashMap>().deserialize(line);
+                this.dbstore.add(inJSON);
+                this.fsstore.add(inJSON);
+            }
+        } finally {
+            if (in instanceof BufferedReader) {
+                in.close();
+            }
+
+            if (out instanceof PrintWriter) {
+                out.close();
+            }
+
+            if (conn instanceof Socket && !conn.isClosed()) {
+                conn.close();
+            }
+        }
     }
 
     /**
@@ -102,11 +153,9 @@ public class FileOperation implements Operation {
     public void run() {
         Context context;
         CommandFile command;
-        JSONSerializer serializer;
 
         context = new Context();
         command = new CommandFile();
-        serializer = new JSONSerializer();
 
         context.setContext("file");
         command.setName("list");
@@ -114,6 +163,12 @@ public class FileOperation implements Operation {
         command.setAcl(Boolean.parseBoolean(this.cfg.get(section, "acl")));
         context.setCommand(command);
 
-        //serializer.exclude("*.class").deepSerialize(context)
+        try {
+            this.sendCommand(context);
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
