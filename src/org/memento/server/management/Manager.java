@@ -27,13 +27,12 @@ public class Manager {
     }
 
     private Operation compute(String name) {
-        Operation result;
         String type;
         
         type = this.cfg.get(name, "type");
         switch (type) {
             case "file":
-                result = new FileOperation(this.cfg);
+                FileOperation result = new FileOperation(this.cfg);
                 return result;
             default:
                 throw new UnsupportedOperationException("type method not supported");
