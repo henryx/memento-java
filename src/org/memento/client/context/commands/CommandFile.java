@@ -16,7 +16,6 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import org.memento.PathName;
 import org.memento.json.FileAttrs;
 
@@ -33,6 +32,7 @@ public class CommandFile implements FileVisitor<Path> {
         FileAttrs result;
 
         result = aPath.getAttrs();
+        result.setName(aPath.getAbsolutePath());
 
         if (aPath.isDirectory()) {
             result.setType("directory");
@@ -55,32 +55,24 @@ public class CommandFile implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException, IOException {
         FileAttrs data;
-        HashMap<String, FileAttrs> result;
         JSONSerializer serializer;
 
         serializer = new JSONSerializer();
-        result = new HashMap<>();
-
         data = this.compute(new PathName(file));
-        result.put(file.toString(), data);
 
-        this.writer.println(serializer.exclude("*.class").deepSerialize(result));
+        this.writer.println(serializer.deepSerialize(data));
         return FileVisitResult.CONTINUE;
     }
 
     @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws FileNotFoundException, IOException {
         FileAttrs data;
-        HashMap<String, FileAttrs> result;
         JSONSerializer serializer;
 
         serializer = new JSONSerializer();
-        result = new HashMap<>();
-
         data = this.compute(new PathName(dir));
-        result.put(dir.toString(), data);
 
-        this.writer.println(serializer.exclude("*.class").deepSerialize(result));
+        this.writer.println(serializer.deepSerialize(data));
         return FileVisitResult.CONTINUE;
     }
 

@@ -27,7 +27,6 @@ public class ContextFile extends AbstractContext {
     }
 
     private void cmdListFile(String directory, Boolean acl) throws FileNotFoundException, IOException {
-        HashMap<String, FileAttrs> result;
         CommandFile cmd;
         Path path;
         PrintWriter out;

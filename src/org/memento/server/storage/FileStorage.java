@@ -10,8 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import org.ini4j.Wini;
+import org.memento.json.FileAttrs;
 import org.memento.server.management.Storage;
 
 /**
@@ -117,7 +117,7 @@ public class FileStorage implements Storage {
     }
 
     @Override
-    public void add(HashMap json) {
+    public void add(FileAttrs json) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

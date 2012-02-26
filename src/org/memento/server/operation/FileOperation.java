@@ -14,11 +14,11 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.json.Context;
+import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.management.Operation;
 import org.memento.server.management.Storage;
@@ -42,13 +42,14 @@ public class FileOperation implements Operation {
 
     private void sendCommand(Context command) throws UnknownHostException, IOException {
         BufferedReader in;
-        HashMap inJSON;
+        FileAttrs inJSON;
         JSONSerializer serializer;
         PrintWriter out;
         Socket conn;
         String line;
 
         serializer = new JSONSerializer();
+
         in = null;
         out = null;
         conn = null;
@@ -62,7 +63,7 @@ public class FileOperation implements Operation {
             out.println(serializer.exclude("*.class").deepSerialize(command));
 
             while (!(line = in.readLine()).equals("")) {
-                inJSON = new JSONDeserializer<HashMap>().deserialize(line);
+                inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
                 this.dbstore.add(inJSON);
                 this.fsstore.add(inJSON);
             }

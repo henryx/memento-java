@@ -1,10 +1,9 @@
 /*
-Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
-Project       BackupSYNC
-Description   A backup system
-License       GPL version 2 (see GPL.txt for details)
+ Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
+ Project       BackupSYNC
+ Description   A backup system
+ License       GPL version 2 (see GPL.txt for details)
  */
-
 package org.memento.json;
 
 import java.util.ArrayList;
@@ -14,28 +13,42 @@ import java.util.ArrayList;
  * @author enrico
  */
 public class FileAttrs {
-    
+
+    private String name;
     // Common attributes
     private long ctime;
     private long mtime;
     private long size;
     private String type;
     private String hash;
-
     // Posix attributes
     private Boolean posixSymlink;
     private String posixOwner;
     private String posixGroup;
     private String posixPermission;
-    
+
     // Dos attributes
     private Boolean dosArchive;
     private Boolean dosHidden;
     private Boolean dosReadonly;
     private Boolean dosSystem;
-    
+
     // ACL
     private ArrayList<FileAcl> acl;
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
     /**
      * @return the ctime
