@@ -66,7 +66,7 @@ public class FileOperation implements Operation {
             while (!(line = in.readLine()).equals("")) {
                 inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
                 this.dbstore.add(inJSON);
-                this.fsstore.add(inJSON);
+                this.fsstore.add(inJSON, conn);
             }
         } finally {
             if (in instanceof BufferedReader) {

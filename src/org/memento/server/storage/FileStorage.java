@@ -8,6 +8,7 @@ package org.memento.server.storage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ini4j.Wini;
@@ -116,7 +117,7 @@ public class FileStorage implements Properties {
         }
     }
 
-    public void add(FileAttrs json) {
+    public void add(FileAttrs json, Socket sock) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
