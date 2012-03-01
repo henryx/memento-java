@@ -6,11 +6,7 @@ License       GPL version 2 (see GPL.txt for details)
  */
 package org.memento;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -100,7 +96,7 @@ public class PathName {
         fis = new FileInputStream(this.path.toFile());
         dataBytes = new byte[65536];
         hexString = new StringBuffer();
-        
+
         try {
             while ((nread = fis.read(dataBytes)) != -1) {
                 md.update(dataBytes, 0, nread);
@@ -108,7 +104,7 @@ public class PathName {
         } finally {
             fis.close();
         }
-        
+
         byte[] mdbytes = md.digest();
 
         for (int i = 0; i < mdbytes.length; i++) {
@@ -171,11 +167,11 @@ public class PathName {
 
         return result;
     }
-    
+
     public Boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
         return Files.isDirectory(this.path);
     }
-    
+
     public String getAbsolutePath() {
         return this.path.toString();
     }

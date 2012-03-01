@@ -21,14 +21,14 @@ import org.memento.server.storage.FileStorage;
 public class Manager {
     private String grace;
     private Wini cfg;
-    
+
     public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
     }
 
     private Operation compute(String name) {
         String type;
-        
+
         type = this.cfg.get(name, "type");
         switch (type) {
             case "file":
@@ -38,7 +38,7 @@ public class Manager {
                 throw new UnsupportedOperationException("type method not supported");
         }
     }
-    
+
     /**
      * @return the mode
      */
@@ -52,22 +52,22 @@ public class Manager {
     public void setGrace(String grace) {
         this.grace = grace;
     }
-    
+
     public void go() throws IOException {
         Integer dataset;
         Operation operation;
-        Storage fsStorage;
-        Storage dbStorage;
+        FileStorage fsStorage;
+        DbStorage dbStorage;
 
         fsStorage = new FileStorage(this.cfg);
         dbStorage = new DbStorage(this.cfg);
 
         fsStorage.setGrace(this.grace);
         dbStorage.setGrace(this.grace);
-        
+
         // TODO: retrieve last dataset used
         dataset = Integer.decode(this.cfg.get("dataset", this.grace));
-        
+
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);
 
@@ -75,9 +75,9 @@ public class Manager {
             if (!(section.equals("general") || section.equals("dataset"))) {
                 fsStorage.setSection(section);
                 dbStorage.setSection(section);
-                
+
                 operation = this.compute(section);
-                
+
                 operation.setGrace(this.grace);
                 operation.setDataset(dataset);
                 operation.setSection(section);

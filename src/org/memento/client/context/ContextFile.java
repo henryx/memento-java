@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.memento.client.context.commands.CommandFile;
-import org.memento.json.FileAttrs;
 
 /**
  *

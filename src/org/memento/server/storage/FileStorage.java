@@ -12,13 +12,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
-import org.memento.server.management.Storage;
+import org.memento.server.management.Properties;
 
 /**
  *
  * @author enrico
  */
-public class FileStorage implements Storage {
+public class FileStorage implements Properties {
 
     private Integer dataset;
     private String grace;
@@ -116,7 +116,6 @@ public class FileStorage implements Storage {
         }
     }
 
-    @Override
     public void add(FileAttrs json) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

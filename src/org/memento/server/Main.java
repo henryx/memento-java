@@ -7,22 +7,12 @@
 
 package org.memento.server;
 
-import org.memento.server.management.Manager;
 import java.io.FileInputStream;
 import java.io.IOException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.log4j.Appender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.commons.cli.*;
+import org.apache.log4j.*;
 import org.ini4j.Wini;
+import org.memento.server.management.Manager;
 
 /**
  *
@@ -32,7 +22,7 @@ import org.ini4j.Wini;
 public class Main {
     private Options opts;
     private Wini cfg;
-    
+
     public static final String VERSION = "1.0";
     public static Logger logger = Logger.getLogger("BackupSYNC");
 
@@ -50,15 +40,15 @@ public class Main {
         this.opts.addOption("D", false, "Daily backup is executed");
         this.opts.addOption("W", false, "Weekly backup is executed");
         this.opts.addOption("M", false, "Monthly backup is executed");
-        
+
     }
-    
+
     /**
      * Create log via log4j
      */
     private void setLog() {
         Appender appender;
-        
+
         try {
             appender = new FileAppender(new PatternLayout("%d %-5p %c - %m%n"),
                                         this.cfg.get("general", "log_file"));
@@ -69,7 +59,7 @@ public class Main {
             System.exit(2);
         }
     }
-    
+
     /**
      * Open the configuration file
      * @param cfgFile a configuration file
@@ -127,16 +117,16 @@ public class Main {
 
         manage.go();
     }
-    
+
     public static void main(String[] args) {
         Main m;
-        
+
         m = new Main();
 
         if (args.length == 0) {
             m.printHelp();
         }
-        
+
         try {
             m.go(args);
         } catch (ParseException | IOException ex) {

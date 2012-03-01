@@ -6,16 +6,19 @@
  */
 package org.memento.server.management;
 
+import org.memento.server.storage.DbStorage;
+import org.memento.server.storage.FileStorage;
+
 /**
  *
  * @author enrico
  */
 public interface Operation extends Properties {
 
-    public void setDbStore(Storage dbstore);
-    public Storage getDbStore();
-    public void setFsStore(Storage fsstore);
-    public Storage getFsStore();
+    public void setDbStore(DbStorage dbstore);
+    public DbStorage getDbStore();
+    public void setFsStore(FileStorage fsstore);
+    public FileStorage getFsStore();
 
     public void run();
 }

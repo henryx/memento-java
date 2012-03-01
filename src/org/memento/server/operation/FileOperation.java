@@ -21,7 +21,8 @@ import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.management.Operation;
-import org.memento.server.management.Storage;
+import org.memento.server.storage.DbStorage;
+import org.memento.server.storage.FileStorage;
 
 /**
  *
@@ -30,8 +31,8 @@ import org.memento.server.management.Storage;
 public class FileOperation implements Operation {
 
     private Integer dataset;
-    private Storage dbstore;
-    private Storage fsstore;
+    private DbStorage dbstore;
+    private FileStorage fsstore;
     private String grace;
     private String section;
     private Wini cfg;
@@ -131,22 +132,22 @@ public class FileOperation implements Operation {
     }
 
     @Override
-    public void setDbStore(Storage dbstore) {
+    public void setDbStore(DbStorage dbstore) {
         this.dbstore = dbstore;
     }
 
     @Override
-    public Storage getDbStore() {
+    public DbStorage getDbStore() {
         return this.dbstore;
     }
 
     @Override
-    public void setFsStore(Storage fsstore) {
+    public void setFsStore(FileStorage fsstore) {
         this.fsstore = fsstore;
     }
 
     @Override
-    public Storage getFsStore() {
+    public FileStorage getFsStore() {
         return this.fsstore;
     }
 

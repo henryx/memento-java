@@ -6,13 +6,13 @@ package org.memento.server.storage;
 
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
-import org.memento.server.management.Storage;
+import org.memento.server.management.Properties;
 
 /**
  *
  * @author ebianchi
  */
-public class DbStorage implements Storage {
+public class DbStorage implements Properties {
 
     private Integer dataset;
     private String grace;
@@ -71,7 +71,6 @@ public class DbStorage implements Storage {
         this.section = section;
     }
 
-    @Override
     public void add(FileAttrs json) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
