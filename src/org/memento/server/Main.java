@@ -24,7 +24,7 @@ public class Main {
     private Wini cfg;
 
     public static final String VERSION = "1.0";
-    public static Logger logger = Logger.getLogger("BackupSYNC");
+    public static Logger logger = Logger.getLogger("Memento");
 
     public Main() {
         this.opts = new Options();
@@ -113,9 +113,11 @@ public class Main {
         }
 
         this.setLog();
-        Main.logger.info("Memento " + VERSION);
+        Main.logger.info("Started version " + VERSION);
 
         manage.go();
+
+        Main.logger.info("Ended version " + VERSION);
     }
 
     public static void main(String[] args) {
