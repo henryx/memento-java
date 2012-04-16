@@ -7,6 +7,8 @@
 
 package org.memento.server.storage;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
 import org.memento.server.management.Properties;
@@ -17,6 +19,7 @@ import org.memento.server.management.Properties;
  */
 public class DbStorage implements Properties {
 
+    private Connection conn;
     private Integer dataset;
     private String grace;
     private String section;
@@ -74,7 +77,7 @@ public class DbStorage implements Properties {
         this.section = section;
     }
 
-    public void add(FileAttrs json) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
+        this.conn = DBConnection.getInstance().getConnection(section, this.cfg.get("general", "repository"));
     }
 }

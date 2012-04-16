@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -41,7 +42,7 @@ public class FileOperation implements Operation {
         this.cfg = cfg;
     }
 
-    private void sendCommand(Context command) throws UnknownHostException, IOException {
+    private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         BufferedReader in;
         FileAttrs inJSON;
         JSONSerializer serializer;
@@ -171,6 +172,8 @@ public class FileOperation implements Operation {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | ClassNotFoundException ex) {
+                Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
