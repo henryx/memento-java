@@ -1,9 +1,9 @@
 /*
-Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
-Project       BackupSYNC
-Description   A backup system
-License       GPL version 2 (see GPL.txt for details)
- */
+ Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@gmail.com)
+ Project       Memento
+ Description   A backup system
+ License       GPL version 2 (see GPL.txt for details)
+*/
 
 package org.memento.json.commands;
 

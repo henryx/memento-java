@@ -1,6 +1,6 @@
 /*
- Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@ymail.com)
- Project       BackupSYNC
+ Copyright (C) 2011 Enrico Bianchi (enrico.bianchi@gmail.com)
+ Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
 */
@@ -75,9 +75,9 @@ public class DBConnection {
             
             for (String item : queries) {
                 stmt.executeUpdate(item);
-            }
-            
+            }            
         } catch (SQLException ex) {
+            // NOTE: add code for exception management
         }
     }
 
@@ -105,6 +105,5 @@ public class DBConnection {
     public Iterable<String> getAreaList() {
         // TODO: implement this
         throw new UnsupportedOperationException("Not yet implemented");
-    }
-    
+    }    
 }
