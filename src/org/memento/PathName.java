@@ -145,6 +145,11 @@ public class PathName {
             posixAttr = Files.readAttributes(this.path, PosixFileAttributes.class);
 
             result.setPosixSymlink(posixAttr.isSymbolicLink());
+            
+            if (result.getPosixSymlink()) {
+                result.setLinkTo(Files.readSymbolicLink(path).toString());
+            }
+            
             result.setPosixOwner(posixAttr.owner().getName());
             result.setPosixGroup(posixAttr.group().getName());
             result.setPosixPermission(PosixFilePermissions.toString(posixAttr.permissions()));
@@ -172,7 +177,11 @@ public class PathName {
     public Boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
         return Files.isDirectory(this.path);
     }
-
+    
+    public Boolean isSymlink() {
+        return Files.isSymbolicLink(this.path);
+    }
+    
     public String getAbsolutePath() {
         return this.path.toString();
     }

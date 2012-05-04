@@ -36,6 +36,8 @@ public class CommandFile implements FileVisitor<Path> {
 
         if (aPath.isDirectory()) {
             result.setType("directory");
+        } else if (aPath.isSymlink()) {
+            result.setType("symlink");
         } else {
             result.setType("file");
             try {

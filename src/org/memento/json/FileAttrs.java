@@ -36,6 +36,9 @@ public class FileAttrs {
 
     // ACL
     private ArrayList<FileAcl> acl;
+    
+    // Other
+    private String linkTo;
 
     /**
      * @param name the name to set
@@ -245,5 +248,19 @@ public class FileAttrs {
      */
     public void setPosixSymlink(Boolean posixSymlink) {
         this.posixSymlink = posixSymlink;
+    }
+
+    /**
+     * @return the linkTo
+     */
+    public String getLinkTo() {
+        return linkTo;
+    }
+
+    /**
+     * @param linkTo the linkTo to set
+     */
+    public void setLinkTo(String linkTo) {
+        this.linkTo = linkTo;
     }
 }
