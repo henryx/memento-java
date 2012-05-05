@@ -31,10 +31,10 @@ public class Main {
         this.opts.addOption(OptionBuilder.withLongOpt("port").withDescription("Set port number").hasArg().withArgName("PORT").create("p"));
     }
 
-    public void printHelp() {
+    public void printHelp(Integer code) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("Memento", this.opts);
-        System.exit(0);
+        System.exit(code);
     }
 
     public void go(String[] args) throws ParseException, ClassCastException {
@@ -48,11 +48,12 @@ public class Main {
         exit = Boolean.FALSE;
 
         if (cmd.hasOption("h") || cmd.hasOption("help")) {
-            this.printHelp();
+            this.printHelp(0);
         }
 
         if (!cmd.hasOption("p")) {
-            throw new ParseException("No port defined!");
+            System.out.println("No port defined!");
+            this.printHelp(2);
         }
 
         try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
