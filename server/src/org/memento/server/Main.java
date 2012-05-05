@@ -129,10 +129,10 @@ public class Main {
             Logger.getLogger(Main.class.getName()).log(Level.FATAL, null, ex);
         } finally {
             if (dbControl instanceof NetworkServerControl) {
-                for (String item : DBConnection.getInstance().getAreaList()) {
-                    
-                }
                 try {
+                    for (String item : DBConnection.getInstance().getAreaList()) {
+                        DBConnection.getInstance().closeConnection(item);
+                    }
                     dbControl.shutdown();
                 } catch (Exception ex) {
                 }

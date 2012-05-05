@@ -8,7 +8,9 @@
 package org.memento.server.storage;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *
@@ -17,10 +19,10 @@ import java.util.HashMap;
 public class DBConnection {
 
     private static DBConnection instance;
-    private HashMap<String, Connection> connections;
+    private static HashMap<String, Connection> connections;
 
     private DBConnection() {
-        this.connections = new HashMap<>();
+        DBConnection.connections = new HashMap<>();
     }
 
     private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
@@ -32,7 +34,7 @@ public class DBConnection {
         Class.forName("org.apache.derby.jdbc.ClientDriver");
         conn = DriverManager.getConnection(url + ";create=true");
 
-        this.connections.put(area, conn);
+        DBConnection.connections.put(area, conn);
     }
 
     private Boolean checkSchemaExist(String area) throws SQLException {
@@ -41,7 +43,7 @@ public class DBConnection {
         int counter;
 
         counter = 0;
-        dbmd = this.connections.get(area).getMetaData();
+        dbmd = DBConnection.connections.get(area).getMetaData();
 
         res = dbmd.getTables(null, null, null, new String[]{"TABLE"});
         while (res.next()) {
@@ -71,7 +73,7 @@ public class DBConnection {
         };
 
         try {
-            stmt = this.connections.get(area).createStatement();
+            stmt = DBConnection.connections.get(area).createStatement();
             
             for (String item : queries) {
                 stmt.executeUpdate(item);
@@ -83,7 +85,7 @@ public class DBConnection {
 
     public Connection getConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
 
-        if (!this.connections.containsKey(area)) {
+        if (!DBConnection.connections.containsKey(area)) {
             this.openConnection(area, dbLocation);
         }
 
@@ -91,7 +93,7 @@ public class DBConnection {
             this.createSchema(area);
         }
 
-        return this.connections.get(area);
+        return DBConnection.connections.get(area);
     }
 
     public static DBConnection getInstance() {
@@ -102,8 +104,28 @@ public class DBConnection {
         return instance;
     }
 
-    public Iterable<String> getAreaList() {
-        // TODO: implement this
-        throw new UnsupportedOperationException("Not yet implemented");
-    }    
+    public ArrayList<String> getAreaList() {
+        Iterator it;
+        ArrayList<String> keys;
+
+
+        keys = new ArrayList<>();
+
+        it = DBConnection.connections.keySet().iterator();
+
+        while (it.hasNext()) {
+            keys.add(it.next().toString());
+        }
+
+        return keys;
+    }
+
+    public void closeConnection(String area) throws SQLException {
+        Connection conn;
+
+        if (DBConnection.connections.containsKey(area)) {
+            conn = DBConnection.connections.get(area);
+            conn.close();
+        }
+    }
 }

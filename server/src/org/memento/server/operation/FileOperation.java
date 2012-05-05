@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -170,6 +171,8 @@ public class FileOperation implements Operation {
         try {
             this.sendCommand(context);
         } catch (UnknownHostException ex) {
+            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ConnectException ex) {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
