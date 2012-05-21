@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import org.apache.commons.cli.*;
-import org.apache.derby.drda.NetworkServerControl;
 import org.apache.log4j.*;
 import org.ini4j.Wini;
 import org.memento.server.management.Manager;
@@ -87,11 +86,9 @@ public class Main {
         CommandLine cmd;
         CommandLineParser parser;
         Manager manage;
-        NetworkServerControl dbControl;
 
         parser = new PosixParser();
         cmd = parser.parse(this.opts, args);
-        dbControl = null;
 
         if (cmd.hasOption("h") || cmd.hasOption("help")) {
             this.printHelp();
@@ -120,23 +117,12 @@ public class Main {
         this.setLog();
         Main.logger.info("Started version " + VERSION);
 
+        manage.go();
         try {
-            dbControl = new NetworkServerControl(InetAddress.getByName("localhost"), 1527);
-            dbControl.start(null);
-
-            manage.go();
-        } catch(Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.FATAL, null, ex);
-        } finally {
-            if (dbControl instanceof NetworkServerControl) {
-                try {
-                    for (String item : DBConnection.getInstance().getAreaList()) {
-                        DBConnection.getInstance().closeConnection(item);
-                    }
-                    dbControl.shutdown();
-                } catch (Exception ex) {
-                }
+            for (String item : DBConnection.getInstance().getAreaList()) {
+                DBConnection.getInstance().closeConnection(item);
             }
+        } catch (Exception ex) {
         }
 
         Main.logger.info("Ended version " + VERSION);

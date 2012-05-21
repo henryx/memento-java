@@ -29,10 +29,14 @@ public class DBConnection {
         Connection conn;
         String url;
 
-        url = "jdbc:derby://localhost:1527/" + dbLocation + "/.memento";
+        if (area.equals("system")) {
+            url = "jdbc:sqlite:" + dbLocation + "/.store.db";
+        } else {
+            url = "jdbc:sqlite:" + dbLocation + "/" + area + "/.store.db";
+        }
 
-        Class.forName("org.apache.derby.jdbc.ClientDriver");
-        conn = DriverManager.getConnection(url + ";create=true");
+        Class.forName("org.sqlite.JDBC");
+        conn = DriverManager.getConnection(url);
 
         DBConnection.connections.put(area, conn);
     }
@@ -59,25 +63,46 @@ public class DBConnection {
 
     private void createSchema(String area) {
         Statement stmt;
-        String[] queries;
+        String[] data;
+        String[] index;
+        String[] tables;
 
-        queries = new String[]{
-            "CREATE TABLE accounts(account_name VARCHAR(30),"
-                      + "account_type VARCHAR(70), account_number INTEGER,"
-                      + "CONSTRAINT pk_accounts PRIMARY KEY(account_name))",
-            "CREATE TABLE attributes(attribute_type VARCHAR(30),attribute_value VARCHAR(70),"
-                      + "CONSTRAINT pk_attributes PRIMARY KEY(attribute_type, attribute_value))",
-            "CREATE TABLE payments(account_name VARCHAR(30),transaction_date DATE,"
-                      + "category VARCHAR(70),payment_type VARCHAR(70),amount NUMERIC(10,2),"
-                      + "note TEXT)"
-        };
+        if (!area.equals("system")) {
+            data = new String[]{}; // In non-system area, data is empty
+            index = new String[] {"CREATE INDEX idx_store_1 ON attrs(element_mtime, element_ctime)"};
+            tables = new String[]{
+                "CREATE TABLE attrs (element VARCHAR(1024), element_user VARCHAR(50), element_group VARCHAR(50), element_type CHAR(1), element_perm VARCHAR(32), element_mtime INTEGER, element_ctime INTEGER)",
+                "CREATE TABLE acls (element VARCHAR(1024), id VARCHAR(50), id_type VARCHAR(1), perms VARCHAR(3))"
+            };
+        } else {
+            data = new String[]{
+                "INSERT INTO status VALUES('hour', 0, current_timestamp)",
+                "INSERT INTO status VALUES('day', 0, current_timestamp)",
+                "INSERT INTO status VALUES('week', 0, current_timestamp)",
+                "INSERT INTO status VALUES('month', 0, current_timestamp)"
+            };
+
+            index = new String[]{}; // In system area, index is empty
+
+            tables = new String[]{
+                "CREATE TABLE status (grace VARCHAR(5), actual INTEGER, last_run TIMESTAMP)"
+            };
+        }
 
         try {
             stmt = DBConnection.connections.get(area).createStatement();
-            
-            for (String item : queries) {
+
+            for (String item : tables) {
                 stmt.executeUpdate(item);
-            }            
+            }
+
+            for (String item : index) {
+                stmt.executeUpdate(item);
+            }
+
+            for (String item : data) {
+                stmt.executeUpdate(item);
+            }
         } catch (SQLException ex) {
             // NOTE: add code for exception management
         }
