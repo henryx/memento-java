@@ -9,7 +9,7 @@ package org.memento.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.sql.SQLException;
 import org.apache.commons.cli.*;
 import org.apache.log4j.*;
 import org.ini4j.Wini;
@@ -122,7 +122,7 @@ public class Main {
             for (String item : DBConnection.getInstance().getAreaList()) {
                 DBConnection.getInstance().closeConnection(item);
             }
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
         }
 
         Main.logger.info("Ended version " + VERSION);
