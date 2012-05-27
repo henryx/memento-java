@@ -25,6 +25,7 @@ public class FileStorage implements Properties {
     private Integer dataset;
     private String grace;
     private String section;
+    private String structure;
     private Wini cfg;
 
     public FileStorage(Wini cfg) throws IOException {
@@ -96,29 +97,30 @@ public class FileStorage implements Properties {
     @Override
     public void setSection(String section) {
         File directory;
-        String structure;
         String sep;
 
         sep = System.getProperty("file.separator");
 
         this.section = section;
-        structure = this.cfg.get("general", "repository")
+        this.structure = this.cfg.get("general", "repository")
                 + sep
                 + this.grace
                 + sep
                 + this.dataset
                 + sep
-                + this.section;
+                + this.section
+                + sep;
 
-        directory = new File(structure);
+        directory = new File(this.structure);
 
         if (!directory.exists()) {
             directory.mkdirs();
         }
     }
 
-    public void add(FileAttrs json, Socket sock) {
-        // TODO: implement this
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void add(FileAttrs json, Socket sock) throws IOException {
+        if (json.getType().equals("directory")) {
+            Files.createDirectories(Paths.get(this.structure + json.getName()));
+        }
     }
 }
