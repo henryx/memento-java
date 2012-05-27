@@ -17,6 +17,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -45,6 +46,9 @@ public class FileOperation implements Operation {
     }
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
+        ArrayList<FileAttrs> dirs;
+        ArrayList<FileAttrs> files;
+        ArrayList<FileAttrs> symlinks;
         BufferedReader in;
         FileAttrs inJSON;
         JSONSerializer serializer;
@@ -58,6 +62,10 @@ public class FileOperation implements Operation {
         out = null;
         conn = null;
 
+        files = new ArrayList<>();
+        dirs = new ArrayList<>();
+        symlinks = new ArrayList<>();
+
         try {
             conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
 
@@ -66,10 +74,41 @@ public class FileOperation implements Operation {
 
             out.println(serializer.exclude("*.class").deepSerialize(command));
 
-            while (!(line = in.readLine()).equals("")) {
+            while (Boolean.TRUE) {
+                line = in.readLine();
+
+                if (line == null) {
+                    break;
+                }
+
                 inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
-                this.dbstore.add(inJSON);
-                this.fsstore.add(inJSON, conn);
+                
+                if (inJSON.getType().equals("file")) {
+                    files.add(inJSON);
+                }
+
+                if (inJSON.getType().equals("directory")) {
+                    dirs.add(inJSON);
+                }
+
+                if (inJSON.getType().equals("symlink")) {
+                    symlinks.add(inJSON);
+                }
+            }
+            
+            for (FileAttrs item : dirs) {
+                this.fsstore.add(item, conn);
+                this.dbstore.add(item);
+            }
+
+            for (FileAttrs item : files) {
+                this.fsstore.add(item, conn);
+                this.dbstore.add(item);
+            }
+
+            for (FileAttrs item : symlinks) {
+                this.fsstore.add(item, conn);
+                this.dbstore.add(item);
             }
         } finally {
             if (in instanceof BufferedReader) {
