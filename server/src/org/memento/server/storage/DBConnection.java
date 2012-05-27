@@ -27,12 +27,15 @@ public class DBConnection {
 
     private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
         Connection conn;
+        String sep;
         String url;
 
+        sep = System.getProperty("file.separator");
+
         if (area.equals("system")) {
-            url = "jdbc:sqlite:" + dbLocation + "/.store.db";
+            url = "jdbc:sqlite:" + dbLocation + sep + ".store.db";
         } else {
-            url = "jdbc:sqlite:" + dbLocation + "/" + area + "/.store.db";
+            url = "jdbc:sqlite:" + dbLocation + sep + area + sep + ".store.db";
         }
 
         Class.forName("org.sqlite.JDBC");

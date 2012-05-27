@@ -79,11 +79,17 @@ public class DbStorage implements Properties {
 
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
         String dbLocation;
+        String sep;
         
-        dbLocation = this.cfg.get("general", "repository") + "/"
-                + this.grace +  "/"
+        sep = System.getProperty("file.separator");
+        
+        dbLocation = this.cfg.get("general", "repository")
+                + sep
+                + this.grace
+                + sep
                 + this.dataset;
 
         this.conn = DBConnection.getInstance().getConnection(this.section, dbLocation);
+        // TODO: Add code for storing data into database
     }
 }
