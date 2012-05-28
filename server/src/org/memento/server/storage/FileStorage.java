@@ -7,13 +7,15 @@
 
 package org.memento.server.storage;
 
-import java.io.File;
-import java.io.IOException;
+import flexjson.JSONSerializer;
+import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ini4j.Wini;
+import org.memento.json.Context;
 import org.memento.json.FileAttrs;
+import org.memento.json.commands.CommandFile;
 import org.memento.server.management.Properties;
 
 /**
@@ -47,6 +49,63 @@ public class FileStorage implements Properties {
         if (!directory.exists()) {
             for (String subdirectory : subdirectories) {
                 Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
+            }
+        }
+    }
+
+    private void getRemoteFile(String source, String dest) throws IOException {
+        InputStream in;
+        Context context;
+        CommandFile command;
+        FileOutputStream outFile;
+        JSONSerializer serializer;
+        PrintWriter out;
+        Socket conn;
+        byte[] buf = new byte[1048576];
+        int bytesRead = 0;
+
+        context = new Context();
+        command = new CommandFile();
+        serializer = new JSONSerializer();
+
+        in = null;
+        out = null;
+        conn = null;
+
+        try {
+            conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
+
+            in = conn.getInputStream();
+            out = new PrintWriter(conn.getOutputStream(), true);
+            outFile = new FileOutputStream(dest);
+
+            context.setContext("file");
+            command.setName("get");
+            command.setFilename(source);
+            context.setCommand(command);
+
+            out.println(serializer.exclude("*.class").deepSerialize(context));
+            out.flush();
+
+            while (-1 != (bytesRead = in.read(buf, 0, buf.length))) {
+                outFile.write(buf, 0, bytesRead);
+            }
+
+            in.close();
+            out.flush();
+            out.close();
+        } finally {
+            if (conn instanceof Socket && !conn.isClosed()) {
+                conn.close();
+            }
+
+            if (in instanceof InputStream) {
+                in.close();
+            }
+
+            if (out instanceof PrintWriter) {
+                out.flush();
+                out.close();
             }
         }
     }
@@ -118,9 +177,17 @@ public class FileStorage implements Properties {
         }
     }
 
-    public void add(FileAttrs json, Socket sock) throws IOException {
-        if (json.getType().equals("directory")) {
-            Files.createDirectories(Paths.get(this.structure + json.getName()));
+    public void add(FileAttrs json) throws IOException {
+        switch (json.getType()) {
+            case "directory":
+                Files.createDirectories(Paths.get(this.structure + json.getName()));
+                break;
+            case "file":
+                this.getRemoteFile(json.getName(), this.structure + json.getName());
+                break;
+            case "symlink":
+                // TODO: Create a symlink
+                break;
         }
     }
 }

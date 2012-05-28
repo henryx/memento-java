@@ -73,6 +73,7 @@ public class FileOperation implements Operation {
             out = new PrintWriter(conn.getOutputStream(), true);
 
             out.println(serializer.exclude("*.class").deepSerialize(command));
+            out.flush();
 
             while (Boolean.TRUE) {
                 line = in.readLine();
@@ -97,17 +98,17 @@ public class FileOperation implements Operation {
             }
             
             for (FileAttrs item : dirs) {
-                this.fsstore.add(item, conn);
+                this.fsstore.add(item);
                 this.dbstore.add(item);
             }
 
             for (FileAttrs item : files) {
-                this.fsstore.add(item, conn);
+                this.fsstore.add(item);
                 this.dbstore.add(item);
             }
 
             for (FileAttrs item : symlinks) {
-                this.fsstore.add(item, conn);
+                this.fsstore.add(item);
                 this.dbstore.add(item);
             }
         } finally {

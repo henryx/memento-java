@@ -13,9 +13,12 @@ package org.memento.json.commands;
  */
 public class CommandFile extends Command {
 
-    // For list commands
+    // For list command:
     private String[] directory;
     private Boolean acl;
+    
+    // For get/put command:
+    private String filename;
 
     /**
      * @return the directory
@@ -43,5 +46,19 @@ public class CommandFile extends Command {
      */
     public void setAcl(Boolean acl) {
         this.acl = acl;
+    }
+
+    /**
+     * @return the filename
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * @param filename the filename to set
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }

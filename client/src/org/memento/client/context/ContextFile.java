@@ -59,7 +59,7 @@ public class ContextFile extends AbstractContext {
         int read;
 
         data = new File(fileName);
-        buffer = new byte[1024];
+        buffer = new byte[1048576];
 
         if (!data.exists()) {
             throw new FileNotFoundException("File not exist");
@@ -109,10 +109,10 @@ public class ContextFile extends AbstractContext {
                 }
                 break;
             case "get":
-                this.cmdGetFile(command.get("file").toString());
+                this.cmdGetFile(command.get("filename").toString());
                 break;
             case "put":
-                this.cmdPutFile(command.get("file").toString());
+                this.cmdPutFile(command.get("filename").toString());
                 break;
             default:
                 errMsg = new HashMap();
