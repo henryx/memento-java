@@ -87,7 +87,7 @@ public class FileStorage implements Properties {
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
 
-            while (-1 != (bytesRead = in.read(buf, 0, buf.length))) {
+            while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
 
