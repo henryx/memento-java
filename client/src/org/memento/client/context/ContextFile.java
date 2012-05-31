@@ -55,11 +55,12 @@ public class ContextFile extends AbstractContext {
         BufferedInputStream buff;
         BufferedOutputStream outStream;
         File data;
+        FileInputStream fis;
         byte[] buffer;
         int read;
 
         data = new File(fileName);
-        buffer = new byte[1048576];
+        buffer = new byte[8192];
 
         if (!data.exists()) {
             throw new FileNotFoundException("File not exist");
@@ -69,7 +70,8 @@ public class ContextFile extends AbstractContext {
             throw new IllegalArgumentException(fileName + " is not a file");
         }
 
-        buff = new BufferedInputStream(new FileInputStream(data));
+        fis = new FileInputStream(data);
+        buff = new BufferedInputStream(fis);
         outStream = new BufferedOutputStream(this.connection.getOutputStream());
 
         while ((read = buff.read(buffer)) != -1) {
@@ -77,8 +79,10 @@ public class ContextFile extends AbstractContext {
             outStream.flush();
         }
 
-        outStream.close();
+        data = null;
+        fis.close();
         buff.close();
+        outStream.close();
     }
 
     private void cmdPutFile(String toString) {

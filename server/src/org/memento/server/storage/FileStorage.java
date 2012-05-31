@@ -61,7 +61,7 @@ public class FileStorage implements Properties {
         JSONSerializer serializer;
         PrintWriter out;
         Socket conn;
-        byte[] buf = new byte[1048576];
+        byte[] buf = new byte[8192];
         int bytesRead = 0;
 
         context = new Context();

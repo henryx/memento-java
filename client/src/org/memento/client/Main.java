@@ -9,6 +9,7 @@ package org.memento.client;
 
 import java.io.IOException;
 import java.net.BindException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +62,7 @@ public class Main {
             while (!exit) {
                 exit = serve.listen();
             }
-        } catch (BindException | UnknownHostException | NullPointerException ex) {
+        } catch (SocketException | UnknownHostException | NullPointerException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
