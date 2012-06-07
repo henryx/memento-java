@@ -13,8 +13,12 @@ package org.memento.server.management;
  */
 
 import java.io.IOException;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.server.operation.FileOperation;
+import org.memento.server.storage.DBConnection;
 import org.memento.server.storage.DbStorage;
 import org.memento.server.storage.FileStorage;
 
@@ -37,6 +41,30 @@ public class Manager {
             default:
                 throw new UnsupportedOperationException("type method not supported");
         }
+    }
+    
+    // Ugly. This is not a good place for getting last dataset from database
+    private Integer getLastDataset() {
+        Connection conn;
+        Integer result;
+        PreparedStatement pstmt;
+        ResultSet res;
+
+        try {
+            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
+            pstmt = conn.prepareStatement("SELECT actual FROM status WHERE grace = ?");
+            pstmt.setString(1, this.grace);
+
+            res = pstmt.executeQuery();
+
+            res.next();
+            result = res.getInt(1);
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            result = 0;
+        }
+
+        return result;
     }
 
     /**
@@ -65,8 +93,13 @@ public class Manager {
         fsStorage.setGrace(this.grace);
         dbStorage.setGrace(this.grace);
 
-        // TODO: retrieve last dataset used
-        dataset = Integer.decode(this.cfg.get("dataset", this.grace));
+        dataset = this.getLastDataset();
+
+        if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
+            dataset = 1;
+        } else {
+            dataset = dataset + 1;
+        }
 
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);
