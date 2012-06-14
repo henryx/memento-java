@@ -33,21 +33,17 @@ public class ContextFile extends AbstractContext {
 
         out = new PrintWriter(this.connection.getOutputStream(), true);
 
-        try {
-            cmd = new CommandFile();
-            path = Paths.get(directory);
+        cmd = new CommandFile();
+        path = Paths.get(directory);
 
-            cmd.setDirectory(directory);
-            cmd.setAcl(acl);
-            cmd.setWriter(out);
+        cmd.setDirectory(directory);
+        cmd.setAcl(acl);
+        cmd.setWriter(out);
 
-            if (Files.isReadable(path)) {
-                Files.walkFileTree(path, cmd);
-            } else {
-                throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
-            }
-        } finally {
-            out.close();
+        if (Files.isReadable(path)) {
+            Files.walkFileTree(path, cmd);
+        } else {
+            throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
         }
     }
 
