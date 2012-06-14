@@ -9,12 +9,10 @@ package org.memento.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import org.apache.commons.cli.*;
 import org.apache.log4j.*;
 import org.ini4j.Wini;
 import org.memento.server.management.Manager;
-import org.memento.server.storage.DBConnection;
 
 /**
  *
@@ -118,12 +116,6 @@ public class Main {
         Main.logger.info("Started version " + VERSION);
 
         manage.go();
-        try {
-            for (String item : DBConnection.getInstance().getAreaList()) {
-                DBConnection.getInstance().closeConnection(item);
-            }
-        } catch (SQLException ex) {
-        }
 
         Main.logger.info("Ended version " + VERSION);
     }

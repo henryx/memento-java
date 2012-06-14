@@ -42,16 +42,24 @@ public class Manager {
                 throw new UnsupportedOperationException("type method not supported");
         }
     }
-    
+
     // Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
         Connection conn;
+        DBConnection dbc;
         Integer result;
         PreparedStatement pstmt;
         ResultSet res;
+        String dbUrl;
+
+        dbc = new DBConnection();
+        dbUrl = this.cfg.get("general", "repository")
+                + System.getProperty("file.separator")
+                + ".store.db";
 
         try {
-            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
+            conn = dbc.open(dbUrl, Boolean.TRUE);
+
             pstmt = conn.prepareStatement("SELECT actual FROM status WHERE grace = ?");
             pstmt.setString(1, this.grace);
 
@@ -59,6 +67,8 @@ public class Manager {
 
             res.next();
             result = res.getInt(1);
+
+            dbc.close();
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
             result = 0;

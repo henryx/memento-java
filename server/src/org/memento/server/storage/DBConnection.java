@@ -8,49 +8,24 @@
 package org.memento.server.storage;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  *
  * @author enrico
  */
 public class DBConnection {
+    private Connection conn;
 
-    private static DBConnection instance;
-    private static HashMap<String, Connection> connections;
-
-    private DBConnection() {
-        DBConnection.connections = new HashMap<>();
+    public DBConnection() {
     }
 
-    private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
-        Connection conn;
-        String sep;
-        String url;
-
-        sep = System.getProperty("file.separator");
-
-        if (area.equals("system")) {
-            url = "jdbc:sqlite:" + dbLocation + sep + ".store.db";
-        } else {
-            url = "jdbc:sqlite:" + dbLocation + sep + area + sep + ".store.db";
-        }
-
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection(url);
-
-        DBConnection.connections.put(area, conn);
-    }
-
-    private Boolean checkSchemaExist(String area) throws SQLException {
+    private Boolean checkSchemaExist() throws SQLException {
         DatabaseMetaData dbmd;
         ResultSet res;
         int counter;
 
         counter = 0;
-        dbmd = DBConnection.connections.get(area).getMetaData();
+        dbmd = this.conn.getMetaData();
 
         res = dbmd.getTables(null, null, null, new String[]{"TABLE"});
         while (res.next()) {
@@ -64,13 +39,13 @@ public class DBConnection {
         }
     }
 
-    private void createSchema(String area) {
+    private void createSchema(Boolean system) {
         Statement stmt;
         String[] data;
         String[] index;
         String[] tables;
 
-        if (!area.equals("system")) {
+        if (!system) {
             data = new String[]{}; // In non-system area, data is empty
             index = new String[] {"CREATE INDEX idx_store_1 ON attrs(element_mtime, element_ctime)"};
             tables = new String[]{
@@ -93,7 +68,7 @@ public class DBConnection {
         }
 
         try {
-            stmt = DBConnection.connections.get(area).createStatement();
+            stmt = this.conn.createStatement();
 
             for (String item : tables) {
                 stmt.executeUpdate(item);
@@ -111,49 +86,21 @@ public class DBConnection {
         }
     }
 
-    public Connection getConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
+    public Connection open(String dbname, Boolean system) throws ClassNotFoundException, SQLException {
+        String url;
 
-        if (!DBConnection.connections.containsKey(area)) {
-            this.openConnection(area, dbLocation);
+        url = "jdbc:sqlite:" + dbname;
+        Class.forName("org.sqlite.JDBC");
+        conn = DriverManager.getConnection(url);
+
+        if (!this.checkSchemaExist()) {
+            this.createSchema(system);
         }
 
-        if (!this.checkSchemaExist(area)) {
-            this.createSchema(area);
-        }
-
-        return DBConnection.connections.get(area);
+        return this.conn;
     }
 
-    public static DBConnection getInstance() {
-        if (instance == null) {
-            instance = new DBConnection();
-        }
-
-        return instance;
-    }
-
-    public ArrayList<String> getAreaList() {
-        Iterator it;
-        ArrayList<String> keys;
-
-
-        keys = new ArrayList<>();
-
-        it = DBConnection.connections.keySet().iterator();
-
-        while (it.hasNext()) {
-            keys.add(it.next().toString());
-        }
-
-        return keys;
-    }
-
-    public void closeConnection(String area) throws SQLException {
-        Connection conn;
-
-        if (DBConnection.connections.containsKey(area)) {
-            conn = DBConnection.connections.get(area);
-            conn.close();
-        }
+    public void close() throws SQLException {
+        this.conn.close();
     }
 }
