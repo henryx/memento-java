@@ -43,7 +43,7 @@ public class Manager {
         }
     }
 
-    // Ugly. This is not a good place for getting last dataset from database
+    // FIXME: Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
         Connection conn;
         DBConnection dbc;
@@ -75,6 +75,33 @@ public class Manager {
         }
 
         return result;
+    }
+
+    // FIXME: Ugly. This is not a good place for getting last dataset from database
+    private void setLastDataset(Integer dataset) {
+        Connection conn;
+        DBConnection dbc;
+        PreparedStatement pstmt;
+        String dbUrl;
+
+        dbc = new DBConnection();
+        dbUrl = this.cfg.get("general", "repository")
+                + System.getProperty("file.separator")
+                + ".store.db";
+
+        try {
+            conn = dbc.open(dbUrl, Boolean.TRUE);
+
+            pstmt = conn.prepareStatement("UPDATE status SET actual = ? WHERE grace = ?");
+            pstmt.setInt(1, dataset);
+            pstmt.setString(2, this.grace);
+
+            pstmt.executeUpdate();
+
+            dbc.close();
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -131,5 +158,7 @@ public class Manager {
                 operation.run();
             }
         }
+
+        this.setLastDataset(dataset);
     }
 }
