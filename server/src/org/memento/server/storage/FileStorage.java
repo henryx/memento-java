@@ -27,7 +27,6 @@ public class FileStorage implements Properties {
     private Integer dataset;
     private String grace;
     private String section;
-    private String structure;
     private Wini cfg;
 
     public FileStorage(Wini cfg) throws IOException {
@@ -51,6 +50,32 @@ public class FileStorage implements Properties {
                 Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
             }
         }
+    }
+
+    private String returnStructure(Boolean old) {
+        Integer curDataset;
+        String sep;
+
+        sep = System.getProperty("file.separator");
+
+        if (old) {
+            if ((this.dataset - 1) <= 0) {
+                curDataset = Integer.decode(this.cfg.get("dataset", this.grace));
+            } else {
+                curDataset = this.dataset - 1;
+            }
+        } else {
+            curDataset = this.dataset;
+        }
+
+        return this.cfg.get("general", "repository")
+                + sep
+                + this.grace
+                + sep
+                + curDataset
+                + sep
+                + this.section
+                + sep;
     }
 
     private void getRemoteFile(String source, String dest) throws IOException {
@@ -157,21 +182,9 @@ public class FileStorage implements Properties {
     @Override
     public void setSection(String section) {
         File directory;
-        String sep;
-
-        sep = System.getProperty("file.separator");
 
         this.section = section;
-        this.structure = this.cfg.get("general", "repository")
-                + sep
-                + this.grace
-                + sep
-                + this.dataset
-                + sep
-                + this.section
-                + sep;
-
-        directory = new File(this.structure);
+        directory = new File(this.returnStructure(Boolean.FALSE));
 
         if (!directory.exists()) {
             directory.mkdirs();
@@ -181,10 +194,10 @@ public class FileStorage implements Properties {
     public void add(FileAttrs json) throws IOException {
         switch (json.getType()) {
             case "directory":
-                Files.createDirectories(Paths.get(this.structure + json.getName()));
+                Files.createDirectories(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()));
                 break;
             case "file":
-                this.getRemoteFile(json.getName(), this.structure + json.getName());
+                this.getRemoteFile(json.getName(), this.returnStructure(Boolean.FALSE) + json.getName());
                 break;
             case "symlink":
                 // TODO: Create a symlink
