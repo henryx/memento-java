@@ -12,7 +12,13 @@ package org.memento.server.management;
  * @author enrico
  */
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -140,6 +146,8 @@ public class Manager {
 
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);
+        
+        this.remove(dataset);
 
         for (String section : this.cfg.keySet()) {
             if (!(section.equals("general") || section.equals("dataset"))) {
@@ -160,5 +168,49 @@ public class Manager {
         }
 
         this.setLastDataset(dataset);
+    }
+    
+    public void remove(Integer dataset) throws IOException {
+        File directory;
+        String sep;
+
+        sep = System.getProperty("file.separator");
+
+        directory = new File(this.cfg.get("general", "repository")
+                + sep
+                + this.grace
+                + sep
+                + dataset);
+
+        if (directory.exists()) {
+            Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    // try to delete the file anyway, even if its attributes
+                    // could not be read, since delete-only access is
+                    // theoretically possible
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if (exc == null) {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    } else {
+                        // directory iteration failed; propagate exception
+                        throw exc;
+                    }
+                }
+            });
+        }
     }
 }
