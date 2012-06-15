@@ -91,6 +91,8 @@ public class DbStorage implements Properties {
                 + sep
                 + this.dataset
                 + sep
+                + this.section
+                + sep
                 + ".store.db";
 
         this.conn = dbc.open(dbLocation, Boolean.FALSE);
