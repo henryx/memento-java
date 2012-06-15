@@ -118,7 +118,7 @@ public class Manager {
         this.grace = grace;
     }
 
-    public void go() throws IOException {
+    public void sync() throws IOException {
         Integer dataset;
         Operation operation;
         FileStorage fsStorage;

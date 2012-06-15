@@ -115,7 +115,7 @@ public class Main {
         this.setLog();
         Main.logger.info("Started version " + VERSION);
 
-        manage.go();
+        manage.sync();
 
         Main.logger.info("Ended version " + VERSION);
     }
