@@ -90,10 +90,6 @@ public class FileStorage implements Properties {
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
-
-            in.close();
-            out.flush();
-            out.close();
         } finally {
             if (conn instanceof Socket && !conn.isClosed()) {
                 conn.close();
