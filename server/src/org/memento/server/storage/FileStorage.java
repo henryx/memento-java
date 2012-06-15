@@ -70,6 +70,7 @@ public class FileStorage implements Properties {
 
         in = null;
         out = null;
+        outFile = null;
         conn = null;
 
         try {
@@ -102,6 +103,10 @@ public class FileStorage implements Properties {
             if (out instanceof PrintWriter) {
                 out.flush();
                 out.close();
+            }
+
+            if (outFile instanceof FileOutputStream) {
+                outFile.close();
             }
         }
     }
