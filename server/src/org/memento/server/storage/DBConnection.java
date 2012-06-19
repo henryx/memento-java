@@ -56,6 +56,7 @@ public class DBConnection {
                 + " element_user VARCHAR(50),"
                 + " element_group VARCHAR(50),"
                 + " element_type CHAR(1),"
+                + " element_hash VARCHAR(32),"
                 + " element_perm VARCHAR(32),"
                 + " element_mtime INTEGER,"
                 + " element_ctime INTEGER)",
