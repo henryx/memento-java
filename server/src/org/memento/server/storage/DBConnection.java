@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.server.storage;
 
 import java.sql.*;
@@ -14,6 +13,7 @@ import java.sql.*;
  * @author enrico
  */
 public class DBConnection {
+
     private Connection conn;
 
     public DBConnection() {
@@ -47,10 +47,22 @@ public class DBConnection {
 
         if (!system) {
             data = new String[]{}; // In non-system area, data is empty
-            index = new String[] {"CREATE INDEX idx_store_1 ON attrs(element_mtime, element_ctime)"};
+            index = new String[]{
+                "CREATE INDEX idx_store_1 ON attrs(element_mtime,"
+                + " element_ctime)"
+            };
             tables = new String[]{
-                "CREATE TABLE attrs (element VARCHAR(1024), element_user VARCHAR(50), element_group VARCHAR(50), element_type CHAR(1), element_perm VARCHAR(32), element_mtime INTEGER, element_ctime INTEGER)",
-                "CREATE TABLE acls (element VARCHAR(1024), id VARCHAR(50), id_type VARCHAR(1), perms VARCHAR(3))"
+                "CREATE TABLE attrs (element VARCHAR(1024),"
+                + " element_user VARCHAR(50),"
+                + " element_group VARCHAR(50),"
+                + " element_type CHAR(1),"
+                + " element_perm VARCHAR(32),"
+                + " element_mtime INTEGER,"
+                + " element_ctime INTEGER)",
+                "CREATE TABLE acls (element VARCHAR(1024),"
+                + " id VARCHAR(50),"
+                + " id_type VARCHAR(1),"
+                + " perms VARCHAR(3))"
             };
         } else {
             data = new String[]{
@@ -63,7 +75,9 @@ public class DBConnection {
             index = new String[]{}; // In system area, index is empty
 
             tables = new String[]{
-                "CREATE TABLE status (grace VARCHAR(5), actual INTEGER, last_run TIMESTAMP)"
+                "CREATE TABLE status (grace VARCHAR(5),"
+                + " actual INTEGER,"
+                + " last_run TIMESTAMP)"
             };
         }
 
