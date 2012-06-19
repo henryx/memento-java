@@ -112,10 +112,12 @@ public class DBConnection {
             this.createSchema(system);
         }
 
+        this.conn.setAutoCommit(Boolean.FALSE);
         return this.conn;
     }
 
     public void close() throws SQLException {
+        this.conn.commit();
         this.conn.close();
     }
 }
