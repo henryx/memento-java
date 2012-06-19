@@ -7,6 +7,9 @@
 package org.memento.server.storage;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *
@@ -14,18 +17,36 @@ import java.sql.*;
  */
 public class DBConnection {
 
-    private Connection conn;
+    private static DBConnection instance;
+    private static HashMap<String, Connection> connections;
 
-    public DBConnection() {
+    private DBConnection() {
+        DBConnection.connections = new HashMap<>();
     }
 
-    private Boolean checkSchemaExist() throws SQLException {
+    private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
+        Connection conn;
+        String sep;
+        String url;
+
+        sep = System.getProperty("file.separator");
+
+        url = "jdbc:sqlite:" + dbLocation + sep + ".store.db";
+
+        Class.forName("org.sqlite.JDBC");
+        conn = DriverManager.getConnection(url);
+
+        conn.setAutoCommit(Boolean.FALSE);
+        DBConnection.connections.put(area, conn);
+    }
+
+    private Boolean checkSchemaExist(String area) throws SQLException {
         DatabaseMetaData dbmd;
         ResultSet res;
         int counter;
 
         counter = 0;
-        dbmd = this.conn.getMetaData();
+        dbmd = DBConnection.connections.get(area).getMetaData();
 
         res = dbmd.getTables(null, null, null, new String[]{"TABLE"});
         while (res.next()) {
@@ -39,13 +60,13 @@ public class DBConnection {
         }
     }
 
-    private void createSchema(Boolean system) {
+    private void createSchema(String area) throws SQLException {
         Statement stmt;
         String[] data;
         String[] index;
         String[] tables;
 
-        if (!system) {
+        if (!area.equals("system")) {
             data = new String[]{}; // In non-system area, data is empty
             index = new String[]{
                 "CREATE INDEX idx_store_1 ON attrs(element_mtime,"
@@ -82,42 +103,67 @@ public class DBConnection {
             };
         }
 
-        try {
-            stmt = this.conn.createStatement();
+        stmt = DBConnection.connections.get(area).createStatement();
 
-            for (String item : tables) {
-                stmt.executeUpdate(item);
-            }
+        for (String item : tables) {
+            stmt.executeUpdate(item);
+        }
 
-            for (String item : index) {
-                stmt.executeUpdate(item);
-            }
+        for (String item : index) {
+            stmt.executeUpdate(item);
+        }
 
-            for (String item : data) {
-                stmt.executeUpdate(item);
-            }
-        } catch (SQLException ex) {
-            // NOTE: add code for exception management
+        for (String item : data) {
+            stmt.executeUpdate(item);
         }
     }
 
-    public Connection open(String dbname, Boolean system) throws ClassNotFoundException, SQLException {
-        String url;
+    public Connection getConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
 
-        url = "jdbc:sqlite:" + dbname;
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection(url);
-
-        if (!this.checkSchemaExist()) {
-            this.createSchema(system);
+        if (!DBConnection.connections.containsKey(area)) {
+            this.openConnection(area, dbLocation);
         }
 
-        this.conn.setAutoCommit(Boolean.FALSE);
-        return this.conn;
+        if (!this.checkSchemaExist(area)) {
+            this.createSchema(area);
+        }
+
+        return DBConnection.connections.get(area);
     }
 
-    public void close() throws SQLException {
-        this.conn.commit();
-        this.conn.close();
+    public static DBConnection getInstance() {
+        if (instance == null) {
+            instance = new DBConnection();
+        }
+
+        return instance;
+    }
+
+    public ArrayList<String> getAreaList() {
+        Iterator it;
+        ArrayList<String> keys;
+
+
+        keys = new ArrayList<>();
+
+        it = DBConnection.connections.keySet().iterator();
+
+        while (it.hasNext()) {
+            keys.add(it.next().toString());
+        }
+
+        return keys;
+    }
+
+    public void closeConnection(String area, Boolean commit) throws SQLException {
+        Connection conn;
+
+        if (DBConnection.connections.containsKey(area)) {
+            conn = DBConnection.connections.get(area);
+            if (commit) {
+                conn.commit();
+            }
+            conn.close();
+        }
     }
 }

@@ -9,10 +9,12 @@ package org.memento.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import org.apache.commons.cli.*;
 import org.apache.log4j.*;
 import org.ini4j.Wini;
 import org.memento.server.management.Manager;
+import org.memento.server.storage.DBConnection;
 
 /**
  *
@@ -107,8 +109,7 @@ public class Main {
             manage.setGrace("day");
         } else if (cmd.hasOption("W")) {
             manage.setGrace("week");
-        }
-        else if (cmd.hasOption("M")) {
+        } else if (cmd.hasOption("M")) {
             manage.setGrace("month");
         }
 
@@ -116,6 +117,13 @@ public class Main {
         Main.logger.info("Started version " + VERSION);
 
         manage.sync();
+
+        try {
+            for (String item : DBConnection.getInstance().getAreaList()) {
+                DBConnection.getInstance().closeConnection(item, Boolean.TRUE);
+            }
+        } catch (SQLException ex) {
+        }
 
         Main.logger.info("Ended version " + VERSION);
     }

@@ -109,27 +109,21 @@ public class DbStorage implements Properties {
         String dbLocation;
         String sep;
 
-        dbc = new DBConnection();
         sep = System.getProperty("file.separator");
-
         dbLocation = this.cfg.get("general", "repository")
                 + sep
                 + this.grace
                 + sep
                 + this.dataset
                 + sep
-                + this.section
-                + sep
-                + ".store.db";
+                + this.section;
 
-        this.conn = dbc.open(dbLocation, Boolean.FALSE);
+        this.conn = DBConnection.getInstance().getConnection("cur_" + this.section, dbLocation);
 
         if (json.getOs().indexOf("windows") >= 0) {
             this.addDosAttrs(json);
         } else {
             this.addPosixAttrs(json);
         }
-
-        dbc.close();
     }
 }

@@ -19,7 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -52,29 +55,24 @@ public class Manager {
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
         Connection conn;
-        DBConnection dbc;
         Integer result;
         PreparedStatement pstmt;
         ResultSet res;
-        String dbUrl;
-
-        dbc = new DBConnection();
-        dbUrl = this.cfg.get("general", "repository")
-                + System.getProperty("file.separator")
-                + ".store.db";
+        final String SELECT = "SELECT actual FROM status WHERE grace = ?";
 
         try {
-            conn = dbc.open(dbUrl, Boolean.TRUE);
+            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
 
-            pstmt = conn.prepareStatement("SELECT actual FROM status WHERE grace = ?");
+            pstmt = conn.prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
 
             res = pstmt.executeQuery();
 
             res.next();
             result = res.getInt(1);
-
-            dbc.close();
+            
+            res.close();
+            pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
             result = 0;
@@ -86,25 +84,18 @@ public class Manager {
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private void setLastDataset(Integer dataset) {
         Connection conn;
-        DBConnection dbc;
         PreparedStatement pstmt;
-        String dbUrl;
-
-        dbc = new DBConnection();
-        dbUrl = this.cfg.get("general", "repository")
-                + System.getProperty("file.separator")
-                + ".store.db";
+        final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
 
         try {
-            conn = dbc.open(dbUrl, Boolean.TRUE);
+            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
 
-            pstmt = conn.prepareStatement("UPDATE status SET actual = ? WHERE grace = ?");
+            pstmt = conn.prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
 
             pstmt.executeUpdate();
-
-            dbc.close();
+            pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
         }
