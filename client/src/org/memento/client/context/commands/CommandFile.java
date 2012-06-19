@@ -27,12 +27,14 @@ public class CommandFile implements FileVisitor<Path> {
     private String directory;
     private Boolean acl;
     private PrintWriter writer;
-    
+
     private FileAttrs compute(PathName aPath) throws IllegalArgumentException, FileNotFoundException, IOException {
         FileAttrs result;
 
         result = aPath.getAttrs();
+
         result.setName(aPath.getAbsolutePath());
+        result.setOs(System.getProperty("os.name").toLowerCase());
 
         if (aPath.isDirectory()) {
             result.setType("directory");
@@ -115,7 +117,7 @@ public class CommandFile implements FileVisitor<Path> {
     public void setAcl(Boolean acl) {
         this.acl = acl;
     }
-    
+
     /**
      * @return the writer
      */

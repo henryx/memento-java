@@ -22,6 +22,10 @@ public class FileAttrs {
     private long size;
     private String type;
     private String hash;
+
+    // System type
+    private String os;
+
     // Posix attributes
     private Boolean posixSymlink;
     private String posixOwner;
@@ -36,7 +40,7 @@ public class FileAttrs {
 
     // ACL
     private ArrayList<FileAcl> acl;
-    
+
     // Other
     private String linkTo;
 
@@ -262,5 +266,19 @@ public class FileAttrs {
      */
     public void setLinkTo(String linkTo) {
         this.linkTo = linkTo;
+    }
+
+    /**
+     * @return the system
+     */
+    public String getOs() {
+        return os;
+    }
+
+    /**
+     * @param os the system to set
+     */
+    public void setOs(String os) {
+        this.os = os;
     }
 }
