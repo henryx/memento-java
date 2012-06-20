@@ -16,21 +16,15 @@ import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
-import org.memento.server.management.Properties;
 
 /**
  *
  * @author enrico
  */
-public class FileStorage implements Properties {
-
-    private Integer dataset;
-    private String grace;
-    private String section;
-    private Wini cfg;
+public class FileStorage extends CommonStorage{
 
     public FileStorage(Wini cfg) throws IOException {
-        this.cfg = cfg;
+        super(cfg);
         this.checkStructure();
     }
 
@@ -50,32 +44,6 @@ public class FileStorage implements Properties {
                 Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
             }
         }
-    }
-
-    private String returnStructure(Boolean old) {
-        Integer curDataset;
-        String sep;
-
-        sep = System.getProperty("file.separator");
-
-        if (old) {
-            if ((this.dataset - 1) <= 0) {
-                curDataset = Integer.decode(this.cfg.get("dataset", this.grace));
-            } else {
-                curDataset = this.dataset - 1;
-            }
-        } else {
-            curDataset = this.dataset;
-        }
-
-        return this.cfg.get("general", "repository")
-                + sep
-                + this.grace
-                + sep
-                + curDataset
-                + sep
-                + this.section
-                + sep;
     }
 
     private void getRemoteFile(String source, String dest) throws IOException {
@@ -99,7 +67,8 @@ public class FileStorage implements Properties {
         conn = null;
 
         try {
-            conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
+            conn = new Socket(this.cfg.get(this.section, "host"),
+                    Integer.parseInt(this.cfg.get(this.section, "port")));
 
             in = conn.getInputStream();
             out = new PrintWriter(conn.getOutputStream(), true);
@@ -134,46 +103,6 @@ public class FileStorage implements Properties {
                 outFile.close();
             }
         }
-    }
-
-    /**
-     * @return the dataset
-     */
-    @Override
-    public Integer getDataset() {
-        return dataset;
-    }
-
-    /**
-     * @param dataset the dataset to set
-     */
-    @Override
-    public void setDataset(Integer dataset) {
-        this.dataset = dataset;
-    }
-
-    /**
-     * @return the grace
-     */
-    @Override
-    public String getGrace() {
-        return grace;
-    }
-
-    /**
-     * @param grace the grace to set
-     */
-    @Override
-    public void setGrace(String grace) {
-        this.grace = grace;
-    }
-
-    /**
-     * @return the section
-     */
-    @Override
-    public String getSection() {
-        return section;
     }
 
     /**

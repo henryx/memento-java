@@ -12,22 +12,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
-import org.memento.server.management.Properties;
 
 /**
  *
  * @author ebianchi
  */
-public class DbStorage implements Properties {
+public class DbStorage extends CommonStorage {
 
     private Connection conn;
-    private Integer dataset;
-    private String grace;
-    private String section;
-    private Wini cfg;
 
     public DbStorage(Wini cfg) {
-        this.cfg = cfg;
+        super(cfg);
     }
 
     private void addDosAttrs(FileAttrs json) {
@@ -56,69 +51,9 @@ public class DbStorage implements Properties {
         pstmt.close();
     }
 
-    /**
-     * @return the dataset
-     */
-    @Override
-    public Integer getDataset() {
-        return dataset;
-    }
-
-    /**
-     * @param dataset the dataset to set
-     */
-    @Override
-    public void setDataset(Integer dataset) {
-        this.dataset = dataset;
-    }
-
-    /**
-     * @return the grace
-     */
-    @Override
-    public String getGrace() {
-        return grace;
-    }
-
-    /**
-     * @param grace the grace to set
-     */
-    @Override
-    public void setGrace(String grace) {
-        this.grace = grace;
-    }
-
-    /**
-     * @return the section
-     */
-    @Override
-    public String getSection() {
-        return section;
-    }
-
-    /**
-     * @param section the section to set
-     */
-    @Override
-    public void setSection(String section) {
-        this.section = section;
-    }
-
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
-        DBConnection dbc;
-        String dbLocation;
-        String sep;
-
-        sep = System.getProperty("file.separator");
-        dbLocation = this.cfg.get("general", "repository")
-                + sep
-                + this.grace
-                + sep
-                + this.dataset
-                + sep
-                + this.section;
-
-        this.conn = DBConnection.getInstance().getConnection("cur_" + this.section, dbLocation);
+        this.conn = DBConnection.getInstance().getConnection("cur_" + this.section,
+                this.returnStructure(Boolean.FALSE));
 
         if (json.getOs().indexOf("windows") >= 0) {
             this.addDosAttrs(json);
