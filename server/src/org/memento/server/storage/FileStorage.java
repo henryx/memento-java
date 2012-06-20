@@ -129,7 +129,8 @@ public class FileStorage extends CommonStorage{
                 this.getRemoteFile(json.getName(), this.returnStructure(Boolean.FALSE) + json.getName());
                 break;
             case "symlink":
-                // TODO: Create a symlink
+                Files.createSymbolicLink(Paths.get(json.getLinkTo()),
+                        Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()));
                 break;
         }
     }
