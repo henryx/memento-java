@@ -43,7 +43,8 @@ public class FileAttrs {
 
     // Other
     private String linkTo;
-
+    private Boolean previousDataset;
+    
     /**
      * @param name the name to set
      */
@@ -280,5 +281,19 @@ public class FileAttrs {
      */
     public void setOs(String os) {
         this.os = os;
+    }
+
+    /**
+     * @return the previousDataset
+     */
+    public Boolean getPreviousDataset() {
+        return previousDataset;
+    }
+
+    /**
+     * @param previousDataset the previousDataset to set
+     */
+    public void setPreviousDataset(Boolean previousDataset) {
+        this.previousDataset = previousDataset;
     }
 }
