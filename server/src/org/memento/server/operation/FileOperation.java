@@ -46,7 +46,6 @@ public class FileOperation implements Operation {
     }
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
-        ArrayList<FileAttrs> dirs;
         ArrayList<FileAttrs> files;
         ArrayList<FileAttrs> symlinks;
         BufferedReader in;
@@ -63,7 +62,6 @@ public class FileOperation implements Operation {
         conn = null;
 
         files = new ArrayList<>();
-        dirs = new ArrayList<>();
         symlinks = new ArrayList<>();
 
         try {
@@ -84,22 +82,19 @@ public class FileOperation implements Operation {
 
                 inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
                 
-                if (inJSON.getType().equals("file")) {
-                    files.add(inJSON);
-                }
-
                 if (inJSON.getType().equals("directory")) {
-                    dirs.add(inJSON);
-                }
-
-                if (inJSON.getType().equals("symlink")) {
+                    this.fsstore.add(inJSON);
+                    this.dbstore.add(inJSON);
+                } else if (inJSON.getType().equals("file")) {
+                    if(this.dbstore.isItemExist(inJSON)) {
+                        inJSON.setPreviousDataset(Boolean.TRUE);
+                    } else {
+                        inJSON.setPreviousDataset(Boolean.FALSE);
+                    }                    
+                    files.add(inJSON);
+                } else if (inJSON.getType().equals("symlink")) {
                     symlinks.add(inJSON);
                 }
-            }
-            
-            for (FileAttrs item : dirs) {
-                this.fsstore.add(item);
-                this.dbstore.add(item);
             }
 
             for (FileAttrs item : files) {

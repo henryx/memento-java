@@ -27,6 +27,15 @@ public class FileStorage extends CommonStorage{
         super(cfg);
         this.checkStructure();
     }
+    
+     private void addFile(FileAttrs json) throws IOException {
+        if (!json.getPreviousDataset()) {
+            this.getRemoteFile(json.getName(), this.returnStructure(Boolean.FALSE) + json.getName());
+        } else {
+            Files.createLink(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()),
+                    Paths.get(this.returnStructure(Boolean.TRUE) + json.getName()));
+        }
+    }
 
     private void checkStructure() throws IOException {
         File directory;
@@ -126,7 +135,7 @@ public class FileStorage extends CommonStorage{
                 Files.createDirectories(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()));
                 break;
             case "file":
-                this.getRemoteFile(json.getName(), this.returnStructure(Boolean.FALSE) + json.getName());
+                this.addFile(json);
                 break;
             case "symlink":
                 Files.createSymbolicLink(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()),
