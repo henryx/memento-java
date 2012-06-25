@@ -69,8 +69,8 @@ public class DBConnection {
         if (!area.equals("system")) {
             data = new String[]{}; // In non-system area, data is empty
             index = new String[]{
-                "CREATE INDEX idx_store_1 ON attrs(element_mtime,"
-                + " element_ctime)"
+                "CREATE INDEX idx_store_1 ON attrs(element,"
+                + " element_hash)"
             };
             tables = new String[]{
                 "CREATE TABLE attrs (element VARCHAR(1024),"
