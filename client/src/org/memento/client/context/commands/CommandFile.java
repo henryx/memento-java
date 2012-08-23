@@ -8,14 +8,13 @@
 package org.memento.client.context.commands;
 
 import flexjson.JSONSerializer;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
 import org.memento.PathName;
 import org.memento.json.FileAttrs;
 
@@ -23,7 +22,7 @@ import org.memento.json.FileAttrs;
  *
  * @author enrico
  */
-public class CommandFile implements FileVisitor<Path> {
+public class CommandFile {
     private String directory;
     private Boolean acl;
     private PrintWriter writer;
@@ -56,45 +55,11 @@ public class CommandFile implements FileVisitor<Path> {
         return result;
     }
 
-    @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException, IOException {
-        FileAttrs data;
-        JSONSerializer serializer;
-
-        serializer = new JSONSerializer();
-        data = this.compute(new PathName(file));
-
-        this.writer.println(serializer.deepSerialize(data));
-        return FileVisitResult.CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws FileNotFoundException, IOException {
-        FileAttrs data;
-        JSONSerializer serializer;
-
-        serializer = new JSONSerializer();
-        data = this.compute(new PathName(dir));
-
-        this.writer.println(serializer.deepSerialize(data));
-        return FileVisitResult.CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult preVisitDirectory(Path t, BasicFileAttributes bfa) throws IOException {
-        return FileVisitResult.CONTINUE;
-    }
-
-    @Override
-    public FileVisitResult visitFileFailed(Path t, IOException ioe) throws IOException {
-        return FileVisitResult.CONTINUE;
-    }
-
     /**
      * @return the directory
      */
     public String getDirectory() {
-        return directory;
+        return this.directory;
     }
 
     /**
@@ -108,7 +73,7 @@ public class CommandFile implements FileVisitor<Path> {
      * @return the acl
      */
     public Boolean getAcl() {
-        return acl;
+        return this.acl;
     }
 
     /**
@@ -122,7 +87,7 @@ public class CommandFile implements FileVisitor<Path> {
      * @return the writer
      */
     public PrintWriter getWriter() {
-        return writer;
+        return this.writer;
     }
 
     /**
@@ -130,5 +95,28 @@ public class CommandFile implements FileVisitor<Path> {
      */
     public void setWriter(PrintWriter writer) {
         this.writer = writer;
+    }
+
+    public void iterate(File path) throws IllegalArgumentException, FileNotFoundException, IOException {
+        File[] filesAndDirs;
+        FileAttrs data;
+        List<File> filesDirs;
+        JSONSerializer serializer;
+        
+        filesAndDirs = path.listFiles();
+        filesDirs = Arrays.asList(filesAndDirs);
+        serializer = new JSONSerializer();
+
+        data = this.compute(new PathName(path.toPath()));
+        this.writer.println(serializer.deepSerialize(data));
+
+        for (File file : filesDirs) {
+            data = this.compute(new PathName(file.toPath()));
+            this.writer.println(serializer.deepSerialize(data));
+
+            if (file.isDirectory()) {
+                this.iterate(file);
+            }
+        }
     }
 }

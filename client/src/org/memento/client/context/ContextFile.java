@@ -41,7 +41,7 @@ public class ContextFile extends AbstractContext {
         cmd.setWriter(out);
 
         if (Files.isReadable(path)) {
-            Files.walkFileTree(path, cmd);
+            cmd.iterate(path.toFile());
         } else {
             throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
         }
