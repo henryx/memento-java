@@ -7,11 +7,15 @@
 
 package org.memento.client.context;
 
-import java.io.*;
+import flexjson.JSONSerializer;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.memento.client.context.commands.CommandFile;
@@ -20,28 +24,30 @@ import org.memento.client.context.commands.CommandFile;
  *
  * @author enrico
  */
-public class ContextFile extends AbstractContext {
 
-    public ContextFile(Socket connection) {
+public class Context {
+    private Socket connection;
+
+    public Context(Socket connection) {
         this.connection = connection;
     }
-
+    
     private void cmdListFile(String directory, Boolean acl) throws FileNotFoundException, IOException {
         CommandFile cmd;
-        Path path;
+        File path;
         PrintWriter out;
 
         out = new PrintWriter(this.connection.getOutputStream(), true);
 
         cmd = new CommandFile();
-        path = Paths.get(directory);
+        path = new File(directory);
 
         cmd.setDirectory(directory);
         cmd.setAcl(acl);
         cmd.setWriter(out);
 
-        if (Files.isReadable(path)) {
-            cmd.iterate(path.toFile());
+        if (path.isDirectory()) {
+            cmd.iterate(path);
         } else {
             throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
         }
@@ -85,11 +91,10 @@ public class ContextFile extends AbstractContext {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    @Override
-    public Boolean parse(HashMap command) throws IOException {
+    public Boolean parseFile(HashMap command) throws IOException {
         ArrayList paths;
         Boolean exit;
-        ContextError error;
+        Context error;
         HashMap errMsg;
 
         exit = Boolean.FALSE;
@@ -116,13 +121,52 @@ public class ContextFile extends AbstractContext {
                 break;
             default:
                 errMsg = new HashMap();
-                error = new ContextError(this.connection);
+                error = new Context(this.connection);
 
                 errMsg.put("message", "Command not found");
 
-                error.parse(errMsg);
+                error.parseError(errMsg);
                 break;
         }
+
+        return exit;
+    }
+    
+    public Boolean parseSystem(HashMap command) throws IOException {
+        Boolean exit;
+        Context error;
+        HashMap result;
+
+        switch (command.get("name").toString()) {
+            case "exit":
+                exit = Boolean.TRUE;
+                break;
+            default:
+                result = new HashMap();
+                error = new Context(this.connection);
+
+                result.put("message", "Command not found");
+                error.parseError(result);
+                exit = Boolean.FALSE;
+                break;
+        }
+        
+        return exit;
+    }
+
+    public Boolean parseError(HashMap command) throws IOException {
+        Boolean exit;
+        HashMap result;
+        JSONSerializer serializer;
+        PrintWriter out;
+
+        out = new PrintWriter(connection.getOutputStream(), true);
+        result = command;
+        exit = Boolean.FALSE;
+        serializer = new JSONSerializer();
+
+        result.put("result", "error");
+        out.println(serializer.exclude("*.class").serialize(result));
 
         return exit;
     }

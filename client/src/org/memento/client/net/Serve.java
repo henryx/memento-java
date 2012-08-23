@@ -16,10 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import org.memento.client.context.AbstractContext;
-import org.memento.client.context.ContextError;
-import org.memento.client.context.ContextFile;
-import org.memento.client.context.ContextSystem;
+import org.memento.client.context.Context;
 
 /**
  *
@@ -35,7 +32,7 @@ public class Serve implements AutoCloseable {
     }
 
     public Boolean listen() throws UnknownHostException, IOException {
-        AbstractContext context;
+        Context context;
         Boolean exit;
         BufferedReader in;
         HashMap errMsg;
@@ -45,26 +42,23 @@ public class Serve implements AutoCloseable {
         connection = socket.accept();
 
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        context = new Context(connection);
         try {
             inJSON = new JSONDeserializer<HashMap>().deserialize(in.readLine());
             switch (inJSON.get("context").toString()) {
                 case "file":
-                    context = new ContextFile(connection);
-                    exit = context.parse((HashMap) inJSON.get("command"));
+                    exit = context.parseFile((HashMap) inJSON.get("command"));
                     break;
                 case "system":
-                    context = new ContextSystem(connection);
-                    exit = context.parse((HashMap) inJSON.get("command"));
+                    exit = context.parseSystem((HashMap) inJSON.get("command"));
                     break;
                 default:
-                    context = new ContextError(connection);
                     errMsg = new HashMap();
                     errMsg.put("message", "Command not found");
-                    exit = context.parse(errMsg);
+                    exit = context.parseError(errMsg);
                     break;
             }
         } catch (FileNotFoundException | IllegalArgumentException | NullPointerException ex) {
-            context = new ContextError(connection);
             errMsg = new HashMap();
 
             if (ex instanceof FileNotFoundException
@@ -75,7 +69,7 @@ public class Serve implements AutoCloseable {
             } else {
                 errMsg.put("message", "Malformed command");
             }
-            exit = context.parse(errMsg);
+            exit = context.parseError(errMsg);
         }
         connection.close();
 
