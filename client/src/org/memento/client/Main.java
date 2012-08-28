@@ -8,7 +8,6 @@
 package org.memento.client;
 
 import java.io.IOException;
-import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;

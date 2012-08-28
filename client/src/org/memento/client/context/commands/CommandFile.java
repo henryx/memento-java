@@ -97,7 +97,7 @@ public class CommandFile {
         this.writer = writer;
     }
 
-    public void iterate(File path) throws IllegalArgumentException, FileNotFoundException, IOException {
+    public void walk(File path) throws IllegalArgumentException, FileNotFoundException, IOException {
         File[] filesAndDirs;
         FileAttrs data;
         List<File> filesDirs;
@@ -115,7 +115,7 @@ public class CommandFile {
             this.writer.println(serializer.deepSerialize(data));
 
             if (file.isDirectory()) {
-                this.iterate(file);
+                this.walk(file);
             }
         }
     }

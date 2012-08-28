@@ -47,7 +47,7 @@ public class Context {
         cmd.setWriter(out);
 
         if (path.isDirectory()) {
-            cmd.iterate(path);
+            cmd.walk(path);
         } else {
             throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
         }
