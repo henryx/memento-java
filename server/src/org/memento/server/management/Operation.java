@@ -7,6 +7,7 @@
 
 package org.memento.server.management;
 
+import java.io.IOException;
 import org.memento.server.storage.DbStorage;
 import org.memento.server.storage.FileStorage;
 
@@ -14,12 +15,26 @@ import org.memento.server.storage.FileStorage;
  *
  * @author enrico
  */
-public interface Operation extends Properties {
+public abstract class Operation implements Properties {
 
-    public void setDbStore(DbStorage dbstore);
-    public DbStorage getDbStore();
-    public void setFsStore(FileStorage fsstore);
-    public FileStorage getFsStore();
+    public abstract void setDbStore(DbStorage dbstore);
+    public abstract DbStorage getDbStore();
+    public abstract void setFsStore(FileStorage fsstore);
+    public abstract FileStorage getFsStore();
 
-    public void run();
+    public void preCommand(String command) throws IOException, InterruptedException {
+        Process p;
+        
+        p = Runtime.getRuntime().exec(command);
+        p.wait();
+    }
+    
+    public void postCommand(String command) throws IOException, InterruptedException {
+        Process p;
+        
+        p = Runtime.getRuntime().exec(command);
+        p.wait();
+    }
+    
+    public abstract void run();
 }
