@@ -66,7 +66,9 @@ public class FileOperation extends Operation {
         symlinks = new ArrayList<>();
 
         try {
-            preCommand(this.cfg.get(this.section, "pre_command"));
+            if (!this.cfg.get(this.section, "pre_command").equals("")) {
+                preCommand(this.cfg.get(this.section, "pre_command"));
+            }
             conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
 
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -85,8 +87,8 @@ public class FileOperation extends Operation {
                 inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
                 
                 if (inJSON.getType().equals("directory")) {
-                    this.fsstore.add(inJSON);
-                    this.dbstore.add(inJSON);
+                    //this.fsstore.add(inJSON);
+                    //this.dbstore.add(inJSON);
                 } else if (inJSON.getType().equals("file")) {
                     if(this.dbstore.isItemExist(inJSON)) {
                         inJSON.setPreviousDataset(Boolean.TRUE);
@@ -109,7 +111,9 @@ public class FileOperation extends Operation {
                 this.dbstore.add(item);
             }
             
-            postCommand(this.cfg.get(this.section, "post_command"));
+            if (!this.cfg.get(this.section, "post_command").equals("")) {
+                postCommand(this.cfg.get(this.section, "post_command"));
+            }
         } catch (InterruptedException ex) {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
