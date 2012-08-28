@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.client.context.commands;
 
 import flexjson.JSONSerializer;
@@ -13,8 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Stack;
 import org.memento.PathName;
 import org.memento.json.FileAttrs;
 
@@ -23,6 +21,7 @@ import org.memento.json.FileAttrs;
  * @author enrico
  */
 public class CommandFile {
+
     private String directory;
     private Boolean acl;
     private PrintWriter writer;
@@ -98,24 +97,25 @@ public class CommandFile {
     }
 
     public void walk(File path) throws IllegalArgumentException, FileNotFoundException, IOException {
-        File[] filesAndDirs;
+        File child;
         FileAttrs data;
-        List<File> filesDirs;
         JSONSerializer serializer;
-        
-        filesAndDirs = path.listFiles();
-        filesDirs = Arrays.asList(filesAndDirs);
+        Stack<File> stack;
+
+        stack = new Stack<>();
         serializer = new JSONSerializer();
 
-        data = this.compute(new PathName(path.toPath()));
-        this.writer.println(serializer.deepSerialize(data));
+        stack.push(path);
+        while (!stack.isEmpty()) {
+            child = stack.pop();
 
-        for (File file : filesDirs) {
-            data = this.compute(new PathName(file.toPath()));
+            data = this.compute(new PathName(child.toPath()));
             this.writer.println(serializer.deepSerialize(data));
 
-            if (file.isDirectory()) {
-                this.walk(file);
+            if (child.isDirectory()) {
+                for (File f : child.listFiles()) {
+                    stack.push(f);
+                }
             }
         }
     }
