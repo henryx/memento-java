@@ -23,7 +23,7 @@ import org.memento.json.FileAttrs;
 public class CommandFile {
 
     private String directory;
-    private Boolean acl;
+    private boolean acl;
     private PrintWriter writer;
 
     private FileAttrs compute(PathName aPath) throws IllegalArgumentException, FileNotFoundException, IOException {
@@ -71,14 +71,14 @@ public class CommandFile {
     /**
      * @return the acl
      */
-    public Boolean getAcl() {
+    public boolean getAcl() {
         return this.acl;
     }
 
     /**
      * @param acl the acl to set
      */
-    public void setAcl(Boolean acl) {
+    public void setAcl(boolean acl) {
         this.acl = acl;
     }
 

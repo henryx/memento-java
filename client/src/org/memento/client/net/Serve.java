@@ -31,9 +31,9 @@ public class Serve implements AutoCloseable {
         this.port = port;
     }
 
-    public Boolean listen() throws UnknownHostException, IOException {
+    public boolean listen() throws UnknownHostException, IOException {
         Context context;
-        Boolean exit;
+        boolean exit;
         BufferedReader in;
         HashMap errMsg;
         HashMap inJSON;

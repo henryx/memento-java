@@ -32,7 +32,7 @@ public class Context {
         this.connection = connection;
     }
     
-    private void cmdListFile(String directory, Boolean acl) throws FileNotFoundException, IOException {
+    private void cmdListFile(String directory, boolean acl) throws FileNotFoundException, IOException {
         CommandFile cmd;
         File path;
         PrintWriter out;
@@ -91,13 +91,13 @@ public class Context {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public Boolean parseFile(HashMap command) throws IOException {
+    public boolean parseFile(HashMap command) throws IOException {
         ArrayList paths;
-        Boolean exit;
+        boolean exit;
         Context error;
         HashMap errMsg;
 
-        exit = Boolean.FALSE;
+        exit = false;
         switch (command.get("name").toString()) {
             case "list":
                 try {
@@ -107,7 +107,7 @@ public class Context {
                     }
 
                     for (int item = 0; item < paths.size(); item++) {
-                        this.cmdListFile(paths.get(item).toString(), (Boolean) command.get("acl"));
+                        this.cmdListFile(paths.get(item).toString(), (boolean) command.get("acl"));
                     }
                 } catch (ClassCastException ex) {
                     // TODO: manage exception
@@ -132,14 +132,14 @@ public class Context {
         return exit;
     }
     
-    public Boolean parseSystem(HashMap command) throws IOException {
-        Boolean exit;
+    public boolean parseSystem(HashMap command) throws IOException {
+        boolean exit;
         Context error;
         HashMap result;
 
         switch (command.get("name").toString()) {
             case "exit":
-                exit = Boolean.TRUE;
+                exit = false;
                 break;
             default:
                 result = new HashMap();
@@ -147,22 +147,22 @@ public class Context {
 
                 result.put("message", "Command not found");
                 error.parseError(result);
-                exit = Boolean.FALSE;
+                exit = false;
                 break;
         }
         
         return exit;
     }
 
-    public Boolean parseError(HashMap command) throws IOException {
-        Boolean exit;
+    public boolean parseError(HashMap command) throws IOException {
+        boolean exit;
         HashMap result;
         JSONSerializer serializer;
         PrintWriter out;
 
         out = new PrintWriter(connection.getOutputStream(), true);
         result = command;
-        exit = Boolean.FALSE;
+        exit = false;
         serializer = new JSONSerializer();
 
         result.put("result", "error");

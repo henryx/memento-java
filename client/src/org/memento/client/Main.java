@@ -38,14 +38,14 @@ public class Main {
     }
 
     public void go(String[] args) throws ParseException, ClassCastException {
-        Boolean exit;
+        boolean exit;
         CommandLine cmd;
         CommandLineParser parser;
 
         parser = new PosixParser();
 
         cmd = parser.parse(this.opts, args);
-        exit = Boolean.FALSE;
+        exit = false;
 
         if (cmd.hasOption("h") || cmd.hasOption("help")) {
             this.printHelp(0);
