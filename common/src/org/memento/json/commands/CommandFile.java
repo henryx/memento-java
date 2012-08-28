@@ -15,7 +15,7 @@ public class CommandFile extends Command {
 
     // For list command:
     private String[] directory;
-    private Boolean acl;
+    private boolean acl;
     
     // For get/put command:
     private String filename;
@@ -37,14 +37,14 @@ public class CommandFile extends Command {
     /**
      * @return the acl
      */
-    public Boolean getAcl() {
+    public boolean getAcl() {
         return acl;
     }
 
     /**
      * @param acl the acl to set
      */
-    public void setAcl(Boolean acl) {
+    public void setAcl(boolean acl) {
         this.acl = acl;
     }
 

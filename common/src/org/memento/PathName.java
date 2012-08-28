@@ -174,11 +174,11 @@ public class PathName {
         return result;
     }
 
-    public Boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
+    public boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
         return Files.isDirectory(this.path);
     }
 
-    public Boolean isSymlink() {
+    public boolean isSymlink() {
         return Files.isSymbolicLink(this.path);
     }
 

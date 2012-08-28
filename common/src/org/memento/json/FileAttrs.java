@@ -27,23 +27,23 @@ public class FileAttrs {
     private String os;
 
     // Posix attributes
-    private Boolean posixSymlink;
+    private boolean posixSymlink;
     private String posixOwner;
     private String posixGroup;
     private String posixPermission;
 
     // Dos attributes
-    private Boolean dosArchive;
-    private Boolean dosHidden;
-    private Boolean dosReadonly;
-    private Boolean dosSystem;
+    private boolean dosArchive;
+    private boolean dosHidden;
+    private boolean dosReadonly;
+    private boolean dosSystem;
 
     // ACL
     private ArrayList<FileAcl> acl;
 
     // Other
     private String linkTo;
-    private Boolean previousDataset;
+    private boolean previousDataset;
     
     /**
      * @param name the name to set
@@ -174,56 +174,56 @@ public class FileAttrs {
     /**
      * @return the dosArchive
      */
-    public Boolean getDosArchive() {
+    public boolean getDosArchive() {
         return dosArchive;
     }
 
     /**
      * @param dosArchive the dosArchive to set
      */
-    public void setDosArchive(Boolean dosArchive) {
+    public void setDosArchive(boolean dosArchive) {
         this.dosArchive = dosArchive;
     }
 
     /**
      * @return the dosHidden
      */
-    public Boolean getDosHidden() {
+    public boolean getDosHidden() {
         return dosHidden;
     }
 
     /**
      * @param dosHidden the dosHidden to set
      */
-    public void setDosHidden(Boolean dosHidden) {
+    public void setDosHidden(boolean dosHidden) {
         this.dosHidden = dosHidden;
     }
 
     /**
      * @return the dosReadonly
      */
-    public Boolean getDosReadonly() {
+    public boolean getDosReadonly() {
         return dosReadonly;
     }
 
     /**
      * @param dosReadonly the dosReadonly to set
      */
-    public void setDosReadonly(Boolean dosReadonly) {
+    public void setDosReadonly(boolean dosReadonly) {
         this.dosReadonly = dosReadonly;
     }
 
     /**
      * @return the dosSystem
      */
-    public Boolean getDosSystem() {
+    public boolean getDosSystem() {
         return dosSystem;
     }
 
     /**
      * @param dosSystem the dosSystem to set
      */
-    public void setDosSystem(Boolean dosSystem) {
+    public void setDosSystem(boolean dosSystem) {
         this.dosSystem = dosSystem;
     }
 
@@ -244,14 +244,14 @@ public class FileAttrs {
     /**
      * @return the posixSymlink
      */
-    public Boolean getPosixSymlink() {
+    public boolean getPosixSymlink() {
         return posixSymlink;
     }
 
     /**
      * @param posixSymlink the posixSymlink to set
      */
-    public void setPosixSymlink(Boolean posixSymlink) {
+    public void setPosixSymlink(boolean posixSymlink) {
         this.posixSymlink = posixSymlink;
     }
 
@@ -286,14 +286,14 @@ public class FileAttrs {
     /**
      * @return the previousDataset
      */
-    public Boolean getPreviousDataset() {
+    public boolean getPreviousDataset() {
         return previousDataset;
     }
 
     /**
      * @param previousDataset the previousDataset to set
      */
-    public void setPreviousDataset(Boolean previousDataset) {
+    public void setPreviousDataset(boolean previousDataset) {
         this.previousDataset = previousDataset;
     }
 }
