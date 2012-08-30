@@ -67,7 +67,7 @@ public class FileOperation extends Operation {
 
         try {
             if (!this.cfg.get(this.section, "pre_command").equals("")) {
-                preCommand(this.cfg.get(this.section, "pre_command"));
+                execCommand(this.cfg.get(this.section, "pre_command"));
             }
             conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
 
@@ -112,7 +112,7 @@ public class FileOperation extends Operation {
             }
             
             if (!this.cfg.get(this.section, "post_command").equals("")) {
-                postCommand(this.cfg.get(this.section, "post_command"));
+                execCommand(this.cfg.get(this.section, "post_command"));
             }
         } catch (InterruptedException ex) {
             Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);

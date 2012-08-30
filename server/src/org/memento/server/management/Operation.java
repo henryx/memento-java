@@ -22,14 +22,7 @@ public abstract class Operation implements Properties {
     public abstract void setFsStore(FileStorage fsstore);
     public abstract FileStorage getFsStore();
 
-    public void preCommand(String command) throws IOException, InterruptedException {
-        Process p;
-        
-        p = Runtime.getRuntime().exec(command);
-        p.wait();
-    }
-    
-    public void postCommand(String command) throws IOException, InterruptedException {
+    public void execCommand(String command) throws IOException, InterruptedException {
         Process p;
         
         p = Runtime.getRuntime().exec(command);
