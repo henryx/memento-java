@@ -32,7 +32,7 @@ import org.memento.server.storage.FileStorage;
  *
  * @author enrico
  */
-public class FileOperation extends Operation {
+public class FileOperation implements Operation {
 
     private Integer dataset;
     private DbStorage dbstore;
@@ -42,7 +42,6 @@ public class FileOperation extends Operation {
     private Wini cfg;
 
     public FileOperation(Wini cfg) {
-        super();
         this.cfg = cfg;
     }
 
@@ -66,9 +65,6 @@ public class FileOperation extends Operation {
         symlinks = new ArrayList<>();
 
         try {
-            if (!this.cfg.get(this.section, "pre_command").equals("")) {
-                execCommand(this.cfg.get(this.section, "pre_command"));
-            }
             conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
 
             in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -110,12 +106,6 @@ public class FileOperation extends Operation {
                 this.fsstore.add(item);
                 this.dbstore.add(item);
             }
-            
-            if (!this.cfg.get(this.section, "post_command").equals("")) {
-                execCommand(this.cfg.get(this.section, "post_command"));
-            }
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (in instanceof BufferedReader) {
                 in.close();
