@@ -109,7 +109,7 @@ public class CommandFile {
         while (!stack.isEmpty()) {
             child = stack.pop();
 
-            data = this.compute(new PathName(child.toPath()));
+            data = this.compute(new PathName(child));
             this.writer.println(serializer.deepSerialize(data));
 
             if (child.isDirectory()) {

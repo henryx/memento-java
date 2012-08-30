@@ -26,9 +26,9 @@ import org.memento.json.FileAttrs;
  */
 public class PathName {
 
-    private Path path;
+    private File path;
 
-    public PathName(Path aPath) {
+    public PathName(File aPath) {
         this.path = aPath;
     }
 
@@ -49,7 +49,7 @@ public class PathName {
 
         result = new ArrayList<>();
 
-        command = new String[]{"getfacl", this.path.toString()};
+        command = new String[]{"getfacl", this.path.getAbsolutePath()};
         p = Runtime.getRuntime().exec(command);
         bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
         //bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -94,7 +94,7 @@ public class PathName {
         int nread;
 
         md = MessageDigest.getInstance("MD5");
-        fis = new FileInputStream(this.path.toFile());
+        fis = new FileInputStream(this.path);
         dataBytes = new byte[65536];
         hexString = new StringBuffer();
 
@@ -127,7 +127,7 @@ public class PathName {
         PosixFileAttributes posixAttr;
 
         result = new FileAttrs();
-        attr = Files.readAttributes(this.path, BasicFileAttributes.class);
+        attr = Files.readAttributes(this.path.toPath(), BasicFileAttributes.class);
 
         result.setCtime(attr.creationTime().toMillis());
         result.setMtime(attr.lastModifiedTime().toMillis());
@@ -135,19 +135,19 @@ public class PathName {
         result.setSize(attr.size());
 
         if (System.getProperty("os.name").startsWith("Windows")) {
-            dosAttr = Files.readAttributes(this.path, DosFileAttributes.class);
+            dosAttr = Files.readAttributes(this.path.toPath(), DosFileAttributes.class);
 
             result.setDosArchive(dosAttr.isArchive());
             result.setDosHidden(dosAttr.isHidden());
             result.setDosReadonly(dosAttr.isReadOnly());
             result.setDosSystem(dosAttr.isSystem());
         } else {
-            posixAttr = Files.readAttributes(this.path, PosixFileAttributes.class);
+            posixAttr = Files.readAttributes(this.path.toPath(), PosixFileAttributes.class);
 
             result.setPosixSymlink(this.isSymlink());
 
             if (result.getPosixSymlink()) {
-                result.setLinkTo(Files.readSymbolicLink(path).toString());
+                result.setLinkTo(Files.readSymbolicLink(this.path.toPath()).toString());
             }
 
             result.setPosixOwner(posixAttr.owner().getName());
@@ -175,11 +175,11 @@ public class PathName {
     }
 
     public boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
-        return Files.isDirectory(this.path);
+        return Files.isDirectory(this.path.toPath());
     }
 
     public boolean isSymlink() {
-        return Files.isSymbolicLink(this.path);
+        return Files.isSymbolicLink(this.path.toPath());
     }
 
     public String getAbsolutePath() {
