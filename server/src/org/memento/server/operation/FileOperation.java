@@ -87,8 +87,8 @@ public class FileOperation extends Operation {
                 inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
                 
                 if (inJSON.getType().equals("directory")) {
-                    //this.fsstore.add(inJSON);
-                    //this.dbstore.add(inJSON);
+                    this.fsstore.add(inJSON);
+                    this.dbstore.add(inJSON);
                 } else if (inJSON.getType().equals("file")) {
                     if(this.dbstore.isItemExist(inJSON)) {
                         inJSON.setPreviousDataset(Boolean.TRUE);
