@@ -30,10 +30,10 @@ public class FileStorage extends CommonStorage{
     
      private void addFile(FileAttrs json) throws IOException {
         if (!json.getPreviousDataset()) {
-            this.getRemoteFile(json.getName(), this.returnStructure(Boolean.FALSE) + json.getName());
+            this.getRemoteFile(json.getName(), this.returnStructure(false) + json.getName());
         } else {
-            Files.createLink(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()),
-                    Paths.get(this.returnStructure(Boolean.TRUE) + json.getName()));
+            Files.createLink(Paths.get(this.returnStructure(false) + json.getName()),
+                    Paths.get(this.returnStructure(true) + json.getName()));
         }
     }
 
@@ -122,7 +122,7 @@ public class FileStorage extends CommonStorage{
         File directory;
 
         this.section = section;
-        directory = new File(this.returnStructure(Boolean.FALSE));
+        directory = new File(this.returnStructure(false));
 
         if (!directory.exists()) {
             directory.mkdirs();
@@ -132,7 +132,13 @@ public class FileStorage extends CommonStorage{
     public void add(FileAttrs json) throws IOException {
         switch (json.getType()) {
             case "directory":
-                Files.createDirectories(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()));
+                if (json.getOs().startsWith("windows")) {
+                    Files.createDirectories(Paths.get(this.returnStructure(false)
+                            + json.getName().replace("\\", System.getProperty("file.separator"))));
+                } else {
+                    Files.createDirectories(Paths.get(this.returnStructure(false)
+                            + json.getName()));
+                }
                 break;
             case "file":
                 this.addFile(json);
