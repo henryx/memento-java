@@ -130,15 +130,17 @@ public class FileStorage extends CommonStorage{
     }
 
     public void add(FileAttrs json) throws IOException {
+        File dir;
+
         switch (json.getType()) {
             case "directory":
                 if (json.getOs().startsWith("windows")) {
-                    Files.createDirectories(Paths.get(this.returnStructure(false)
-                            + json.getName().replace("\\", System.getProperty("file.separator"))));
+                    dir = new File(this.returnStructure(false)
+                            + json.getName().replace("\\", System.getProperty("file.separator")));
                 } else {
-                    Files.createDirectories(Paths.get(this.returnStructure(false)
-                            + json.getName()));
+                    dir = new File(this.returnStructure(false) + json.getName());
                 }
+                dir.mkdirs();
                 break;
             case "file":
                 this.addFile(json);
