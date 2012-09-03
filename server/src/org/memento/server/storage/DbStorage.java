@@ -60,7 +60,7 @@ public class DbStorage extends CommonStorage {
     }
 
     public void add(FileAttrs json) throws SQLException {
-        if (json.getOs().indexOf("windows") >= 0) {
+        if (json.getOs().startsWith("windows")) {
             this.addDosAttrs(json);
         } else {
             this.addPosixAttrs(json);
