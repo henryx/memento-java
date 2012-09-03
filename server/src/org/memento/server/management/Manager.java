@@ -3,15 +3,13 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.server.management;
 
 /**
  *
  * @author enrico
  */
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -32,16 +30,17 @@ import org.memento.server.storage.DbStorage;
 import org.memento.server.storage.FileStorage;
 
 public class Manager {
+
     private String grace;
     private Wini cfg;
-
+    
     public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
     }
-
+    
     private Operation compute(String name) {
         String type;
-
+        
         type = this.cfg.get(name, "type");
         switch (type) {
             case "file":
@@ -59,15 +58,15 @@ public class Manager {
         PreparedStatement pstmt;
         ResultSet res;
         final String SELECT = "SELECT actual FROM status WHERE grace = ?";
-
+        
         try {
             conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
-
+            
             pstmt = conn.prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
-
+            
             res = pstmt.executeQuery();
-
+            
             res.next();
             result = res.getInt(1);
             
@@ -77,7 +76,7 @@ public class Manager {
             Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
             result = 0;
         }
-
+        
         return result;
     }
 
@@ -86,14 +85,14 @@ public class Manager {
         Connection conn;
         PreparedStatement pstmt;
         final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
-
+        
         try {
             conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
-
+            
             pstmt = conn.prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
-
+            
             pstmt.executeUpdate();
             pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
@@ -114,94 +113,80 @@ public class Manager {
     public void setGrace(String grace) {
         this.grace = grace;
     }
-
+    
     public void sync() throws IOException {
         Integer dataset;
         Operation operation;
         FileStorage fsStorage;
         DbStorage dbStorage;
-
+        
         fsStorage = new FileStorage(this.cfg);
         dbStorage = new DbStorage(this.cfg);
-
+        
         fsStorage.setGrace(this.grace);
         dbStorage.setGrace(this.grace);
-
+        
         dataset = this.getLastDataset();
-
+        
         if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
             dataset = 1;
         } else {
             dataset = dataset + 1;
         }
-
+        
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);
         
         this.remove(dataset);
-
+        
         for (String section : this.cfg.keySet()) {
             if (!(section.equals("general") || section.equals("dataset"))) {
                 fsStorage.setSection(section);
                 dbStorage.setSection(section);
-
+                
                 operation = this.compute(section);
-
+                
                 operation.setGrace(this.grace);
                 operation.setDataset(dataset);
                 operation.setSection(section);
-
+                
                 operation.setDbStore(dbStorage);
                 operation.setFsStore(fsStorage);
-
+                
                 operation.run();
             }
         }
-
+        
         this.setLastDataset(dataset);
     }
     
     public void remove(Integer dataset) throws IOException {
+        class Remove {
+            public void remove(File aDir) {
+                if (aDir.exists()) {
+                    for (File child : aDir.listFiles()) {
+                        if (child.isDirectory()) {
+                            this.remove(child);
+                        } else {
+                            child.delete();
+                        }
+                    }
+                }
+                aDir.delete();
+            }
+        }
+        
         File directory;
         String sep;
-
+        
         sep = System.getProperty("file.separator");
-
+        
         directory = new File(this.cfg.get("general", "repository")
                 + sep
                 + this.grace
                 + sep
                 + dataset);
-
-        if (directory.exists()) {
-            Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                    // try to delete the file anyway, even if its attributes
-                    // could not be read, since delete-only access is
-                    // theoretically possible
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    if (exc == null) {
-                        Files.delete(dir);
-                        return FileVisitResult.CONTINUE;
-                    } else {
-                        // directory iteration failed; propagate exception
-                        throw exc;
-                    }
-                }
-            });
-        }
+        
+        new Remove().remove(directory);
     }
 }
