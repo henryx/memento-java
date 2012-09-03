@@ -30,7 +30,8 @@ public class FileStorage extends CommonStorage{
     
      private void addFile(FileAttrs json) throws IOException {
         if (!json.getPreviousDataset()) {
-            this.getRemoteFile(json.getName(), this.returnStructure(false) + json.getName());
+            this.getRemoteFile(json.getName(),
+                    this.getFile(this.returnStructure(false) + json.getName(), json.getOs()));
         } else {
             Files.createLink(Paths.get(this.returnStructure(false) + json.getName()),
                     Paths.get(this.returnStructure(true) + json.getName()));
@@ -55,7 +56,7 @@ public class FileStorage extends CommonStorage{
         }
     }
 
-    private void getRemoteFile(String source, String dest) throws IOException {
+    private void getRemoteFile(String source, File dest) throws IOException {
         InputStream in;
         Context context;
         CommandFile command;
@@ -114,6 +115,22 @@ public class FileStorage extends CommonStorage{
         }
     }
 
+    private File getFile(String aPath, String os) {
+        File result;
+        String pathCleaned;
+
+        if (os.startsWith("windows")) {
+            pathCleaned = aPath
+                    .replace("\\", System.getProperty("file.separator"))
+                    .replace(":", "");
+            result = new File(pathCleaned);
+        } else {
+            result = new File(aPath);
+        }
+
+        return result;
+    }
+
     /**
      * @param section the section to set
      */
@@ -130,24 +147,19 @@ public class FileStorage extends CommonStorage{
     }
 
     public void add(FileAttrs json) throws IOException {
-        File dir;
+        File path;
 
         switch (json.getType()) {
             case "directory":
-                if (json.getOs().startsWith("windows")) {
-                    dir = new File(this.returnStructure(false)
-                            + json.getName().replace("\\", System.getProperty("file.separator")));
-                } else {
-                    dir = new File(this.returnStructure(false) + json.getName());
-                }
-                dir.mkdirs();
+                path = getFile(this.returnStructure(false) + json.getName(), json.getOs());
+                path.mkdirs();
                 break;
             case "file":
                 this.addFile(json);
                 break;
             case "symlink":
-                Files.createSymbolicLink(Paths.get(this.returnStructure(Boolean.FALSE) + json.getName()),
-                        Paths.get(json.getLinkTo()));
+                path = getFile(this.returnStructure(false) + json.getName(), json.getOs());
+                Files.createSymbolicLink(path.toPath(), Paths.get(json.getLinkTo()));
                 break;
         }
     }
