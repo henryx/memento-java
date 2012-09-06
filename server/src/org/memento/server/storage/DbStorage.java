@@ -22,7 +22,7 @@ import org.memento.json.FileAttrs;
  */
 public class DbStorage extends CommonStorage {
 
-    private PreparedStatement insPosix;
+    private PreparedStatement insert;
     private PreparedStatement selExist;
 
     public DbStorage(Wini cfg) {
@@ -34,22 +34,22 @@ public class DbStorage extends CommonStorage {
     }
 
     private void addPosixAttrs(FileAttrs json) throws SQLException {
-        this.insPosix.setString(1, json.getName());
-        this.insPosix.setString(2, json.getPosixOwner());
-        this.insPosix.setString(3, json.getPosixGroup());
-        this.insPosix.setString(4, json.getType());
-        this.insPosix.setLong(5, json.getMtime());
-        this.insPosix.setLong(6, json.getCtime());
-        this.insPosix.setString(7, json.getHash());
-        this.insPosix.setString(8, json.getPosixPermission());
+        this.insert.setString(1, json.getName());
+        this.insert.setString(2, json.getPosixOwner());
+        this.insert.setString(3, json.getPosixGroup());
+        this.insert.setString(4, json.getType());
+        this.insert.setLong(5, json.getMtime());
+        this.insert.setLong(6, json.getCtime());
+        this.insert.setString(7, json.getHash());
+        this.insert.setString(8, json.getPosixPermission());
 
-        this.insPosix.executeUpdate();
+        this.insert.executeUpdate();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (this.insPosix instanceof PreparedStatement) {
-            this.insPosix.close();
+        if (this.insert instanceof PreparedStatement) {
+            this.insert.close();
         }
 
         if (this.selExist instanceof PreparedStatement) {
@@ -116,7 +116,7 @@ public class DbStorage extends CommonStorage {
             conn = DBConnection.getInstance().getConnection("cur_" + this.section,
                     this.returnStructure(Boolean.FALSE));
 
-            this.insPosix = conn.prepareStatement("INSERT INTO attrs"
+            this.insert = conn.prepareStatement("INSERT INTO attrs"
                     + "(element, element_user, element_group, element_type,"
                     + " element_mtime, element_ctime, element_hash, element_perm)"
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
