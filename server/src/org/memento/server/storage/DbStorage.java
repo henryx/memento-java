@@ -59,11 +59,27 @@ public class DbStorage extends CommonStorage {
         super.finalize();
     }
 
-    public void add(FileAttrs json) throws SQLException {
-        if (json.getOs().startsWith("windows")) {
-            this.addDosAttrs(json);
-        } else {
+    public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
+        Connection conn;
+        Connection oldConn;
+
+        conn = DBConnection.getInstance().getConnection("cur_" + this.section,
+                this.returnStructure(Boolean.FALSE));
+
+        if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
+            oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
+                    this.returnStructure(Boolean.TRUE));
+            this.selExist = oldConn.prepareStatement("SELECT count(*) FROM attrs"
+                    + " WHERE element = ? AND element_hash = ?");
+        }
+        if (!json.getOs().startsWith("windows")) {
+            this.insert = conn.prepareStatement("INSERT INTO attrs"
+                    + "(element, element_user, element_group, element_type,"
+                    + " element_mtime, element_ctime, element_hash, element_perm)"
+                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             this.addPosixAttrs(json);
+        } else {
+            this.addDosAttrs(json);
         }
     }
 
@@ -108,27 +124,5 @@ public class DbStorage extends CommonStorage {
     @Override
     public void setSection(String section) {
         this.section = section;
-
-        try {
-            Connection conn;
-            Connection oldConn;
-
-            conn = DBConnection.getInstance().getConnection("cur_" + this.section,
-                    this.returnStructure(Boolean.FALSE));
-
-            this.insert = conn.prepareStatement("INSERT INTO attrs"
-                    + "(element, element_user, element_group, element_type,"
-                    + " element_mtime, element_ctime, element_hash, element_perm)"
-                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-
-            if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
-                oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
-                        this.returnStructure(Boolean.TRUE));
-                this.selExist = oldConn.prepareStatement("SELECT count(*) FROM attrs"
-                        + " WHERE element = ? AND element_hash = ?");
-            }
-        } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(DbStorage.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 }
