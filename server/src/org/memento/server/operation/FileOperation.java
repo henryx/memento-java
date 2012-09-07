@@ -59,7 +59,7 @@ public class FileOperation implements Operation {
         }
     }
 
-    private void parseCommandFile(BufferedReader in) throws SQLException, IOException {
+    private void parseCommandFile(BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
         ArrayList<FileAttrs> files;
         ArrayList<FileAttrs> symlinks;
         FileAttrs inJSON;
