@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.server.storage;
 
 import flexjson.JSONSerializer;
@@ -21,20 +20,23 @@ import org.memento.json.commands.CommandFile;
  *
  * @author enrico
  */
-public class FileStorage extends CommonStorage{
+public class FileStorage extends CommonStorage {
 
     public FileStorage(Wini cfg) throws IOException {
         super(cfg);
         this.checkStructure();
     }
-    
-     private void addFile(FileAttrs json) throws IOException {
+
+    private void addFile(FileAttrs json) throws IOException {
+        File source;
+        File dest;
+
+        dest = this.getFile(this.returnStructure(false) + json.getName(), json.getOs());
         if (!json.getPreviousDataset()) {
-            this.getRemoteFile(json.getName(),
-                    this.getFile(this.returnStructure(false) + json.getName(), json.getOs()));
+            this.getRemoteFile(json.getName(), dest);
         } else {
-            Files.createLink(Paths.get(this.returnStructure(false) + json.getName()),
-                    Paths.get(this.returnStructure(true) + json.getName()));
+            source = this.getFile(this.returnStructure(true) + json.getName(), json.getOs());
+            Files.createLink(dest.toPath(), source.toPath());
         }
     }
 
