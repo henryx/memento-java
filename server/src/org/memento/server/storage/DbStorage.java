@@ -29,8 +29,13 @@ public class DbStorage extends CommonStorage {
         super(cfg);
     }
 
-    private void addDosAttrs(FileAttrs json) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void addDosAttrs(FileAttrs json) throws SQLException {
+        this.insert.setString(1, json.getName());
+        this.insert.setLong(2, json.getMtime());
+        this.insert.setLong(3, json.getCtime());
+        this.insert.setString(4, json.getHash());
+        
+        this.insert.execute();
     }
 
     private void addPosixAttrs(FileAttrs json) throws SQLException {
@@ -79,6 +84,10 @@ public class DbStorage extends CommonStorage {
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             this.addPosixAttrs(json);
         } else {
+            // TODO: Add more attributes returned by Windows client
+            this.insert = conn.prepareStatement("INSERT INTO attrs"
+                    + "(element, element_mtime, element_ctime, element_hash)"
+                    + " VALUES (?, ?, ?, ?)");
             this.addDosAttrs(json);
         }
     }
