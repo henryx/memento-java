@@ -42,6 +42,10 @@ public class Main {
         this.opts.addOption("D", false, "Daily backup is executed");
         this.opts.addOption("W", false, "Weekly backup is executed");
         this.opts.addOption("M", false, "Monthly backup is executed");
+        this.opts.addOption(OptionBuilder.withLongOpt("reload-dataset")
+                .withDescription("Reload last dataset")
+                .create("r")
+        );
 
     }
 
@@ -111,6 +115,12 @@ public class Main {
             manage.setGrace("week");
         } else if (cmd.hasOption("M")) {
             manage.setGrace("month");
+        }
+        
+        if (cmd.hasOption("r")) {
+            manage.setReload(true);
+        } else {
+            manage.setReload(false);
         }
 
         this.setLog();

@@ -32,6 +32,7 @@ import org.memento.server.storage.FileStorage;
 public class Manager {
 
     private String grace;
+    private boolean reload;
     private Wini cfg;
     
     public Manager(Wini cfg) throws IOException {
@@ -114,6 +115,14 @@ public class Manager {
         this.grace = grace;
     }
     
+    public void setReload(boolean reload) {
+        this.reload = reload;
+    }
+    
+    public boolean getReload() {
+        return this.reload;
+    }
+    
     public void sync() throws IOException {
         Integer dataset;
         Operation operation;
@@ -128,10 +137,12 @@ public class Manager {
         
         dataset = this.getLastDataset();
         
-        if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
-            dataset = 1;
-        } else {
-            dataset = dataset + 1;
+        if (!this.reload) {
+            if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
+                dataset = 1;
+            } else {
+                dataset = dataset + 1;
+            }
         }
         
         fsStorage.setDataset(dataset);
