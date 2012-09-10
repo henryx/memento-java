@@ -105,6 +105,9 @@ public class Main {
             this.setCfg(cmd.getOptionValue("cfg"));
         }
 
+        this.setLog();
+        Main.logger.info("Started version " + VERSION);
+
         manage = new Manager(this.cfg);
 
         if (cmd.hasOption("H")) {
@@ -115,6 +118,9 @@ public class Main {
             manage.setGrace("week");
         } else if (cmd.hasOption("M")) {
             manage.setGrace("month");
+        } else {
+            Main.logger.fatal("No grace period selected");
+            System.exit(2);
         }
         
         if (cmd.hasOption("r")) {
@@ -122,9 +128,6 @@ public class Main {
         } else {
             manage.setReload(false);
         }
-
-        this.setLog();
-        Main.logger.info("Started version " + VERSION);
 
         manage.sync();
 
