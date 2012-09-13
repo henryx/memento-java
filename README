@@ -36,7 +36,7 @@ Client usage is:
 
     $ java -jar Memento_-_Client.jar -p <port>
 
-Where <port> is port number which service listen requests from server
+Where `<port>` is port number which service listen requests from server
 
 Server usage:
 -------------
@@ -48,8 +48,8 @@ Server usage is:
     $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -W # week backup
     $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -M # month backup
 
-Where <cfgfile> is a file structured like the syncropy.cfg reported in the
-archive. For other options, use -h switch. Some notes:
+Where `<cfgfile>` is a file structured like the `syncropy.cfg` reported in the
+archive. For other options, use `-h` switch. Some notes:
 
  - It is possible to have multiple configuration files, where each file has
    different parameters.
