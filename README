@@ -29,15 +29,24 @@ Installation:
 
 Just extract code into a directory and use it
 
+Client usage:
+-------------
+
+Client usage is:
+
+    $ java -jar Memento_-_Client.jar -p <port>
+
+Where <port> is port number which service listen requests from server
+
 Server usage:
-------
+-------------
 
-Usage is simpliest:
+Server usage is:
 
-$ java -jar Memento_-_Server.jar --cfg=<cfgfile> -H # hour backup
-$ java -jar Memento_-_Server.jar --cfg=<cfgfile> -D # day backup
-$ java -jar Memento_-_Server.jar --cfg=<cfgfile> -W # week backup
-$ java -jar Memento_-_Server.jar --cfg=<cfgfile> -M # month backup
+    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -H # hour backup
+    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -D # day backup
+    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -W # week backup
+    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -M # month backup
 
 Where <cfgfile> is a file structured like the syncropy.cfg reported in the
 archive. For other options, use -h switch. Some notes:
@@ -49,29 +58,29 @@ archive. For other options, use -h switch. Some notes:
 
 This is an example of configuration file:
 
-[general]
-repository = /var/backups/servers
+    [general]
+    repository = /var/backups/servers
 
-log_file = logfile.log
-log_level = INFO
+    log_file = logfile.log
+    log_level = INFO
 
-[dataset]
-hour = 24
-day = 6
-week = 4
-month = 12
+    [dataset]
+    hour = 24
+    day = 6
+    week = 4
+    month = 12
 
-[server1]
-host = 192.168.1.100
-port = 4444
-path = /home
-store_acl = yes
+    [server1]
+    host = 192.168.1.100
+    port = 4444
+    path = /home
+    store_acl = yes
 
-[server2]
-host = 192.168.1.101
-port = 4444
-path = /home/foo
-store_acl = no
+    [server2]
+    host = 192.168.1.101
+    port = 4444
+    path = /home/foo
+    store_acl = no
 
 Caveats:
 --------
