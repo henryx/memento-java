@@ -74,17 +74,19 @@ public class DBConnection {
             };
             tables = new String[]{
                 "CREATE TABLE attrs (element VARCHAR(1024),"
-                + " element_user VARCHAR(50),"
-                + " element_group VARCHAR(50),"
-                + " element_type VARCHAR(9),"
-                + " element_hash VARCHAR(32),"
-                + " element_perm VARCHAR(32),"
-                + " element_mtime INTEGER,"
-                + " element_ctime INTEGER)",
+                    + " element_os VARCHAR(32),"
+                    + " element_user VARCHAR(50),"
+                    + " element_group VARCHAR(50),"
+                    + " element_type VARCHAR(9),"
+                    + " element_link VARCHAR(1024),"
+                    + " element_hash VARCHAR(32),"
+                    + " element_perm VARCHAR(32),"
+                    + " element_mtime INTEGER,"
+                    + " element_ctime INTEGER)",
                 "CREATE TABLE acls (element VARCHAR(1024),"
-                + " id VARCHAR(50),"
-                + " id_type VARCHAR(1),"
-                + " perms VARCHAR(3))"
+                    + " id VARCHAR(50),"
+                    + " id_type VARCHAR(1),"
+                    + " perms VARCHAR(3))"
             };
         } else {
             data = new String[]{
