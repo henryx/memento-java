@@ -22,72 +22,70 @@ import org.memento.json.FileAttrs;
  */
 public class DbStorage extends CommonStorage {
 
-    private PreparedStatement insert;
-    private PreparedStatement selExist;
+    private Connection conn;
+    private Connection oldConn;
 
     public DbStorage(Wini cfg) {
         super(cfg);
     }
 
     private void addDosAttrs(FileAttrs json) throws SQLException {
-        this.insert.setString(1, json.getName());
-        this.insert.setLong(2, json.getMtime());
-        this.insert.setLong(3, json.getCtime());
-        this.insert.setString(4, json.getHash());
-        
-        this.insert.execute();
+        // TODO: Add more attributes returned by Windows client
+        PreparedStatement insert;
+
+        insert = conn.prepareStatement("INSERT INTO attrs"
+                + "(element, element_mtime, element_ctime, element_hash)"
+                + " VALUES (?, ?, ?, ?)");
+
+        insert.setString(1, json.getName());
+        insert.setLong(2, json.getMtime());
+        insert.setLong(3, json.getCtime());
+        insert.setString(4, json.getHash());
+
+        insert.executeUpdate();
+        insert.close();
     }
 
     private void addPosixAttrs(FileAttrs json) throws SQLException {
-        this.insert.setString(1, json.getName());
-        this.insert.setString(2, json.getPosixOwner());
-        this.insert.setString(3, json.getPosixGroup());
-        this.insert.setString(4, json.getType());
-        this.insert.setLong(5, json.getMtime());
-        this.insert.setLong(6, json.getCtime());
-        this.insert.setString(7, json.getHash());
-        this.insert.setString(8, json.getPosixPermission());
+        PreparedStatement insert;
 
-        this.insert.executeUpdate();
+        insert = conn.prepareStatement("INSERT INTO attrs"
+                + "(element, element_user, element_group, element_type,"
+                + " element_mtime, element_ctime, element_hash, element_perm)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+        insert.setString(1, json.getName());
+        insert.setString(2, json.getPosixOwner());
+        insert.setString(3, json.getPosixGroup());
+        insert.setString(4, json.getType());
+        insert.setLong(5, json.getMtime());
+        insert.setLong(6, json.getCtime());
+        insert.setString(7, json.getHash());
+        insert.setString(8, json.getPosixPermission());
+
+        insert.executeUpdate();
+        insert.close();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (this.insert instanceof PreparedStatement) {
-            this.insert.close();
+        if (this.conn instanceof Connection && !this.conn.isClosed()) {
+            this.conn.commit();
+            this.conn.close();
         }
 
-        if (this.selExist instanceof PreparedStatement) {
-            this.selExist.close();
+        if (this.oldConn instanceof Connection && !this.conn.isClosed()) {
+            this.oldConn.rollback();
+            this.oldConn.close();
         }
 
         super.finalize();
     }
 
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
-        Connection conn;
-        Connection oldConn;
-
-        conn = DBConnection.getInstance().getConnection("cur_" + this.section,
-                this.returnStructure(Boolean.FALSE));
-
-        if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
-            oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
-                    this.returnStructure(Boolean.TRUE));
-            this.selExist = oldConn.prepareStatement("SELECT count(*) FROM attrs"
-                    + " WHERE element = ? AND element_hash = ?");
-        }
         if (!json.getOs().startsWith("windows")) {
-            this.insert = conn.prepareStatement("INSERT INTO attrs"
-                    + "(element, element_user, element_group, element_type,"
-                    + " element_mtime, element_ctime, element_hash, element_perm)"
-                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             this.addPosixAttrs(json);
         } else {
-            // TODO: Add more attributes returned by Windows client
-            this.insert = conn.prepareStatement("INSERT INTO attrs"
-                    + "(element, element_mtime, element_ctime, element_hash)"
-                    + " VALUES (?, ?, ?, ?)");
             this.addDosAttrs(json);
         }
     }
@@ -95,17 +93,19 @@ public class DbStorage extends CommonStorage {
     public Boolean isItemExist(FileAttrs json) {
         ResultSet res;
 
-        res = null;
-
-        if (!(this.selExist instanceof PreparedStatement)) {
+        if (!(this.oldConn instanceof Connection)) {
             return Boolean.FALSE;
         }
 
-        try {
-            this.selExist.setString(1, json.getName());
-            this.selExist.setString(2, json.getHash());
+        res = null;
 
-            res = this.selExist.executeQuery();
+        try (PreparedStatement select = this.oldConn.prepareStatement("SELECT count(*) FROM attrs"
+                        + " WHERE element = ? AND element_hash = ?")) {
+
+            select.setString(1, json.getName());
+            select.setString(2, json.getHash());
+
+            res = select.executeQuery();
             res.next();
 
             if (res.getInt(1) > 0) {
@@ -118,11 +118,11 @@ public class DbStorage extends CommonStorage {
             Logger.getLogger(CommonStorage.class.getName()).log(Level.SEVERE, null, ex);
             return Boolean.FALSE;
         } finally {
-            if (res instanceof ResultSet) {
-                try {
+            try {
+                if (res instanceof ResultSet && !res.isClosed()) {
                     res.close();
-                } catch (SQLException ex) {
                 }
+            } catch (SQLException ex) {
             }
         }
     }
@@ -133,5 +133,17 @@ public class DbStorage extends CommonStorage {
     @Override
     public void setSection(String section) {
         this.section = section;
+
+        try {
+            this.conn = DBConnection.getInstance().getConnection("cur_" + this.section,
+                    this.returnStructure(Boolean.FALSE));
+
+            if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
+                this.oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
+                        this.returnStructure(Boolean.TRUE));
+            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(DbStorage.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
