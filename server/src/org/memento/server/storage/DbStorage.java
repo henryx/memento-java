@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -34,13 +36,14 @@ public class DbStorage extends CommonStorage {
         PreparedStatement insert;
 
         insert = conn.prepareStatement("INSERT INTO attrs"
-                + "(element, element_mtime, element_ctime, element_hash)"
-                + " VALUES (?, ?, ?, ?)");
+                + "(element, element_os, element_mtime, element_ctime, element_hash)"
+                + " VALUES (?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, json.getName());
-        insert.setLong(2, json.getMtime());
-        insert.setLong(3, json.getCtime());
-        insert.setString(4, json.getHash());
+        insert.setString(2, json.getOs());
+        insert.setLong(3, json.getMtime());
+        insert.setLong(4, json.getCtime());
+        insert.setString(5, json.getHash());
 
         insert.executeUpdate();
         insert.close();
@@ -50,18 +53,24 @@ public class DbStorage extends CommonStorage {
         PreparedStatement insert;
 
         insert = conn.prepareStatement("INSERT INTO attrs"
-                + "(element, element_user, element_group, element_type,"
-                + " element_mtime, element_ctime, element_hash, element_perm)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                + "(element, element_os, element_user, element_group, element_type,"
+                + " element_link, element_mtime, element_ctime, element_hash, element_perm)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, json.getName());
-        insert.setString(2, json.getPosixOwner());
-        insert.setString(3, json.getPosixGroup());
-        insert.setString(4, json.getType());
-        insert.setLong(5, json.getMtime());
-        insert.setLong(6, json.getCtime());
-        insert.setString(7, json.getHash());
-        insert.setString(8, json.getPosixPermission());
+        insert.setString(2, json.getOs());
+        insert.setString(3, json.getPosixOwner());
+        insert.setString(4, json.getPosixGroup());
+        insert.setString(5, json.getType());
+        if (json.getPosixSymlink()) {
+            insert.setString(6, json.getLinkTo());
+        } else {
+            insert.setNull(6, Types.VARCHAR);
+        }
+        insert.setLong(7, json.getMtime());
+        insert.setLong(8, json.getCtime());
+        insert.setString(9, json.getHash());
+        insert.setString(10, json.getPosixPermission());
 
         insert.executeUpdate();
         insert.close();
@@ -88,6 +97,40 @@ public class DbStorage extends CommonStorage {
         } else {
             this.addDosAttrs(json);
         }
+    }
+    
+    public ArrayList<FileAttrs> listItems(String itemType) throws SQLException {
+        ArrayList<FileAttrs> result;
+        FileAttrs json;
+        PreparedStatement query;
+        final ResultSet res;
+
+
+        query = this.conn.prepareStatement("SELECT element,"
+                + " element_os,"
+                + " element_hash,"
+                + " element_link,"
+                + " element_mtime,"
+                + " element_ctime FROM attrs WHERE element_type = ?");
+
+        query.setString(1, itemType);
+        res = query.executeQuery();
+
+        result = new ArrayList<> ();
+
+        while (res.next()) {
+            json = new FileAttrs();
+            json.setName(res.getString(1));
+            json.setOs(res.getString(2));
+            json.setHash(res.getString(3));
+            json.setLinkTo(res.getString(4));
+            json.setMtime(res.getLong(5));
+            json.setCtime(res.getLong(6));
+            json.setType(itemType);
+            result.add(json);
+        }
+
+        return result;
     }
 
     public Boolean isItemExist(FileAttrs json) {

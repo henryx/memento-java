@@ -16,7 +16,6 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -60,13 +59,8 @@ public class FileOperation implements Operation {
     }
 
     private void parseCommandFile(BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
-        ArrayList<FileAttrs> files;
-        ArrayList<FileAttrs> symlinks;
         FileAttrs inJSON;
         String line;
-
-        files = new ArrayList<>();
-        symlinks = new ArrayList<>();
 
         while (true) {
             line = in.readLine();
@@ -76,34 +70,24 @@ public class FileOperation implements Operation {
             }
 
             inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
+            this.dbstore.add(inJSON);
+        }
 
-            switch (inJSON.getType()) {
-                case "directory":
-                    this.fsstore.add(inJSON);
-                    this.dbstore.add(inJSON);
-                    break;
-                case "file":
-                    if (this.dbstore.isItemExist(inJSON)) {
-                        inJSON.setPreviousDataset(Boolean.TRUE);
-                    } else {
-                        inJSON.setPreviousDataset(Boolean.FALSE);
-                    }
-                    files.add(inJSON);
-                    break;
-                case "symlink":
-                    symlinks.add(inJSON);
-                    break;
+        for (FileAttrs item : this.dbstore.listItems("directory")) {
+            this.fsstore.add(item);
+        }
+        
+        for (FileAttrs item : this.dbstore.listItems("file")) {
+            if (this.dbstore.isItemExist(item)) {
+                item.setPreviousDataset(Boolean.TRUE);
+            } else {
+                item.setPreviousDataset(Boolean.FALSE);
             }
+            this.fsstore.add(item);
         }
 
-        for (FileAttrs item : files) {
+        for (FileAttrs item : this.dbstore.listItems("symlink")) {
             this.fsstore.add(item);
-            this.dbstore.add(item);
-        }
-
-        for (FileAttrs item : symlinks) {
-            this.fsstore.add(item);
-            this.dbstore.add(item);
         }
     }
 
