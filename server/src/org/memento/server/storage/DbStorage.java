@@ -36,14 +36,15 @@ public class DbStorage extends CommonStorage {
         PreparedStatement insert;
 
         insert = conn.prepareStatement("INSERT INTO attrs"
-                + "(element, element_os, element_mtime, element_ctime, element_hash)"
+                + "(element, element_os, element_type, element_mtime, element_ctime, element_hash)"
                 + " VALUES (?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, json.getName());
         insert.setString(2, json.getOs());
-        insert.setLong(3, json.getMtime());
-        insert.setLong(4, json.getCtime());
-        insert.setString(5, json.getHash());
+        insert.setString(3, json.getType());
+        insert.setLong(4, json.getMtime());
+        insert.setLong(5, json.getCtime());
+        insert.setString(6, json.getHash());
 
         insert.executeUpdate();
         insert.close();
