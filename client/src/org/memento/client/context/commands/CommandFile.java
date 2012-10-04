@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.memento.PathName;
 import org.memento.json.FileAttrs;
 
@@ -96,7 +98,7 @@ public class CommandFile {
         this.writer = writer;
     }
 
-    public void walk(File path) throws IllegalArgumentException, FileNotFoundException, IOException {
+    public void walk(File path) throws IllegalArgumentException {
         File child;
         FileAttrs data;
         JSONSerializer serializer;
@@ -109,8 +111,14 @@ public class CommandFile {
         while (!stack.isEmpty()) {
             child = stack.pop();
 
-            data = this.compute(new PathName(child));
-            this.writer.println(serializer.deepSerialize(data));
+            try {
+                data = this.compute(new PathName(child));
+                this.writer.println(serializer.deepSerialize(data));
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(CommandFile.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(CommandFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             if (child.isDirectory()) {
                 for (File f : child.listFiles()) {
