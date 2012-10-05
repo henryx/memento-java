@@ -70,7 +70,8 @@ public class DBConnection {
             data = new String[]{}; // In non-system area, data is empty
             index = new String[]{
                 "CREATE INDEX idx_store_1 ON attrs(element,"
-                + " element_hash)"
+                + " element_hash)",
+                "CREATE INDEX idx_store_2 ON attrs(element_type)"
             };
             tables = new String[]{
                 "CREATE TABLE attrs (element VARCHAR(1024),"
