@@ -12,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -99,13 +99,11 @@ public class DbStorage extends CommonStorage {
             this.addDosAttrs(json);
         }
     }
-    
-    public ArrayList<FileAttrs> listItems(String itemType) throws SQLException {
-        ArrayList<FileAttrs> result;
-        FileAttrs json;
+
+    public DbItems listItems(String itemType) throws SQLException {
+        DbItems result;
         PreparedStatement query;
         final ResultSet res;
-
 
         query = this.conn.prepareStatement("SELECT element,"
                 + " element_os,"
@@ -117,19 +115,10 @@ public class DbStorage extends CommonStorage {
         query.setString(1, itemType);
         res = query.executeQuery();
 
-        result = new ArrayList<> ();
+        result = new DbItems();
 
-        while (res.next()) {
-            json = new FileAttrs();
-            json.setName(res.getString(1));
-            json.setOs(res.getString(2));
-            json.setHash(res.getString(3));
-            json.setLinkTo(res.getString(4));
-            json.setMtime(res.getLong(5));
-            json.setCtime(res.getLong(6));
-            json.setType(itemType);
-            result.add(json);
-        }
+        result.setType(itemType);
+        result.setResult(res);
 
         return result;
     }
@@ -189,5 +178,53 @@ public class DbStorage extends CommonStorage {
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(DbStorage.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+}
+
+class DbItems implements Iterator<FileAttrs> {
+
+    private ResultSet res;
+    private String type;
+
+    @Override
+    public boolean hasNext() {
+        try {
+            return this.res.next();
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    @Override
+    public FileAttrs next() {
+        FileAttrs json;
+        json = new FileAttrs();
+
+        try {
+            json.setName(this.res.getString(1));
+            json.setOs(this.res.getString(2));
+            json.setHash(this.res.getString(3));
+            json.setLinkTo(this.res.getString(4));
+            json.setMtime(this.res.getLong(5));
+            json.setCtime(this.res.getLong(6));
+            json.setType(this.type);
+
+            return json;
+        } catch (SQLException ex) {
+            return null;
+        }
+    }
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setResult(ResultSet res) {
+        this.res = res;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

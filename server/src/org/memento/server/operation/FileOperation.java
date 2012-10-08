@@ -16,6 +16,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
@@ -60,6 +61,8 @@ public class FileOperation implements Operation {
 
     private void parseCommandFile(BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
         FileAttrs inJSON;
+        FileAttrs item;
+        Iterator<FileAttrs> items;
         String line;
 
         while (true) {
@@ -73,11 +76,15 @@ public class FileOperation implements Operation {
             this.dbstore.add(inJSON);
         }
 
-        for (FileAttrs item : this.dbstore.listItems("directory")) {
+        items = this.dbstore.listItems("directory");
+        while (items.hasNext()) {
+            item = items.next();
             this.fsstore.add(item);
         }
         
-        for (FileAttrs item : this.dbstore.listItems("file")) {
+        items = this.dbstore.listItems("file");
+        while(items.hasNext()) {
+            item = items.next();
             if (this.dbstore.isItemExist(item)) {
                 item.setPreviousDataset(Boolean.TRUE);
             } else {
@@ -86,7 +93,9 @@ public class FileOperation implements Operation {
             this.fsstore.add(item);
         }
 
-        for (FileAttrs item : this.dbstore.listItems("symlink")) {
+        items = this.dbstore.listItems("symlink");
+        while (items.hasNext()) {
+            item = items.next();
             this.fsstore.add(item);
         }
     }
