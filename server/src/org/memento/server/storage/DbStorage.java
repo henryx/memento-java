@@ -100,10 +100,58 @@ public class DbStorage extends CommonStorage {
         }
     }
 
-    public DbItems listItems(String itemType) throws SQLException {
+    public Iterator<FileAttrs> listItems(String itemType) throws SQLException {
+        class DbItems implements Iterator<FileAttrs> {
+
+            private ResultSet res;
+            private String type;
+
+            @Override
+            public boolean hasNext() {
+                try {
+                    return this.res.next();
+                } catch (SQLException ex) {
+                    return false;
+                }
+            }
+
+            @Override
+            public FileAttrs next() {
+                FileAttrs json;
+                json = new FileAttrs();
+
+                try {
+                    json.setName(this.res.getString(1));
+                    json.setOs(this.res.getString(2));
+                    json.setHash(this.res.getString(3));
+                    json.setLinkTo(this.res.getString(4));
+                    json.setMtime(this.res.getLong(5));
+                    json.setCtime(this.res.getLong(6));
+                    json.setType(this.type);
+
+                    return json;
+                } catch (SQLException ex) {
+                    return null;
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            public void setResult(ResultSet res) {
+                this.res = res;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
+        }
+
         DbItems result;
         PreparedStatement query;
-        final ResultSet res;
+        ResultSet res;
 
         query = this.conn.prepareStatement("SELECT element,"
                 + " element_os,"
@@ -178,53 +226,5 @@ public class DbStorage extends CommonStorage {
         } catch (SQLException | ClassNotFoundException ex) {
             Logger.getLogger(DbStorage.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-}
-
-class DbItems implements Iterator<FileAttrs> {
-
-    private ResultSet res;
-    private String type;
-
-    @Override
-    public boolean hasNext() {
-        try {
-            return this.res.next();
-        } catch (SQLException ex) {
-            return false;
-        }
-    }
-
-    @Override
-    public FileAttrs next() {
-        FileAttrs json;
-        json = new FileAttrs();
-
-        try {
-            json.setName(this.res.getString(1));
-            json.setOs(this.res.getString(2));
-            json.setHash(this.res.getString(3));
-            json.setLinkTo(this.res.getString(4));
-            json.setMtime(this.res.getLong(5));
-            json.setCtime(this.res.getLong(6));
-            json.setType(this.type);
-
-            return json;
-        } catch (SQLException ex) {
-            return null;
-        }
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setResult(ResultSet res) {
-        this.res = res;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }
