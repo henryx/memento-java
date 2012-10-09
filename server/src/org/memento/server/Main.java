@@ -111,12 +111,16 @@ public class Main {
         manage = new Manager(this.cfg);
 
         if (cmd.hasOption("H")) {
+            Main.logger.debug("Hour mode selected");
             manage.setGrace("hour");
         } else if (cmd.hasOption("D")) {
+            Main.logger.debug("Day mode selected");
             manage.setGrace("day");
         } else if (cmd.hasOption("W")) {
+            Main.logger.debug("Week mode selected");
             manage.setGrace("week");
         } else if (cmd.hasOption("M")) {
+            Main.logger.debug("Month mode selected");
             manage.setGrace("month");
         } else {
             Main.logger.fatal("No grace period selected");
@@ -124,6 +128,7 @@ public class Main {
         }
         
         if (cmd.hasOption("r")) {
+            Main.logger.debug("Reload dataset selected");
             manage.setReload(true);
         } else {
             manage.setReload(false);
@@ -132,6 +137,7 @@ public class Main {
         manage.sync();
 
         try {
+            Main.logger.debug("Closing all connections");
             for (String item : DBConnection.getInstance().getAreaList()) {
                 DBConnection.getInstance().closeConnection(item, Boolean.TRUE);
             }

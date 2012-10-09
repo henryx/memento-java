@@ -12,11 +12,6 @@ package org.memento.server.management;
  */
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,6 +19,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
+import org.memento.server.Main;
 import org.memento.server.operation.FileOperation;
 import org.memento.server.storage.DBConnection;
 import org.memento.server.storage.DbStorage;
@@ -34,14 +30,14 @@ public class Manager {
     private String grace;
     private boolean reload;
     private Wini cfg;
-    
+
     public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
     }
-    
+
     private Operation compute(String name) {
         String type;
-        
+
         type = this.cfg.get(name, "type");
         switch (type) {
             case "file":
@@ -59,25 +55,25 @@ public class Manager {
         PreparedStatement pstmt;
         ResultSet res;
         final String SELECT = "SELECT actual FROM status WHERE grace = ?";
-        
+
         try {
             conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
-            
+
             pstmt = conn.prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
-            
+
             res = pstmt.executeQuery();
-            
+
             res.next();
             result = res.getInt(1);
-            
+
             res.close();
             pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.debug("Problems to retrieve last dataset processed: ", ex);
             result = 0;
         }
-        
+
         return result;
     }
 
@@ -86,14 +82,14 @@ public class Manager {
         Connection conn;
         PreparedStatement pstmt;
         final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
-        
+
         try {
             conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
-            
+
             pstmt = conn.prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
-            
+
             pstmt.executeUpdate();
             pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
@@ -114,29 +110,29 @@ public class Manager {
     public void setGrace(String grace) {
         this.grace = grace;
     }
-    
+
     public void setReload(boolean reload) {
         this.reload = reload;
     }
-    
+
     public boolean getReload() {
         return this.reload;
     }
-    
+
     public void sync() throws IOException {
         Integer dataset;
         Operation operation;
         FileStorage fsStorage;
         DbStorage dbStorage;
-        
+
         fsStorage = new FileStorage(this.cfg);
         dbStorage = new DbStorage(this.cfg);
-        
+
         fsStorage.setGrace(this.grace);
         dbStorage.setGrace(this.grace);
-        
+
         dataset = this.getLastDataset();
-        
+
         if (!this.reload) {
             if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
                 dataset = 1;
@@ -144,33 +140,36 @@ public class Manager {
                 dataset = dataset + 1;
             }
         }
-        
+
+        Main.logger.info("Dataset processed: " + dataset);
+
         fsStorage.setDataset(dataset);
         dbStorage.setDataset(dataset);
-        
+
         this.remove(dataset);
-        
+
         for (String section : this.cfg.keySet()) {
             if (!(section.equals("general") || section.equals("dataset"))) {
+                Main.logger.info("About to backup section " + section);
                 fsStorage.setSection(section);
                 dbStorage.setSection(section);
-                
+
                 operation = this.compute(section);
-                
+
                 operation.setGrace(this.grace);
                 operation.setDataset(dataset);
                 operation.setSection(section);
-                
+
                 operation.setDbStore(dbStorage);
                 operation.setFsStore(fsStorage);
-                
+
                 operation.run();
             }
         }
-        
+
         this.setLastDataset(dataset);
     }
-    
+
     public void remove(Integer dataset) throws IOException {
         class Remove {
             public void remove(File aDir) {
@@ -186,18 +185,19 @@ public class Manager {
                 aDir.delete();
             }
         }
-        
+
         File directory;
         String sep;
-        
+
         sep = System.getProperty("file.separator");
-        
+
         directory = new File(this.cfg.get("general", "repository")
                 + sep
                 + this.grace
                 + sep
                 + dataset);
-        
+
+        Main.logger.debug("About to remove " + directory.getAbsolutePath());
         new Remove().remove(directory);
     }
 }

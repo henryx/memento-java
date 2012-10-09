@@ -15,6 +15,7 @@ import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
+import org.memento.server.Main;
 
 /**
  *
@@ -48,10 +49,12 @@ public class FileStorage extends CommonStorage {
         subdirectories = new String[]{"hour", "day", "week", "month"};
 
         if (directory.isFile()) {
+            Main.logger.debug("Path " + directory.getAbsolutePath() + " refers to a file");
             throw new IllegalArgumentException(directory + " is a file");
         }
 
         if (!directory.exists()) {
+            Main.logger.debug("Path " + directory.getAbsolutePath() + " does not exist, creating");
             for (String subdirectory : subdirectories) {
                 Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
             }
@@ -144,6 +147,7 @@ public class FileStorage extends CommonStorage {
         directory = new File(this.returnStructure(false));
 
         if (!directory.exists()) {
+            
             directory.mkdirs();
         }
     }
