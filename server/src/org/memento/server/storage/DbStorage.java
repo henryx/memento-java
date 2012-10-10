@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
+import org.memento.server.Main;
 
 /**
  *
@@ -224,7 +225,7 @@ public class DbStorage extends CommonStorage {
                         this.returnStructure(Boolean.TRUE));
             }
         } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(DbStorage.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("Error when opening database for section " + section, ex);
         }
     }
 }

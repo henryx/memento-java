@@ -147,7 +147,7 @@ public class FileStorage extends CommonStorage {
         directory = new File(this.returnStructure(false));
 
         if (!directory.exists()) {
-            
+            Main.logger.debug("Creating directory " + directory.getAbsolutePath());
             directory.mkdirs();
         }
     }

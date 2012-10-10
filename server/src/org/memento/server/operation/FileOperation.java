@@ -17,13 +17,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.json.commands.CommandSystem;
+import org.memento.server.Main;
 import org.memento.server.management.Operation;
 import org.memento.server.storage.DbStorage;
 import org.memento.server.storage.FileStorage;
@@ -231,6 +230,7 @@ public class FileOperation implements Operation {
                 context.setCommand(csystem);
 
                 this.sendCommand(context);
+                Main.logger.debug("Pre command executed");
             }
 
             context.setContext("file");
@@ -249,15 +249,20 @@ public class FileOperation implements Operation {
                 context.setCommand(csystem);
 
                 this.sendCommand(context);
+                Main.logger.debug("Pre command executed");
             }
         } catch (UnknownHostException ex) {
-            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("Host not found: " + this.section);
+            Main.logger.debug("Host not found: " + this.section, ex);
         } catch (ConnectException ex) {
-            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("Connect error for host: " + this.section);
+            Main.logger.debug("Connect error for host: " + this.section, ex);
         } catch (IOException ex) {
-            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("I/O error for host: " + this.section);
+            Main.logger.debug("I/O error for host: " + this.section, ex);
         } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(FileOperation.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("SQL error for host: " + this.section);
+            Main.logger.debug("SQL error for host: " + this.section, ex);
         }
     }
 }
