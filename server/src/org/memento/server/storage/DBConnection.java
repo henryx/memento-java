@@ -119,6 +119,8 @@ public class DBConnection {
         for (String item : data) {
             stmt.executeUpdate(item);
         }
+        
+        stmt.close();
     }
 
     public Connection getConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
