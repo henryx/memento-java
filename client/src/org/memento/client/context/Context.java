@@ -139,7 +139,7 @@ public class Context {
 
         switch (command.get("name").toString()) {
             case "exit":
-                exit = false;
+                exit = true;
                 break;
             default:
                 result = new HashMap();
