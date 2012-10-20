@@ -110,7 +110,12 @@ public class DbStorage extends CommonStorage {
             @Override
             public boolean hasNext() {
                 try {
-                    return this.res.next();
+                    if (res.next()) {
+                        return true;
+                    } else {
+                        this.res.close();
+                        return false;
+                    }
                 } catch (SQLException ex) {
                     return false;
                 }
