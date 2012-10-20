@@ -8,6 +8,7 @@
 package org.memento.client.net;
 
 import flexjson.JSONDeserializer;
+import flexjson.JSONException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,12 +59,14 @@ public class Serve implements AutoCloseable {
                     exit = context.parseError(errMsg);
                     break;
             }
-        } catch (FileNotFoundException | IllegalArgumentException | NullPointerException ex) {
+        } catch (FileNotFoundException | JSONException | IllegalArgumentException | NullPointerException ex) {
             errMsg = new HashMap();
 
             if (ex instanceof FileNotFoundException
                     || ex instanceof IllegalArgumentException) {
                 errMsg.put("message", "Context not found");
+            } else if (ex instanceof JSONException) {
+                errMsg.put("message", "JSON value error");
             } else if (ex instanceof NullPointerException) {
                 errMsg.put("message", "Buffer error");
             } else {
