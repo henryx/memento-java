@@ -78,21 +78,6 @@ public class DbStorage extends CommonStorage {
         insert.close();
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if (this.conn instanceof Connection && !this.conn.isClosed()) {
-            this.conn.commit();
-            this.conn.close();
-        }
-
-        if (this.oldConn instanceof Connection && !this.conn.isClosed()) {
-            this.oldConn.rollback();
-            this.oldConn.close();
-        }
-
-        super.finalize();
-    }
-
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
         if (!json.getOs().startsWith("windows")) {
             this.addPosixAttrs(json);
@@ -204,13 +189,6 @@ public class DbStorage extends CommonStorage {
         } catch (SQLException ex) {
             Logger.getLogger(CommonStorage.class.getName()).log(Level.SEVERE, null, ex);
             return Boolean.FALSE;
-        } finally {
-            try {
-                if (res instanceof ResultSet && !res.isClosed()) {
-                    res.close();
-                }
-            } catch (SQLException ex) {
-            }
         }
     }
 
