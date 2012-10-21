@@ -26,6 +26,7 @@ public class DBConnection {
 
     private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
         Connection conn;
+        Statement statement;
         String sep;
         String url;
 
@@ -35,6 +36,11 @@ public class DBConnection {
 
         Class.forName("org.sqlite.JDBC");
         conn = DriverManager.getConnection(url);
+
+        statement = conn.createStatement();
+        statement.execute("PRAGMA synchronous = OFF;");
+        statement.execute("PRAGMA journal_mode = WAL;");
+        statement.close();
 
         conn.setAutoCommit(Boolean.FALSE);
         DBConnection.connections.put(area, conn);
