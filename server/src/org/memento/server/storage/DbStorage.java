@@ -13,8 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.json.FileAttrs;
 import org.memento.server.Main;
@@ -102,6 +100,7 @@ public class DbStorage extends CommonStorage {
                         return false;
                     }
                 } catch (SQLException ex) {
+                    Main.logger.debug("Iterator error", ex);
                     return false;
                 }
             }
@@ -122,6 +121,7 @@ public class DbStorage extends CommonStorage {
 
                     return json;
                 } catch (SQLException ex) {
+                    Main.logger.debug("Iterator error", ex);
                     return null;
                 }
             }
@@ -187,7 +187,7 @@ public class DbStorage extends CommonStorage {
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(CommonStorage.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.debug("Query error", ex);
             return Boolean.FALSE;
         }
     }

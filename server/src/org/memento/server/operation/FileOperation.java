@@ -64,6 +64,7 @@ public class FileOperation implements Operation {
         Iterator<FileAttrs> items;
         String line;
 
+        Main.logger.debug("About to read all files metadata");
         while (true) {
             line = in.readLine();
 
@@ -74,13 +75,17 @@ public class FileOperation implements Operation {
             inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
             this.dbstore.add(inJSON);
         }
+        Main.logger.debug("Al files metadata readed");
 
+        Main.logger.debug("About to create directory structure");
         items = this.dbstore.listItems("directory");
         while (items.hasNext()) {
             item = items.next();
             this.fsstore.add(item);
         }
+        Main.logger.debug("Directory structure created");
         
+        Main.logger.debug("About to download files from remote server");
         items = this.dbstore.listItems("file");
         while(items.hasNext()) {
             item = items.next();
@@ -91,12 +96,15 @@ public class FileOperation implements Operation {
             }
             this.fsstore.add(item);
         }
+        Main.logger.debug("Files downloaded");
 
+        Main.logger.debug("About to create symlinks");
         items = this.dbstore.listItems("symlink");
         while (items.hasNext()) {
             item = items.next();
             this.fsstore.add(item);
         }
+        Main.logger.debug("Symlinks created");
     }
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
@@ -108,14 +116,21 @@ public class FileOperation implements Operation {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
 
+            Main.logger.debug("Connection for "
+                    + this.cfg.get(section, "host")
+                    + ":" + this.cfg.get(section, "port")
+                    + " is opened");
+
             out.println(serializer.exclude("*.class").deepSerialize(command));
             out.flush();
 
             switch (command.getContext()) {
                 case "file":
+                    Main.logger.debug("About to parse File command");
                     this.parseCommandFile(in);
                     break;
                 case "system": // FIXME: is necessary
+                    Main.logger.debug("About to parse System command");
                     this.parseCommandSystem(in);
                     break;
             }
@@ -228,7 +243,7 @@ public class FileOperation implements Operation {
                 context.setCommand(csystem);
 
                 this.sendCommand(context);
-                Main.logger.debug("Pre command executed");
+                Main.logger.debug("Post command executed");
             }
         } catch (UnknownHostException ex) {
             Main.logger.error("Host not found: " + this.section);
