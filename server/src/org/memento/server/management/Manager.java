@@ -16,8 +16,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ini4j.Wini;
 import org.memento.server.Main;
 import org.memento.server.operation.FileOperation;
@@ -93,7 +91,8 @@ public class Manager {
             pstmt.executeUpdate();
             pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            Main.logger.error("Problems whe setting last dataset processed");
+            Main.logger.debug("Problems whe setting last dataset processed", ex);
         }
     }
 
