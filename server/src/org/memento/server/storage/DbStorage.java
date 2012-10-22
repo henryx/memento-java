@@ -189,6 +189,13 @@ public class DbStorage extends CommonStorage {
         } catch (SQLException ex) {
             Main.logger.debug("Query error", ex);
             return Boolean.FALSE;
+        } finally {
+            try {
+                if (res != null) {
+                    res.close();
+                }
+            } catch (SQLException ex) {
+            }
         }
     }
 
