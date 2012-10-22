@@ -100,22 +100,13 @@ public class FileOperation implements Operation {
     }
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
-        BufferedReader in;
         JSONSerializer serializer;
-        PrintWriter out;
-        Socket conn;
 
         serializer = new JSONSerializer();
 
-        in = null;
-        out = null;
-        conn = null;
-
-        try {
-            conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
-
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            out = new PrintWriter(conn.getOutputStream(), true);
+        try (Socket conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
 
             out.println(serializer.exclude("*.class").deepSerialize(command));
             out.flush();
@@ -127,18 +118,6 @@ public class FileOperation implements Operation {
                 case "system": // FIXME: is necessary
                     this.parseCommandSystem(in);
                     break;
-            }
-        } finally {
-            if (in instanceof BufferedReader) {
-                in.close();
-            }
-
-            if (out instanceof PrintWriter) {
-                out.close();
-            }
-
-            if (conn instanceof Socket && !conn.isClosed()) {
-                conn.close();
             }
         }
     }
