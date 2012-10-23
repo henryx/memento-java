@@ -12,8 +12,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Iterator;
 import org.ini4j.Wini;
+import org.memento.json.FileAcl;
 import org.memento.json.FileAttrs;
 import org.memento.server.Main;
 
@@ -28,6 +30,25 @@ public class DbStorage extends CommonStorage {
 
     public DbStorage(Wini cfg) {
         super(cfg);
+    }
+
+    private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {
+        PreparedStatement insert;
+
+        insert = this.conn.prepareStatement("INSERT INTO acls"
+                + "(element, name, type, perms)"
+                + " VALUES(?, ?, ?, ?)");
+
+        for (FileAcl acl : acls) {
+            insert.setString(1, element);
+            insert.setString(2, acl.getName());
+            insert.setString(3, acl.getAclType());
+            insert.setString(4, acl.getAttrs());
+
+            insert.executeUpdate();
+        }
+        
+        insert.close();
     }
 
     private void addDosAttrs(FileAttrs json) throws SQLException {
@@ -79,6 +100,9 @@ public class DbStorage extends CommonStorage {
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
         if (!json.getOs().startsWith("windows")) {
             this.addPosixAttrs(json);
+            if (json.getAcl() != null && !json.getAcl().isEmpty()) {
+                this.addPosixAcl(json.getName(), json.getAcl());
+            }
         } else {
             this.addDosAttrs(json);
         }

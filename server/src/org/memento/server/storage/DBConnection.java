@@ -91,8 +91,8 @@ public class DBConnection {
                     + " element_mtime INTEGER,"
                     + " element_ctime INTEGER)",
                 "CREATE TABLE acls (element VARCHAR(1024),"
-                    + " id VARCHAR(50),"
-                    + " id_type VARCHAR(1),"
+                    + " name VARCHAR(50),"
+                    + " type VARCHAR(5),"
                     + " perms VARCHAR(3))"
             };
         } else {
