@@ -18,6 +18,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.memento.client.context.commands.CommandFile;
 
 /**
@@ -132,25 +134,51 @@ public class Context {
         return exit;
     }
     
-    public boolean parseSystem(HashMap command) throws IOException {
-        boolean exit;
+    public boolean parseSystem(HashMap command) {
         Context error;
         HashMap result;
+        Process p;
+        String message;
+        boolean exit;
+        int status;
 
+        message = "";
         switch (command.get("name").toString()) {
             case "exit":
                 exit = true;
                 break;
-            default:
-                result = new HashMap();
-                error = new Context(this.connection);
+            case "exec":
+                try {
+                    p = Runtime.getRuntime().exec(command.get("value").toString());
+                    status = p.waitFor();
 
-                result.put("message", "Command not found");
-                error.parseError(result);
+                    if (status != 0) {
+                        message = "Error when executing command: " + status;
+                    }
+                } catch (InterruptedException | IOException ex) {
+                    message = "Error when executing command: " + ex.getMessage();
+                }
+
+                exit = false;
+                break;
+            default:
+                message = "Command not found";
                 exit = false;
                 break;
         }
-        
+
+        try {
+            if (!message.isEmpty()) {
+                result = new HashMap();
+                error = new Context(this.connection);
+
+                result.put("message", message);
+                error.parseError(result);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Context.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         return exit;
     }
 
