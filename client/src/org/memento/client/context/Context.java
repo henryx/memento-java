@@ -153,10 +153,10 @@ public class Context {
                     status = p.waitFor();
 
                     if (status != 0) {
-                        message = "Error when executing command: " + status;
+                        message = "Error when executing external command: " + status;
                     }
                 } catch (InterruptedException | IOException ex) {
-                    message = "Error when executing command: " + ex.getMessage();
+                    message = "Error when executing external command: " + ex.getMessage();
                 }
 
                 exit = false;
