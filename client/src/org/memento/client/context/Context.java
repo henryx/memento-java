@@ -181,10 +181,10 @@ public class Context {
     }
 
     public boolean parseError(HashMap command) throws IOException {
-        boolean exit;
         HashMap result;
         JSONSerializer serializer;
         PrintWriter out;
+        boolean exit;
 
         out = new PrintWriter(connection.getOutputStream(), true);
         result = command;
