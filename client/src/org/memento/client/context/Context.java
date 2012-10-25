@@ -135,7 +135,6 @@ public class Context {
     }
     
     public boolean parseSystem(HashMap command) {
-        Context error;
         HashMap result;
         Process p;
         String message;
@@ -143,6 +142,8 @@ public class Context {
         int status;
 
         message = "";
+
+        exit = false;
         switch (command.get("name").toString()) {
             case "exit":
                 exit = true;
@@ -159,21 +160,18 @@ public class Context {
                     message = "Error when executing external command: " + ex.getMessage();
                 }
 
-                exit = false;
                 break;
             default:
                 message = "Command not found";
-                exit = false;
                 break;
         }
 
         try {
             if (!message.isEmpty()) {
                 result = new HashMap();
-                error = new Context(this.connection);
 
                 result.put("message", message);
-                error.parseError(result);
+                this.parseError(result);
             }
         } catch (IOException ex) {
             Logger.getLogger(Context.class.getName()).log(Level.SEVERE, null, ex);
