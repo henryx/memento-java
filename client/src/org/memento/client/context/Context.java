@@ -95,9 +95,9 @@ public class Context {
 
     public boolean parseFile(HashMap command) throws IOException {
         ArrayList paths;
-        boolean exit;
         Context error;
         HashMap errMsg;
+        boolean exit;
 
         exit = false;
         switch (command.get("name").toString()) {
