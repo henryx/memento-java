@@ -168,12 +168,18 @@ public class DBConnection {
 
     public void closeConnection(String area, Boolean commit) throws SQLException {
         Connection conn;
+        Statement stmt;
 
         if (DBConnection.connections.containsKey(area)) {
             conn = DBConnection.connections.get(area);
             if (commit) {
                 conn.commit();
-            }
+             }
+            conn.setAutoCommit(true);
+
+            stmt = conn.createStatement();
+            stmt.execute("VACUUM");
+            
             conn.close();
         }
     }
