@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.memento.client.Main;
 import org.memento.client.context.commands.CommandFile;
 
 /**
@@ -136,6 +137,8 @@ public class Context {
     
     public boolean parseSystem(HashMap command) {
         HashMap result;
+        JSONSerializer serializer;
+        PrintWriter out;
         Process p;
         String message;
         boolean exit;
@@ -158,6 +161,21 @@ public class Context {
                     }
                 } catch (InterruptedException | IOException ex) {
                     message = "Error when executing external command: " + ex.getMessage();
+                }
+
+                break;
+            case "version":
+                result = new HashMap();
+                serializer = new JSONSerializer();
+                
+                result.put("result", "ok");
+                result.put("version", Main.VERSION);
+
+                try {
+                    out = new PrintWriter(this.connection.getOutputStream(), true);
+                    out.println(serializer.exclude("*.class").serialize(result));
+                } catch (IOException ex) {
+                    message = "Error when sending client version: " + ex.getMessage();
                 }
 
                 break;

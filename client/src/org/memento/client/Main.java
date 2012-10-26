@@ -23,6 +23,7 @@ import org.memento.client.net.Serve;
 public class Main {
 
     private Options opts;
+    public static final String VERSION = "1.0";
 
     public Main() {
         this.opts = new Options();
