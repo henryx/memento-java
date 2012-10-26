@@ -77,9 +77,6 @@ public class Main {
         } catch (ParseException ex) {
             System.err.println("Error when passing command: " + ex.getMessage());
             System.exit(2);
-        } catch (ClassCastException ex) {
-            System.err.println(ex.getMessage());
-            System.exit(3);
         }
     }
 }

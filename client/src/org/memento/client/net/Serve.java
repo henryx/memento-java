@@ -59,7 +59,7 @@ public class Serve implements AutoCloseable {
                     exit = context.parseError(errMsg);
                     break;
             }
-        } catch (FileNotFoundException | JSONException | IllegalArgumentException | NullPointerException ex) {
+        } catch (ClassCastException | FileNotFoundException | JSONException | IllegalArgumentException | NullPointerException ex) {
             errMsg = new HashMap();
 
             if (ex instanceof FileNotFoundException
