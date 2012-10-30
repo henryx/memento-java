@@ -25,7 +25,6 @@ public class FileStorage extends CommonStorage {
 
     public FileStorage(Wini cfg) throws IOException {
         super(cfg);
-        this.checkStructure();
     }
 
     private void addFile(FileAttrs json) throws IOException {
@@ -38,26 +37,6 @@ public class FileStorage extends CommonStorage {
         } else {
             source = this.getFile(this.returnStructure(true) + json.getName(), json.getOs());
             Files.createLink(dest.toPath(), source.toPath());
-        }
-    }
-
-    private void checkStructure() throws IOException {
-        File directory;
-        String[] subdirectories;
-
-        directory = new File(this.cfg.get("general", "repository"));
-        subdirectories = new String[]{"hour", "day", "week", "month"};
-
-        if (directory.isFile()) {
-            Main.logger.debug("Path " + directory.getAbsolutePath() + " refers to a file");
-            throw new IllegalArgumentException(directory + " is a file");
-        }
-
-        if (!directory.exists()) {
-            Main.logger.debug("Path " + directory.getAbsolutePath() + " does not exist, creating");
-            for (String subdirectory : subdirectories) {
-                Files.createDirectories(Paths.get(directory.getAbsolutePath(), subdirectory));
-            }
         }
     }
 
