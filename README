@@ -6,13 +6,13 @@ Link: https://github.com/henryx/mementobackup
 Description:
 ------------
 
-Memento is a backup system for remote machines. It is similar of other systems
+Memento is a backup system for remote computers. It is similar of other systems
 (e.g. rsnapshot) but it has some differences:
 
- - It use an agent for check and download data.
- - It manage four distinct datasets (hour, day, week, month).
- - It save space with hard link creation.
- - It save data attribute (owner, group, permission, ACL) into database.
+ - It uses an agent for checking and downloading data.
+ - It manages four distinct datasets (hour, day, week, month).
+ - It saves space with hard link creation.
+ - It saves data attribute (owner, group, permission, ACL) into database.
 
 Licence:
 --------
