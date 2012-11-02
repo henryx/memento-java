@@ -13,12 +13,13 @@ import org.memento.server.storage.FileStorage;
  *
  * @author enrico
  */
-public interface Operation extends Properties {
+public interface Operation extends Properties, Runnable {
 
     public void setDbStore(DbStorage dbstore);
     public DbStorage getDbStore();
     public void setFsStore(FileStorage fsstore);
     public FileStorage getFsStore();
 
+    @Override
     public void run();
 }

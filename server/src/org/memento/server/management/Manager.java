@@ -16,6 +16,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.ini4j.Wini;
 import org.memento.server.Main;
 import org.memento.server.operation.FileOperation;
@@ -123,12 +126,10 @@ public class Manager {
         Operation operation;
         FileStorage fsStorage;
         DbStorage dbStorage;
+        ExecutorService pool;
 
-        fsStorage = new FileStorage(this.cfg);
-        dbStorage = new DbStorage(this.cfg);
-
-        fsStorage.setGrace(this.grace);
-        dbStorage.setGrace(this.grace);
+        // NOTE: maximum concurrent threads is hardcoded for convenience
+        pool = Executors.newFixedThreadPool(5);
 
         dataset = this.getLastDataset();
 
@@ -142,14 +143,21 @@ public class Manager {
 
         Main.logger.info("Dataset processed: " + dataset);
 
-        fsStorage.setDataset(dataset);
-        dbStorage.setDataset(dataset);
-
         this.remove(dataset);
 
         for (String section : this.cfg.keySet()) {
             if (!(section.equals("general") || section.equals("dataset"))) {
                 Main.logger.info("About to backup section " + section);
+
+                fsStorage = new FileStorage(this.cfg);
+                dbStorage = new DbStorage(this.cfg);
+
+                fsStorage.setGrace(this.grace);
+                dbStorage.setGrace(this.grace);
+
+                fsStorage.setDataset(dataset);
+                dbStorage.setDataset(dataset);
+
                 fsStorage.setSection(section);
                 dbStorage.setSection(section);
 
@@ -162,8 +170,16 @@ public class Manager {
                 operation.setDbStore(dbStorage);
                 operation.setFsStore(fsStorage);
 
-                operation.run();
+                pool.execute(operation);
             }
+        }
+
+        pool.shutdown();
+        try {
+            // NOTE: timeout is hardcoded for convenience
+            pool.awaitTermination(12, TimeUnit.HOURS);
+        } catch (InterruptedException ex) {
+            Main.logger.debug("Problems when awaiting thread pool: ", ex);
         }
 
         this.setLastDataset(dataset);
@@ -171,6 +187,7 @@ public class Manager {
 
     public void remove(Integer dataset) throws IOException {
         class Remove {
+
             public void remove(File aDir) {
                 if (aDir.exists()) {
                     for (File child : aDir.listFiles()) {
