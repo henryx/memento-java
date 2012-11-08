@@ -12,6 +12,7 @@ package org.memento.server.management;
  */
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -188,17 +189,17 @@ public class Manager {
     public void remove(Integer dataset) throws IOException {
         class Remove {
 
-            public void remove(File aDir) {
+            public void remove(File aDir) throws IOException {
                 if (aDir.exists()) {
                     for (File child : aDir.listFiles()) {
                         if (child.isDirectory()) {
                             this.remove(child);
                         } else {
-                            child.delete();
+                            Files.delete(child.toPath());
                         }
                     }
                 }
-                aDir.delete();
+                Files.delete(aDir.toPath());
             }
         }
 
@@ -213,7 +214,10 @@ public class Manager {
                 + sep
                 + dataset);
 
-        Main.logger.debug("About to remove " + directory.getAbsolutePath());
-        new Remove().remove(directory);
+        if (directory.exists()) {
+            Main.logger.debug("About to remove " + directory.getAbsolutePath());
+            new Remove().remove(directory);
+            Main.logger.debug("Directory " + directory.getAbsolutePath() + " removed");
+        }
     }
 }
