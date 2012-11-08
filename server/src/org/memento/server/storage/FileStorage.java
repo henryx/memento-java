@@ -23,7 +23,7 @@ import org.memento.server.Main;
  */
 public class FileStorage extends CommonStorage {
 
-    public FileStorage(Wini cfg) throws IOException {
+    public FileStorage(Wini cfg) {
         super(cfg);
     }
 
