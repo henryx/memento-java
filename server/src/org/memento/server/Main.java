@@ -3,7 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
+ */
 
 package org.memento.server;
 
@@ -57,7 +57,7 @@ public class Main {
 
         try {
             appender = new FileAppender(new PatternLayout("%d %-5p %c - %m%n"),
-                                        this.cfg.get("general", "log_file"));
+                    this.cfg.get("general", "log_file"));
             Main.logger.addAppender(appender);
             Main.logger.setLevel(Level.toLevel(this.cfg.get("general", "log_level")));
         } catch (IOException | SecurityException ex) {
@@ -93,7 +93,7 @@ public class Main {
 
         parser = new PosixParser();
         cmd = parser.parse(this.opts, args);
-
+        
         if (cmd.hasOption("h") || cmd.hasOption("help")) {
             this.printHelp();
         }
@@ -126,7 +126,7 @@ public class Main {
             Main.logger.fatal("No grace period selected");
             System.exit(2);
         }
-        
+
         if (cmd.hasOption("r")) {
             Main.logger.debug("Reload dataset selected");
             manage.setReload(true);
@@ -134,7 +134,7 @@ public class Main {
             manage.setReload(false);
         }
 
-        manage.sync();
+            manage.sync();
 
         try {
             Main.logger.debug("Closing all connections");
@@ -159,7 +159,7 @@ public class Main {
         try {
             m.go(args);
         } catch (ParseException | IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.FATAL, null, ex);
+            Main.logger.fatal(ex);
             System.exit(2);
         }
     }
