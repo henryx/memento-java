@@ -112,13 +112,13 @@ public class FileOperation implements Operation {
 
         serializer = new JSONSerializer();
 
-        try (Socket conn = new Socket(this.cfg.get(section, "host"), Integer.parseInt(this.cfg.get(section, "port")));
+        try (Socket conn = new Socket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
 
             Main.logger.debug("Connection for "
-                    + this.cfg.get(section, "host")
-                    + ":" + this.cfg.get(section, "port")
+                    + this.cfg.get(this.section, "host")
+                    + ":" + this.cfg.get(this.section, "port")
                     + " is opened");
 
             out.println(serializer.exclude("*.class").deepSerialize(command));
@@ -142,7 +142,7 @@ public class FileOperation implements Operation {
      */
     @Override
     public Integer getDataset() {
-        return dataset;
+        return this.dataset;
     }
 
     /**
@@ -158,7 +158,7 @@ public class FileOperation implements Operation {
      */
     @Override
     public String getGrace() {
-        return grace;
+        return this.grace;
     }
 
     /**
@@ -174,7 +174,7 @@ public class FileOperation implements Operation {
      */
     @Override
     public String getSection() {
-        return section;
+        return this.section;
     }
 
     /**
@@ -229,8 +229,8 @@ public class FileOperation implements Operation {
 
             context.setContext("file");
             cfile.setName("list");
-            cfile.setDirectory(this.cfg.get(section, "path").split(","));
-            cfile.setAcl(Boolean.parseBoolean(this.cfg.get(section, "acl")));
+            cfile.setDirectory(this.cfg.get(this.section, "path").split(","));
+            cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
             context.setCommand(cfile);
             this.sendCommand(context);
 
