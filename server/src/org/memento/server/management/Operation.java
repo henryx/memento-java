@@ -15,6 +15,8 @@ import org.memento.server.storage.FileStorage;
  */
 public interface Operation extends Properties, Runnable {
 
+    public void setOperationType(String type);
+    public String getOperationType();
     public void setDbStore(DbStorage dbstore);
     public DbStorage getDbStore();
     public void setFsStore(FileStorage fsstore);

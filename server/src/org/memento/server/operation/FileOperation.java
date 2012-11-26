@@ -37,6 +37,7 @@ public class FileOperation implements Operation {
     private DbStorage dbstore;
     private FileStorage fsstore;
     private String grace;
+    private String operationType;
     private String section;
     private Wini cfg;
 
@@ -203,6 +204,16 @@ public class FileOperation implements Operation {
     @Override
     public FileStorage getFsStore() {
         return this.fsstore;
+    }
+
+    @Override
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
+    }
+
+    @Override
+    public String getOperationType() {
+        return this.operationType;
     }
 
     @Override
