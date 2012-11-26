@@ -45,21 +45,7 @@ public class FileOperation implements Operation {
         this.cfg = cfg;
     }
 
-    private void parseCommandSystem(BufferedReader in) throws IOException {
-        String line;
-
-        while (true) {
-            line = in.readLine();
-
-            if (line == null) {
-                break;
-            }
-
-            // TODO: add parsing system command return value (if needed)
-        }
-    }
-
-    private void parseCommandFile(BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
+    private void parseCommand(String context, BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
         FileAttrs inJSON;
         FileAttrs item;
         Iterator<FileAttrs> items;
@@ -73,39 +59,44 @@ public class FileOperation implements Operation {
                 break;
             }
 
-            inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
-            this.dbstore.add(inJSON);
-        }
-        Main.logger.debug("Al files metadata readed");
-
-        Main.logger.debug("About to create directory structure");
-        items = this.dbstore.listItems("directory");
-        while (items.hasNext()) {
-            item = items.next();
-            this.fsstore.add(item);
-        }
-        Main.logger.debug("Directory structure created");
-        
-        Main.logger.debug("About to download files from remote server");
-        items = this.dbstore.listItems("file");
-        while(items.hasNext()) {
-            item = items.next();
-            if (this.dbstore.isItemExist(item)) {
-                item.setPreviousDataset(Boolean.TRUE);
-            } else {
-                item.setPreviousDataset(Boolean.FALSE);
+            if (context.equals("file")) {
+                inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
+                this.dbstore.add(inJSON);
             }
-            this.fsstore.add(item);
         }
-        Main.logger.debug("Files downloaded");
 
-        Main.logger.debug("About to create symlinks");
-        items = this.dbstore.listItems("symlink");
-        while (items.hasNext()) {
-            item = items.next();
-            this.fsstore.add(item);
+        if (context.equals("file")) {
+            Main.logger.debug("Al files metadata readed");
+
+            Main.logger.debug("About to create directory structure");
+            items = this.dbstore.listItems("directory");
+            while (items.hasNext()) {
+                item = items.next();
+                this.fsstore.add(item);
+            }
+            Main.logger.debug("Directory structure created");
+
+            Main.logger.debug("About to download files from remote server");
+            items = this.dbstore.listItems("file");
+            while (items.hasNext()) {
+                item = items.next();
+                if (this.dbstore.isItemExist(item)) {
+                    item.setPreviousDataset(Boolean.TRUE);
+                } else {
+                    item.setPreviousDataset(Boolean.FALSE);
+                }
+                this.fsstore.add(item);
+            }
+            Main.logger.debug("Files downloaded");
+
+            Main.logger.debug("About to create symlinks");
+            items = this.dbstore.listItems("symlink");
+            while (items.hasNext()) {
+                item = items.next();
+                this.fsstore.add(item);
+            }
+            Main.logger.debug("Symlinks created");
         }
-        Main.logger.debug("Symlinks created");
     }
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
@@ -125,16 +116,8 @@ public class FileOperation implements Operation {
             out.println(serializer.exclude("*.class").deepSerialize(command));
             out.flush();
 
-            switch (command.getContext()) {
-                case "file":
-                    Main.logger.debug("About to parse File command");
-                    this.parseCommandFile(in);
-                    break;
-                case "system": // FIXME: is necessary
-                    Main.logger.debug("About to parse System command");
-                    this.parseCommandSystem(in);
-                    break;
-            }
+            Main.logger.debug("About to parse " + command.getContext() + " command");
+            this.parseCommand(command.getContext(), in);
         }
     }
 
