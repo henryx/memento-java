@@ -122,7 +122,7 @@ public class Manager {
         return this.reload;
     }
 
-    public void sync() throws IOException {
+    public void exec(String mode) throws IOException {
         Integer dataset;
         Operation operation;
         FileStorage fsStorage;
@@ -132,23 +132,25 @@ public class Manager {
         // NOTE: maximum concurrent threads is hardcoded for convenience
         pool = Executors.newFixedThreadPool(5);
 
-        dataset = this.getLastDataset();
-
-        if (!this.reload) {
-            if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
-                dataset = 1;
-            } else {
-                dataset = dataset + 1;
+        if (mode.equals("sync")) {
+            dataset = this.getLastDataset();
+            if (!this.reload) {
+                if (dataset >= Integer.decode(this.cfg.get("dataset", this.grace))) {
+                    dataset = 1;
+                } else {
+                    dataset = dataset + 1;
+                }
             }
+            this.remove(dataset);
+        } else {
+            dataset = Integer.decode(this.cfg.get("general", "dataset"));
         }
 
         Main.logger.info("Dataset processed: " + dataset);
 
-        this.remove(dataset);
-
         for (String section : this.cfg.keySet()) {
             if (!(section.equals("general") || section.equals("dataset"))) {
-                Main.logger.info("About to backup section " + section);
+                Main.logger.info("About to execute section " + section);
 
                 fsStorage = new FileStorage(this.cfg);
                 dbStorage = new DbStorage(this.cfg);
@@ -163,6 +165,7 @@ public class Manager {
                 dbStorage.setSection(section);
 
                 operation = this.compute(section);
+                operation.setOperationType(mode);
 
                 operation.setGrace(this.grace);
                 operation.setDataset(dataset);

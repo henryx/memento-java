@@ -121,6 +121,28 @@ public class FileOperation implements Operation {
         }
     }
 
+    private void sync() throws ClassNotFoundException, ConnectException, SQLException, IOException, UnknownHostException {
+        Context context;
+        CommandFile cfile;
+
+        context = new Context();
+        cfile = new CommandFile();
+
+        context.setContext("file");
+        cfile.setName("list");
+        cfile.setDirectory(this.cfg.get(this.section, "path").split(","));
+        cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
+        context.setCommand(cfile);
+        this.sendCommand(context);
+    }
+
+    private void restore() {
+        Context context;
+        CommandFile cfile;
+
+        // TODO: write the code
+    }
+
     /**
      * @return the dataset
      */
@@ -221,12 +243,11 @@ public class FileOperation implements Operation {
                 Main.logger.debug("Pre command executed");
             }
 
-            context.setContext("file");
-            cfile.setName("list");
-            cfile.setDirectory(this.cfg.get(this.section, "path").split(","));
-            cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
-            context.setCommand(cfile);
-            this.sendCommand(context);
+            if (this.getOperationType().equals("sync")) {
+                this.sync();
+            } else {
+                this.restore();
+            }
 
             if (!this.cfg.get(this.section, "post_command").equals("")) {
                 csystem = new CommandSystem();

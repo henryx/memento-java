@@ -4,7 +4,6 @@
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
  */
-
 package org.memento.server;
 
 import java.io.FileInputStream;
@@ -20,11 +19,10 @@ import org.memento.server.storage.DBConnection;
  *
  * @author enrico
  */
-
 public class Main {
+
     private Options opts;
     private Wini cfg;
-
     public static final String VERSION = "1.0";
     public static Logger logger = Logger.getLogger("Memento");
 
@@ -36,16 +34,19 @@ public class Main {
                 .withDescription("Use the specified configuration file")
                 .hasArg()
                 .withArgName("CFGFILE")
-                .create("c")
-        );
+                .create("c"));
+        this.opts.addOption(OptionBuilder.withLongOpt("restore")
+                .withDescription("Restore a backup")
+                .hasArg()
+                .withArgName("RESTOREFILE")
+                .create("R"));
         this.opts.addOption("H", false, "Hourly backup is executed");
         this.opts.addOption("D", false, "Daily backup is executed");
         this.opts.addOption("W", false, "Weekly backup is executed");
         this.opts.addOption("M", false, "Monthly backup is executed");
         this.opts.addOption(OptionBuilder.withLongOpt("reload-dataset")
                 .withDescription("Reload last dataset")
-                .create("r")
-        );
+                .create("r"));
 
     }
 
@@ -68,6 +69,7 @@ public class Main {
 
     /**
      * Open the configuration file
+     *
      * @param cfgFile a configuration file
      */
     private void setCfg(String cfgFile) {
@@ -90,19 +92,31 @@ public class Main {
         CommandLine cmd;
         CommandLineParser parser;
         Manager manage;
+        Boolean sync;
 
         parser = new PosixParser();
         cmd = parser.parse(this.opts, args);
         
+        sync = null;
+
         if (cmd.hasOption("h") || cmd.hasOption("help")) {
             this.printHelp();
         }
 
-        if (!cmd.hasOption("cfg")) {
-            System.out.println("No configuration file defined (see help)");
+        if (cmd.hasOption("cfg") && cmd.hasOption("restore")) {
+            System.out.println("Cannot perform a backup or restore in the same session");
             System.exit(1);
-        } else {
+        }
+        
+        if (cmd.hasOption("cfg")) {
+            sync = Boolean.TRUE;
             this.setCfg(cmd.getOptionValue("cfg"));
+        } else if (cmd.hasOption("restore")) {
+            sync = Boolean.FALSE;
+            this.setCfg(cmd.getOptionValue("restore"));
+        } else {
+            System.out.println("No configuration file defined (see help)");
+            System.exit(2);
         }
 
         this.setLog();
@@ -124,7 +138,7 @@ public class Main {
             manage.setGrace("month");
         } else {
             Main.logger.fatal("No grace period selected");
-            System.exit(2);
+            System.exit(3);
         }
 
         if (cmd.hasOption("r")) {
@@ -134,7 +148,11 @@ public class Main {
             manage.setReload(false);
         }
 
-            manage.sync();
+        if (sync) {
+            manage.exec("sync");
+        } else {
+            manage.exec("restore");
+        }
 
         try {
             Main.logger.debug("Closing all connections");
