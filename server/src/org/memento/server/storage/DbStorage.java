@@ -234,9 +234,11 @@ public class DbStorage extends CommonStorage {
             this.conn = DBConnection.getInstance().getConnection("cur_" + this.section,
                     this.returnStructure(Boolean.FALSE));
 
-            if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
-                this.oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
-                        this.returnStructure(Boolean.TRUE));
+            if (this.getOperationType().equals("sync")) {
+                if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
+                    this.oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
+                            this.returnStructure(Boolean.TRUE));
+                }
             }
         } catch (SQLException | ClassNotFoundException ex) {
             Main.logger.error("Error when opening database for section " + section, ex);

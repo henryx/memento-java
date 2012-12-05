@@ -17,6 +17,7 @@ import org.memento.server.management.Properties;
 public abstract class CommonStorage implements Properties {
     private Integer dataset;
     private String grace;
+    private String operationType;
     protected String section;
     protected Wini cfg;
 
@@ -96,5 +97,19 @@ public abstract class CommonStorage implements Properties {
                 + sep
                 + this.section
                 + sep;
+    }
+
+    /**
+     * @return the operation
+     */
+    public String getOperationType() {
+        return operationType;
+    }
+
+    /**
+     * @param operation the operation to set
+     */
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
     }
 }

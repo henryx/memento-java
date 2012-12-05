@@ -125,7 +125,7 @@ public class FileStorage extends CommonStorage {
         this.section = section;
         directory = new File(this.returnStructure(false));
 
-        if (!directory.exists()) {
+        if (!directory.exists() && this.getOperationType().equals("sync")) {
             Main.logger.debug("Creating directory " + directory.getAbsolutePath());
             directory.mkdirs();
         }

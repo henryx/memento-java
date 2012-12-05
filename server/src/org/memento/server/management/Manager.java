@@ -143,7 +143,7 @@ public class Manager {
             }
             this.remove(dataset);
         } else {
-            dataset = Integer.decode(this.cfg.get("general", "dataset"));
+            dataset = Integer.decode(this.cfg.get("general", "grace"));
         }
 
         Main.logger.info("Dataset processed: " + dataset);
@@ -154,6 +154,9 @@ public class Manager {
 
                 fsStorage = new FileStorage(this.cfg);
                 dbStorage = new DbStorage(this.cfg);
+                
+                fsStorage.setOperationType(mode);
+                dbStorage.setOperationType(mode);
 
                 fsStorage.setGrace(this.grace);
                 dbStorage.setGrace(this.grace);
@@ -186,7 +189,9 @@ public class Manager {
             Main.logger.debug("Problems when awaiting thread pool: ", ex);
         }
 
-        this.setLastDataset(dataset);
+        if (mode.equals("sync")) {
+            this.setLastDataset(dataset);
+        }
     }
 
     public void remove(Integer dataset) throws IOException {
