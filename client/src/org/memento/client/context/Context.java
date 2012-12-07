@@ -10,10 +10,12 @@ package org.memento.client.context;
 import flexjson.JSONSerializer;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -136,10 +138,12 @@ public class Context {
     }
     
     public boolean parseSystem(HashMap command) {
+        BufferedReader bre;
         HashMap result;
         JSONSerializer serializer;
         PrintWriter out;
         Process p;
+        String line;
         String message;
         boolean exit;
         int status;
@@ -157,7 +161,13 @@ public class Context {
                     status = p.waitFor();
 
                     if (status != 0) {
-                        message = "Error when executing external command: " + status;
+                        message = "Error when executing external command:\n";
+                                
+                        bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+                        while ((line = bre.readLine()) != null) {
+                            message = message + "\t" + line + "\n";
+                        }
+                        bre.close();
                     }
                 } catch (InterruptedException | IOException ex) {
                     message = "Error when executing external command: " + ex.getMessage();
