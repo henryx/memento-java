@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.client.context;
 
 import flexjson.JSONSerializer;
@@ -29,14 +28,14 @@ import org.memento.client.context.commands.CommandFile;
  *
  * @author enrico
  */
-
 public class Context {
+
     private Socket connection;
 
     public Context(Socket connection) {
         this.connection = connection;
     }
-    
+
     private void cmdListFile(String directory, boolean acl) throws FileNotFoundException, IOException {
         CommandFile cmd;
         File path;
@@ -136,7 +135,7 @@ public class Context {
 
         return exit;
     }
-    
+
     public boolean parseSystem(HashMap command) {
         BufferedReader bre;
         HashMap result;
@@ -145,24 +144,35 @@ public class Context {
         Process p;
         String line;
         String message;
+        String[] cmd;
         boolean exit;
         int status;
 
         message = "";
-
         exit = false;
+        cmd = new String[3];
+
         switch (command.get("name").toString()) {
             case "exit":
                 exit = true;
                 break;
             case "exec":
+                if (System.getProperty("os.name").startsWith("Windows")) {
+                    cmd[0] = "cmd.exe";
+                    cmd[1] = "/C";
+                } else {
+                    cmd[0] = "/bin/sh";
+                    cmd[1] = "-c";
+                }
+                cmd[2] = command.get("value").toString();
+
                 try {
-                    p = Runtime.getRuntime().exec(command.get("value").toString());
+                    p = Runtime.getRuntime().exec(cmd);
                     status = p.waitFor();
 
                     if (status != 0) {
                         message = "Error when executing external command:\n";
-                                
+
                         bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
                         while ((line = bre.readLine()) != null) {
                             message = message + "\t" + line + "\n";
@@ -172,12 +182,11 @@ public class Context {
                 } catch (InterruptedException | IOException ex) {
                     message = "Error when executing external command: " + ex.getMessage();
                 }
-
                 break;
             case "version":
                 result = new HashMap();
                 serializer = new JSONSerializer();
-                
+
                 result.put("result", "ok");
                 result.put("version", Main.VERSION);
 
