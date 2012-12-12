@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento.client.net;
 
 import flexjson.JSONDeserializer;
@@ -13,10 +12,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.memento.client.context.Context;
 
 /**
@@ -27,6 +29,7 @@ public class Serve implements AutoCloseable {
 
     private Integer port;
     private ServerSocket socket;
+    private String listenTo;
 
     public Serve(Integer port) {
         this.port = port;
@@ -80,11 +83,33 @@ public class Serve implements AutoCloseable {
     }
 
     public void open() throws IOException {
-        this.socket = new ServerSocket(port);
+        if (this.listenTo == null) {
+            this.socket = new ServerSocket(this.port);
+        } else {
+            this.socket = new ServerSocket();
+            this.socket.bind(new InetSocketAddress(this.listenTo, this.port));
+        }
     }
 
     @Override
     public void close() throws IOException {
         this.socket.close();
+    }
+
+    public void listenTo(String ip) {
+        Matcher matcher;
+        Pattern pattern;
+
+        pattern = Pattern.compile("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
+        matcher = pattern.matcher(ip);
+
+        if (matcher.matches()) {
+            this.listenTo = ip;
+        } else {
+            throw new IllegalArgumentException("The network address specified is invalid");
+        }
     }
 }

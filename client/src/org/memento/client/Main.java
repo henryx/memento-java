@@ -29,7 +29,18 @@ public class Main {
         this.opts = new Options();
 
         this.opts.addOption("h", "help", false, "Print this help");
-        this.opts.addOption(OptionBuilder.withLongOpt("port").withDescription("Set port number").hasArg().withArgName("PORT").create("p"));
+        this.opts.addOption(OptionBuilder
+                .withLongOpt("port")
+                .withDescription("Set port number")
+                .hasArg()
+                .withArgName("PORT")
+                .create("p"));
+        this.opts.addOption(OptionBuilder
+                .withLongOpt("listen")
+                .withDescription("Set listen address")
+                .hasArg()
+                .withArgName("ADDRESS")
+                .create("l"));
     }
 
     public void printHelp(Integer code) {
@@ -58,11 +69,15 @@ public class Main {
         }
 
         try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
+            if (cmd.hasOption("l")) {
+                serve.listenTo(cmd.getOptionValue("l"));
+            }
+
             serve.open();
             while (!exit) {
                 exit = serve.listen();
             }
-        } catch (SocketException | UnknownHostException | NullPointerException ex) {
+        } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
