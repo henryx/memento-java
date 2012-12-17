@@ -71,7 +71,7 @@ public class Main {
 
         try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
             if (cmd.hasOption("l")) {
-                serve.listenTo(cmd.getOptionValue("l"));
+                serve.setAddress(cmd.getOptionValue("l"));
             }
 
             serve.open();

@@ -94,7 +94,7 @@ public class Serve implements AutoCloseable {
         this.socket.close();
     }
 
-    public void listenTo(String address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 }
