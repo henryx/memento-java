@@ -27,7 +27,7 @@ public class Serve implements AutoCloseable {
 
     private Integer port;
     private ServerSocket socket;
-    private String listenTo;
+    private String address;
 
     public Serve(Integer port) {
         this.port = port;
@@ -81,11 +81,11 @@ public class Serve implements AutoCloseable {
     }
 
     public void open() throws IOException {
-        if (this.listenTo == null) {
+        if (this.address == null) {
             this.socket = new ServerSocket(this.port);
         } else {
             this.socket = new ServerSocket();
-            this.socket.bind(new InetSocketAddress(this.listenTo, this.port));
+            this.socket.bind(new InetSocketAddress(this.address, this.port));
         }
     }
 
@@ -94,7 +94,7 @@ public class Serve implements AutoCloseable {
         this.socket.close();
     }
 
-    public void listenTo(String ip) {
-        this.listenTo = ip;
+    public void listenTo(String address) {
+        this.address = address;
     }
 }
