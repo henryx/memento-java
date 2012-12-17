@@ -17,8 +17,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.memento.client.context.Context;
 
 /**
@@ -97,19 +95,6 @@ public class Serve implements AutoCloseable {
     }
 
     public void listenTo(String ip) {
-        Matcher matcher;
-        Pattern pattern;
-
-        pattern = Pattern.compile("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-                + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
-        matcher = pattern.matcher(ip);
-
-        if (matcher.matches()) {
-            this.listenTo = ip;
-        } else {
-            throw new IllegalArgumentException("The network address specified is invalid");
-        }
+        this.listenTo = ip;
     }
 }
