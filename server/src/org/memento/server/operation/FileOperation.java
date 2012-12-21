@@ -45,7 +45,7 @@ public class FileOperation implements Operation {
         this.cfg = cfg;
     }
 
-    private void parseCommand(String context, BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
+    private void store(String context, BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
         FileAttrs inJSON;
         FileAttrs item;
         Iterator<FileAttrs> items;
@@ -117,7 +117,7 @@ public class FileOperation implements Operation {
             out.flush();
 
             Main.logger.debug("About to parse " + command.getContext() + " command");
-            this.parseCommand(command.getContext(), in);
+            this.store(command.getContext(), in);
         }
     }
 
