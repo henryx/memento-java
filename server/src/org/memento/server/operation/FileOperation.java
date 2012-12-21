@@ -224,12 +224,9 @@ public class FileOperation implements Operation {
     @Override
     public void run() {
         Context context;
-        CommandFile cfile;
         CommandSystem csystem;
 
         context = new Context();
-        cfile = new CommandFile();
-
         try {
             if (!this.cfg.get(this.section, "pre_command").equals("")) {
                 csystem = new CommandSystem();
