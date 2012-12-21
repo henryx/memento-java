@@ -41,13 +41,10 @@ public class FileStorage extends CommonStorage {
     }
 
     private void getRemoteFile(String source, File dest) throws IOException {
-        InputStream in;
         Context context;
         CommandFile command;
-        FileOutputStream outFile;
         JSONSerializer serializer;
-        PrintWriter out;
-        Socket conn;
+
         byte[] buf = new byte[8192];
         int bytesRead = 0;
 
@@ -55,18 +52,12 @@ public class FileStorage extends CommonStorage {
         command = new CommandFile();
         serializer = new JSONSerializer();
 
-        in = null;
-        out = null;
-        outFile = null;
-        conn = null;
 
-        try {
-            conn = new Socket(this.cfg.get(this.section, "host"),
-                    Integer.parseInt(this.cfg.get(this.section, "port")));
-
-            in = conn.getInputStream();
-            out = new PrintWriter(conn.getOutputStream(), true);
-            outFile = new FileOutputStream(dest);
+        try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
+                        Integer.parseInt(this.cfg.get(this.section, "port")));
+                InputStream in = conn.getInputStream();
+                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
+                FileOutputStream outFile = new FileOutputStream(dest);) {
 
             context.setContext("file");
             command.setName("get");
@@ -79,23 +70,7 @@ public class FileStorage extends CommonStorage {
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
-        } finally {
-            if (conn instanceof Socket && !conn.isClosed()) {
-                conn.close();
-            }
-
-            if (in instanceof InputStream) {
-                in.close();
-            }
-
-            if (out instanceof PrintWriter) {
-                out.flush();
-                out.close();
-            }
-
-            if (outFile instanceof FileOutputStream) {
-                outFile.close();
-            }
+            out.flush();
         }
     }
 
