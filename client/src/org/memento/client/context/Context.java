@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,8 +93,18 @@ public class Context {
         outStream.close();
     }
 
-    private void cmdPutFile(String toString) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void cmdPutFile(String fileName) throws IOException {
+        File destFile;
+        File bakFile;
+
+        destFile = new File(fileName);
+
+        if (destFile.exists()) {
+            bakFile = new File(fileName + "." + Calendar.getInstance().getTimeInMillis());
+            Files.move(destFile.toPath(), bakFile.toPath());
+        }
+
+        // TODO write code to accept and create new file
     }
 
     public boolean parseFile(HashMap command) throws IOException {

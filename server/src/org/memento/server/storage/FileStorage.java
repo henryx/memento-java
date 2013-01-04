@@ -90,6 +90,42 @@ public class FileStorage extends CommonStorage {
         return result;
     }
 
+    private void putFile(FileAttrs json) throws UnknownHostException, IOException {
+        File source;
+
+        source = this.getFile(this.returnStructure(false) + json.getName(), json.getOs());
+        this.putRemoteFile(source, json.getName());
+    }
+
+    private void putRemoteFile(File source, String dest) throws UnknownHostException, IOException {
+        // TODO: add code for putting a file to remote system
+        Context context;
+        CommandFile command;
+        JSONSerializer serializer;
+        
+        context = new Context();
+        command = new CommandFile();
+        serializer = new JSONSerializer();
+        
+        try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
+                        Integer.parseInt(this.cfg.get(this.section, "port")));
+                InputStream in = conn.getInputStream();
+                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
+                FileInputStream inFile = new FileInputStream(source);) {
+            
+            command.setName("put");
+            command.setFilename(dest);
+            
+            context.setContext("file");
+            context.setCommand(command);
+            
+            out.println(serializer.exclude("*.class").deepSerialize(context));
+            out.flush();
+            
+            //TODO write code to send new file
+        }
+    }
+    
     /**
      * @param section the section to set
      */
@@ -120,6 +156,20 @@ public class FileStorage extends CommonStorage {
             case "symlink":
                 path = getFile(this.returnStructure(false) + json.getName(), json.getOs());
                 Files.createSymbolicLink(path.toPath(), Paths.get(json.getLinkTo()));
+                break;
+        }
+    }
+   
+    public void put(FileAttrs json) throws UnknownHostException, IOException {
+        switch(json.getType()) {
+            case "directory":
+                // TODO: need to create directories?
+                break;
+            case "file":
+                this.putFile(json);
+                break;
+            case "symlink":
+                // TODO: need to create symlinks?
                 break;
         }
     }
