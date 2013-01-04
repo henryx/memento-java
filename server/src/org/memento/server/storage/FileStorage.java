@@ -9,6 +9,7 @@ package org.memento.server.storage;
 import flexjson.JSONSerializer;
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.ini4j.Wini;
@@ -27,7 +28,7 @@ public class FileStorage extends CommonStorage {
         super(cfg);
     }
 
-    private void addFile(FileAttrs json) throws IOException {
+    private void addFile(FileAttrs json) throws UnknownHostException, IOException {
         File source;
         File dest;
 
@@ -40,7 +41,7 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    private void getRemoteFile(String source, File dest) throws IOException {
+    private void getRemoteFile(String source, File dest) throws UnknownHostException, IOException {
         Context context;
         CommandFile command;
         JSONSerializer serializer;
@@ -51,7 +52,6 @@ public class FileStorage extends CommonStorage {
         context = new Context();
         command = new CommandFile();
         serializer = new JSONSerializer();
-
 
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
@@ -106,7 +106,7 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    public void add(FileAttrs json) throws IOException {
+    public void add(FileAttrs json) throws UnknownHostException, IOException {
         File path;
 
         switch (json.getType()) {

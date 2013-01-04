@@ -45,7 +45,7 @@ public class FileOperation implements Operation {
         this.cfg = cfg;
     }
 
-    private void store(String context, BufferedReader in) throws ClassNotFoundException, SQLException, IOException {
+    private void store(String context, BufferedReader in) throws ClassNotFoundException, SQLException, UnknownHostException, IOException {
         FileAttrs inJSON;
         FileAttrs item;
         Iterator<FileAttrs> items;
