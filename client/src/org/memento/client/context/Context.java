@@ -52,7 +52,7 @@ public class Context {
         }
     }
 
-    private void cmdGetFile(String fileName) throws FileNotFoundException, IOException {
+    private void cmdSendFile(String fileName) throws FileNotFoundException, IOException {
         CommandFile cmd;
         
         cmd = new CommandFile(this.connection);
@@ -60,7 +60,7 @@ public class Context {
         cmd.sendFile();
     }
 
-    private void cmdPutFile(String fileName) throws IOException {
+    private void cmdReceiveFile(String fileName) throws IOException {
         File destFile;
         File bakFile;
 
@@ -97,10 +97,10 @@ public class Context {
                 }
                 break;
             case "get":
-                this.cmdGetFile(command.get("filename").toString());
+                this.cmdSendFile(command.get("filename").toString());
                 break;
             case "put":
-                this.cmdPutFile(command.get("filename").toString());
+                this.cmdReceiveFile(command.get("filename").toString());
                 break;
             default:
                 errMsg = new HashMap();
