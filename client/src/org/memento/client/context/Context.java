@@ -61,17 +61,26 @@ public class Context {
     }
 
     private void cmdReceiveFile(String fileName) throws IOException {
+        CommandFile cmd;
         File destFile;
         File bakFile;
+        File parent;
 
         destFile = new File(fileName);
+        parent = new File(destFile.getParent());
+        cmd = new CommandFile(this.connection);
 
         if (destFile.exists()) {
             bakFile = new File(fileName + "." + Calendar.getInstance().getTimeInMillis());
             Files.move(destFile.toPath(), bakFile.toPath());
         }
+        
+        if (!parent.exists()) {
+            destFile.mkdirs();
+        }
 
-        // TODO write code to accept and create new file
+        cmd.setFile(destFile);
+        cmd.receiveFile();
     }
 
     public boolean parseFile(HashMap command) throws IOException {

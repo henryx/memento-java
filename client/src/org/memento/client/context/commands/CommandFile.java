@@ -12,7 +12,9 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
@@ -31,7 +33,7 @@ public class CommandFile {
     private boolean acl;
     private File aFile;
     private Socket connection;
-    
+
     public CommandFile(Socket connection) {
         this.connection = connection;
     }
@@ -77,7 +79,7 @@ public class CommandFile {
     public void setAcl(boolean acl) {
         this.acl = acl;
     }
-    
+
     /**
      * @return the aFile
      */
@@ -146,6 +148,21 @@ public class CommandFile {
                 outStream.write(buffer, 0, read);
                 outStream.flush();
             }
+        }
+    }
+
+    public void receiveFile() throws FileNotFoundException, IOException {
+        byte[] buf = new byte[8192];
+        int bytesRead = 0;
+
+        try (InputStream in = this.connection.getInputStream();
+                PrintWriter out = new PrintWriter(this.connection.getOutputStream(), true);
+                FileOutputStream outFile = new FileOutputStream(this.aFile);) {
+
+            while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
+                outFile.write(buf, 0, bytesRead);
+            }
+            out.flush();
         }
     }
 }
