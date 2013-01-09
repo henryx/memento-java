@@ -7,11 +7,8 @@
 package org.memento.client.context;
 
 import flexjson.JSONSerializer;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,56 +38,26 @@ public class Context {
     private void cmdListFile(String directory, boolean acl) throws FileNotFoundException, IOException {
         CommandFile cmd;
         File path;
-        PrintWriter out;
 
-        out = new PrintWriter(this.connection.getOutputStream(), true);
-
-        cmd = new CommandFile();
+        cmd = new CommandFile(this.connection);
         path = new File(directory);
 
-        cmd.setDirectory(directory);
+        cmd.setFile(path);
         cmd.setAcl(acl);
-        cmd.setWriter(out);
 
         if (path.isDirectory()) {
-            cmd.walk(path);
+            cmd.walk();
         } else {
             throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
         }
     }
 
     private void cmdGetFile(String fileName) throws FileNotFoundException, IOException {
-        BufferedInputStream buff;
-        BufferedOutputStream outStream;
-        File data;
-        FileInputStream fis;
-        byte[] buffer;
-        int read;
-
-        data = new File(fileName);
-        buffer = new byte[8192];
-
-        if (!data.exists()) {
-            throw new FileNotFoundException("File not exist");
-        }
-
-        if (data.isDirectory()) {
-            throw new IllegalArgumentException(fileName + " is not a file");
-        }
-
-        fis = new FileInputStream(data);
-        buff = new BufferedInputStream(fis);
-        outStream = new BufferedOutputStream(this.connection.getOutputStream());
-
-        while ((read = buff.read(buffer)) != -1) {
-            outStream.write(buffer, 0, read);
-            outStream.flush();
-        }
-
-        data = null;
-        fis.close();
-        buff.close();
-        outStream.close();
+        CommandFile cmd;
+        
+        cmd = new CommandFile(this.connection);
+        cmd.setFile(new File(fileName));
+        cmd.sendFile();
     }
 
     private void cmdPutFile(String fileName) throws IOException {

@@ -7,10 +7,14 @@
 package org.memento.client.context.commands;
 
 import flexjson.JSONSerializer;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -24,9 +28,13 @@ import org.memento.json.FileAttrs;
  */
 public class CommandFile {
 
-    private String directory;
     private boolean acl;
-    private PrintWriter writer;
+    private File aFile;
+    private Socket connection;
+    
+    public CommandFile(Socket connection) {
+        this.connection = connection;
+    }
 
     private FileAttrs compute(PathName aPath) throws IllegalArgumentException, FileNotFoundException, IOException {
         FileAttrs result;
@@ -57,20 +65,6 @@ public class CommandFile {
     }
 
     /**
-     * @return the directory
-     */
-    public String getDirectory() {
-        return this.directory;
-    }
-
-    /**
-     * @param directory the directory to set
-     */
-    public void setDirectory(String directory) {
-        this.directory = directory;
-    }
-
-    /**
      * @return the acl
      */
     public boolean getAcl() {
@@ -83,37 +77,39 @@ public class CommandFile {
     public void setAcl(boolean acl) {
         this.acl = acl;
     }
-
+    
     /**
-     * @return the writer
+     * @return the aFile
      */
-    public PrintWriter getWriter() {
-        return this.writer;
+    public File getFile() {
+        return this.aFile;
     }
 
     /**
-     * @param writer the writer to set
+     * @param aFile the object to set
      */
-    public void setWriter(PrintWriter writer) {
-        this.writer = writer;
+    public void setFile(File aFile) {
+        this.aFile = aFile;
     }
 
-    public void walk(File path) throws IllegalArgumentException {
+    public void walk() throws IllegalArgumentException, IOException {
         File child;
         FileAttrs data;
         JSONSerializer serializer;
+        PrintWriter writer;
         Stack<File> stack;
 
         stack = new Stack<>();
         serializer = new JSONSerializer();
+        writer = new PrintWriter(this.connection.getOutputStream(), true);
 
-        stack.push(path);
+        stack.push(this.aFile);
         while (!stack.isEmpty()) {
             child = stack.pop();
 
             try {
                 data = this.compute(new PathName(child));
-                this.writer.println(serializer.deepSerialize(data));
+                writer.println(serializer.deepSerialize(data));
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(CommandFile.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -124,6 +120,31 @@ public class CommandFile {
                 for (File f : child.listFiles()) {
                     stack.push(f);
                 }
+            }
+        }
+    }
+
+    public void sendFile() throws FileNotFoundException, IOException {
+        byte[] buffer;
+        int read;
+
+        buffer = new byte[8192];
+
+        if (!this.aFile.exists()) {
+            throw new FileNotFoundException("File not exist");
+        }
+
+        if (this.aFile.isDirectory()) {
+            throw new IllegalArgumentException(this.aFile + " is not a file");
+        }
+
+        try (FileInputStream fis = new FileInputStream(this.aFile);
+                BufferedInputStream buff = new BufferedInputStream(fis);
+                BufferedOutputStream outStream = new BufferedOutputStream(this.connection.getOutputStream());) {
+
+            while ((read = buff.read(buffer)) != -1) {
+                outStream.write(buffer, 0, read);
+                outStream.flush();
             }
         }
     }
