@@ -72,7 +72,7 @@ public class FileOperation implements Operation {
             items = this.dbstore.listItems("directory");
             while (items.hasNext()) {
                 item = items.next();
-                this.fsstore.add(item);
+                this.fsstore.get(item);
             }
             Main.logger.debug("Directory structure created");
 
@@ -85,7 +85,7 @@ public class FileOperation implements Operation {
                 } else {
                     item.setPreviousDataset(Boolean.FALSE);
                 }
-                this.fsstore.add(item);
+                this.fsstore.get(item);
             }
             Main.logger.debug("Files downloaded");
 
@@ -93,7 +93,7 @@ public class FileOperation implements Operation {
             items = this.dbstore.listItems("symlink");
             while (items.hasNext()) {
                 item = items.next();
-                this.fsstore.add(item);
+                this.fsstore.get(item);
             }
             Main.logger.debug("Symlinks created");
         }
