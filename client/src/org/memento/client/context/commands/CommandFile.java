@@ -132,14 +132,6 @@ public class CommandFile {
 
         buffer = new byte[8192];
 
-        if (!this.aFile.exists()) {
-            throw new FileNotFoundException("File not exist");
-        }
-
-        if (this.aFile.isDirectory()) {
-            throw new IllegalArgumentException(this.aFile + " is not a file");
-        }
-
         try (FileInputStream fis = new FileInputStream(this.aFile);
                 BufferedInputStream buff = new BufferedInputStream(fis);
                 BufferedOutputStream outStream = new BufferedOutputStream(this.connection.getOutputStream());) {

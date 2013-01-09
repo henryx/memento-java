@@ -54,9 +54,20 @@ public class Context {
 
     private void cmdSendFile(String fileName) throws FileNotFoundException, IOException {
         CommandFile cmd;
-        
+        File srcFile;
+
         cmd = new CommandFile(this.connection);
-        cmd.setFile(new File(fileName));
+        srcFile = new File(fileName);
+
+        if (!srcFile.exists()) {
+            throw new FileNotFoundException("File not exist");
+        }
+
+        if (srcFile.isDirectory()) {
+            throw new IllegalArgumentException(srcFile + " is not a file");
+        }
+
+        cmd.setFile(srcFile);
         cmd.sendFile();
     }
 
@@ -74,7 +85,7 @@ public class Context {
             bakFile = new File(fileName + "." + Calendar.getInstance().getTimeInMillis());
             Files.move(destFile.toPath(), bakFile.toPath());
         }
-        
+
         if (!parent.exists()) {
             destFile.mkdirs();
         }
