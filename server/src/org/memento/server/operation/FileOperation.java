@@ -136,11 +136,26 @@ public class FileOperation implements Operation {
         this.sendCommand(context);
     }
 
-    private void restore() {
+    private void restore() throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         Context context;
         CommandFile cfile;
 
-        // TODO: write the code
+        context = new Context();
+        cfile = new CommandFile();
+
+        context.setContext(this.cfg.get(this.section, "type"));
+        cfile.setName("put");
+
+        if (!Boolean.getBoolean(this.cfg.get(this.section, "full"))) {
+            cfile.setFilename(this.cfg.get(this.section, "path"));
+        } // TODO: add code for a full restore
+
+        cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
+        context.setCommand(cfile);
+
+        if (context.getContext().equals("file")) {
+            this.fsstore.put(this.dbstore.getFile(((CommandFile) context.getCommand()).getFilename()));
+        }
     }
 
     /**
