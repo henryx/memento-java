@@ -244,4 +244,18 @@ public class DbStorage extends CommonStorage {
             Main.logger.error("Error when opening database for section " + section, ex);
         }
     }
+
+    public FileAttrs getFile(String name) throws SQLException {
+        PreparedStatement query;
+        
+        query = this.conn.prepareStatement("SELECT element,"
+                + " element_os,"
+                + " element_hash,"
+                + " element_link,"
+                + " element_mtime,"
+                + " element_ctime FROM attrs WHERE element = ?");
+        
+        // TODO: write code for extract file's attributes from database
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }
