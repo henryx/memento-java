@@ -45,7 +45,7 @@ public class FileOperation implements Operation {
         this.cfg = cfg;
     }
 
-    private void store(String context, BufferedReader in) throws ClassNotFoundException, SQLException, UnknownHostException, IOException {
+    private void backupFile(String context, BufferedReader in) throws ClassNotFoundException, SQLException, UnknownHostException, IOException {
         FileAttrs inJSON;
         FileAttrs item;
         Iterator<FileAttrs> items;
@@ -117,7 +117,7 @@ public class FileOperation implements Operation {
             out.flush();
 
             Main.logger.debug("About to parse " + command.getContext() + " command");
-            this.store(command.getContext(), in);
+            this.backupFile(command.getContext(), in);
         }
     }
 
