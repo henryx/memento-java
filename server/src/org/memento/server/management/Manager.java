@@ -143,7 +143,7 @@ public class Manager {
             }
             this.remove(dataset);
         } else {
-            dataset = Integer.decode(this.cfg.get("general", "grace"));
+            dataset = Integer.decode(this.cfg.get("general", "dataset"));
         }
 
         Main.logger.info("Dataset processed: " + dataset);
