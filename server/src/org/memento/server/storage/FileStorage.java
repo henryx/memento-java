@@ -98,34 +98,40 @@ public class FileStorage extends CommonStorage {
     }
 
     private void putRemoteFile(File source, String dest) throws UnknownHostException, IOException {
-        // TODO: add code for putting a file to remote system
         Context context;
         CommandFile command;
         JSONSerializer serializer;
-        
+        int read;
+        byte[] buffer = new byte[8192];
+
         context = new Context();
         command = new CommandFile();
         serializer = new JSONSerializer();
-        
+
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
-                InputStream in = conn.getInputStream();
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
-                FileInputStream inFile = new FileInputStream(source);) {
-            
+                FileInputStream inFile = new FileInputStream(source);
+                BufferedInputStream buff = new BufferedInputStream(inFile);
+                BufferedOutputStream outStream = new BufferedOutputStream(conn.getOutputStream());) {
+
             command.setName("put");
             command.setFilename(dest);
-            
+
             context.setContext("file");
             context.setCommand(command);
-            
+
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
-            
-            //TODO write code to send new file
+
+            while ((read = buff.read(buffer)) != -1) {
+                outStream.write(buffer, 0, read);
+                outStream.flush();
+            }
+            // TODO: send file's metadata
         }
     }
-    
+
     /**
      * @param section the section to set
      */
@@ -159,9 +165,9 @@ public class FileStorage extends CommonStorage {
                 break;
         }
     }
-   
+
     public void put(FileAttrs json) throws UnknownHostException, IOException {
-        switch(json.getType()) {
+        switch (json.getType()) {
             case "directory":
                 // TODO: need to create directories?
                 break;
