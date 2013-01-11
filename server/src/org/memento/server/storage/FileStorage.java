@@ -111,8 +111,7 @@ public class FileStorage extends CommonStorage {
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
-                FileInputStream inFile = new FileInputStream(source);
-                BufferedInputStream buff = new BufferedInputStream(inFile);
+                BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
                 BufferedOutputStream outStream = new BufferedOutputStream(conn.getOutputStream());) {
 
             command.setName("put");
