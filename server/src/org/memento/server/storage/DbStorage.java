@@ -47,7 +47,7 @@ public class DbStorage extends CommonStorage {
 
             insert.executeUpdate();
         }
-        
+
         insert.close();
     }
 
@@ -245,17 +245,41 @@ public class DbStorage extends CommonStorage {
         }
     }
 
-    public FileAttrs getFile(String name) throws SQLException {
+    public FileAttrs getFile(String name, boolean acl) throws SQLException {
+        FileAttrs result;
         PreparedStatement query;
-        
+        ResultSet res;
+
+        result = new FileAttrs();
         query = this.conn.prepareStatement("SELECT element,"
                 + " element_os,"
                 + " element_hash,"
                 + " element_link,"
+                + " element_type,"
                 + " element_mtime,"
                 + " element_ctime FROM attrs WHERE element = ?");
+
+        query.setString(1, name);
+        res = query.executeQuery();
+
+        res.next();
+        result.setName(res.getString(1));
+        result.setOs(res.getString(2));
+        result.setHash(res.getString(3));
+        if (!(res.getString(4) == null || res.getString(4).equals(""))) {
+            result.setLinkTo(res.getString(4));
+        }
+        result.setType(res.getString(5));
+        result.setMtime(res.getLong(6));
+        result.setCtime(res.getLong(7));
+
+        res.close();
+        query.close();
         
-        // TODO: write code for extract file's attributes from database
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (acl) {
+            // TODO: Add code for ACL's extraction
+        }
+
+        return result;
     }
 }
