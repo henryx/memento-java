@@ -148,13 +148,12 @@ public class CommandFile {
         int bytesRead = 0;
 
         try (InputStream in = this.connection.getInputStream();
-                PrintWriter out = new PrintWriter(this.connection.getOutputStream(), true);
                 FileOutputStream outFile = new FileOutputStream(this.aFile);) {
 
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
-            out.flush();
+            outFile.flush();
         }
     }
 }
