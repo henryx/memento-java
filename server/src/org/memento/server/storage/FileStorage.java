@@ -70,7 +70,7 @@ public class FileStorage extends CommonStorage {
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
-            out.flush();
+            outFile.flush();
         }
     }
 
