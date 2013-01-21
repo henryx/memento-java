@@ -65,13 +65,13 @@ public class Serve implements AutoCloseable {
 
             if (ex instanceof FileNotFoundException
                     || ex instanceof IllegalArgumentException) {
-                errMsg.put("message", "Context not found");
+                errMsg.put("message", "Context not found: " + ex.getMessage());
             } else if (ex instanceof JSONException) {
-                errMsg.put("message", "JSON value error");
+                errMsg.put("message", "JSON value error: " + ex.getMessage());
             } else if (ex instanceof NullPointerException) {
-                errMsg.put("message", "Buffer error");
+                errMsg.put("message", "Buffer error: " + ex.getMessage());
             } else {
-                errMsg.put("message", "Malformed command");
+                errMsg.put("message", "Malformed command: " + ex.getMessage());
             }
             exit = context.parseError(errMsg);
         }
