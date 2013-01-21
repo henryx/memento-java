@@ -95,7 +95,7 @@ public class Manager {
             pstmt.executeUpdate();
             pstmt.close();
         } catch (SQLException | ClassNotFoundException ex) {
-            Main.logger.error("Problems whe setting last dataset processed");
+            Main.logger.error("Problems whe setting last dataset processed: " + ex.getMessage());
             Main.logger.debug("Problems whe setting last dataset processed", ex);
         }
     }

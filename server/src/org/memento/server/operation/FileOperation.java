@@ -268,16 +268,16 @@ public class FileOperation implements Operation {
                 Main.logger.debug("Post command executed");
             }
         } catch (UnknownHostException ex) {
-            Main.logger.error("Host not found: " + this.section);
+            Main.logger.error("Host not found: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("Host not found: " + this.section, ex);
         } catch (ConnectException ex) {
-            Main.logger.error("Connect error for host: " + this.section);
+            Main.logger.error("Connect error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("Connect error for host: " + this.section, ex);
         } catch (IOException ex) {
-            Main.logger.error("I/O error for host: " + this.section);
+            Main.logger.error("I/O error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("I/O error for host: " + this.section, ex);
         } catch (SQLException | ClassNotFoundException ex) {
-            Main.logger.error("SQL error for host: " + this.section);
+            Main.logger.error("SQL error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("SQL error for host: " + this.section, ex);
         }
     }
