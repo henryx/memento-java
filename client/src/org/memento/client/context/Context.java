@@ -76,10 +76,16 @@ public class Context {
         File destFile;
         File bakFile;
         File parent;
+        HashMap<String, String> result;
+        JSONSerializer serializer;
+        PrintWriter out;
 
         destFile = new File(fileName);
         parent = new File(destFile.getParent());
         cmd = new CommandFile(this.connection);
+        result = new HashMap<>();
+        serializer = new JSONSerializer();
+        out = new PrintWriter(this.connection.getOutputStream(), true);
 
         if (destFile.exists()) {
             bakFile = new File(fileName + "." + Calendar.getInstance().getTimeInMillis());
@@ -91,6 +97,11 @@ public class Context {
         }
 
         cmd.setFile(destFile);
+
+        result.put("context", "restore");
+        result.put("result", "ok");
+
+        out.println(serializer.exclude("*.class").serialize(result));
         cmd.receiveFile();
     }
 

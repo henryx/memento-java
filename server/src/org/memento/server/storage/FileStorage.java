@@ -6,12 +6,14 @@
  */
 package org.memento.server.storage;
 
+import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
@@ -101,6 +103,7 @@ public class FileStorage extends CommonStorage {
         Context context;
         CommandFile command;
         JSONSerializer serializer;
+        HashMap<String, String> response;
         int read;
         byte[] buffer = new byte[8192];
 
@@ -111,6 +114,7 @@ public class FileStorage extends CommonStorage {
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
                 BufferedOutputStream outStream = new BufferedOutputStream(conn.getOutputStream());) {
 
@@ -123,11 +127,15 @@ public class FileStorage extends CommonStorage {
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
 
-            while ((read = buff.read(buffer)) != -1) {
-                outStream.write(buffer, 0, read);
-                outStream.flush();
+            response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
+
+            if (response.get("context").equals("restore") && response.get("result").equals("ok")) {
+                while ((read = buff.read(buffer)) != -1) {
+                    outStream.write(buffer, 0, read);
+                    outStream.flush();
+                }
+                // TODO: send file's metadata
             }
-            // TODO: send file's metadata
         }
     }
 
