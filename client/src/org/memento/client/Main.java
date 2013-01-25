@@ -69,21 +69,21 @@ public class Main {
             this.printHelp(2);
         }
 
-        while (!exit) {
-            try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
-                if (cmd.hasOption("l")) {
-                    serve.setAddress(cmd.getOptionValue("l"));
-                }
-
-                serve.open();
-                exit = serve.listen();
-            } catch (BindException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
-            } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
+            if (cmd.hasOption("l")) {
+                serve.setAddress(cmd.getOptionValue("l"));
             }
+
+            serve.open();
+            while (!exit) {
+                exit = serve.listen();
+            }
+        } catch (BindException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
+        } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
