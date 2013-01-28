@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.FileSystemException;
 import java.sql.SQLException;
 import java.util.Iterator;
 import org.ini4j.Wini;
@@ -273,6 +274,9 @@ public class FileOperation implements Operation {
         } catch (ConnectException ex) {
             Main.logger.error("Connect error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("Connect error for host: " + this.section, ex);
+        } catch (FileSystemException ex) {
+            Main.logger.error("File error for host: " + this.section + ": " + ex.getMessage());
+            Main.logger.debug("File error for host: " + this.section, ex);
         } catch (IOException ex) {
             Main.logger.error("I/O error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("I/O error for host: " + this.section, ex);
