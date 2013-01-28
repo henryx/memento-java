@@ -12,6 +12,8 @@ package org.memento.server.management;
  */
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -154,7 +156,7 @@ public class Manager {
 
                 fsStorage = new FileStorage(this.cfg);
                 dbStorage = new DbStorage(this.cfg);
-                
+
                 fsStorage.setOperationType(mode);
                 dbStorage.setOperationType(mode);
 
@@ -224,7 +226,16 @@ public class Manager {
 
         if (directory.exists()) {
             Main.logger.debug("About to remove " + directory.getAbsolutePath());
-            new Remove().remove(directory);
+            try {
+                new Remove().remove(directory);
+            } catch (DirectoryNotEmptyException ex) {
+                Main.logger.error("Directory " + directory + " is not empty: " + ex.getMessage());
+                Main.logger.debug("Directory " + directory + " is not empty", ex);
+            } catch (FileSystemException ex) {
+                Main.logger.error("Problems when remove old dataset: " + ex.getMessage());
+                Main.logger.debug("Problems when remove old dataset", ex);
+            }
+
             Main.logger.debug("Directory " + directory.getAbsolutePath() + " removed");
         }
     }
