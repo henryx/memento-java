@@ -103,6 +103,9 @@ public class Context {
 
         out.println(serializer.exclude("*.class").serialize(result));
         cmd.receiveFile();
+        out.println(serializer.exclude("*.class").serialize(result));
+        cmd.receiveFileMeta();
+        
     }
 
     public boolean parseFile(HashMap command) throws IOException {
