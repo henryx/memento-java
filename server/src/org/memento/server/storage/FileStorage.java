@@ -93,15 +93,9 @@ public class FileStorage extends CommonStorage {
     }
 
     private void putFile(FileAttrs json) throws UnknownHostException, IOException {
-        File source;
-
-        source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
-        this.putRemoteFile(source, json.getName());
-    }
-
-    private void putRemoteFile(File source, String dest) throws UnknownHostException, IOException {
         Context context;
         CommandFile command;
+        File source;
         JSONSerializer serializer;
         HashMap<String, String> response;
         int read;
@@ -111,6 +105,7 @@ public class FileStorage extends CommonStorage {
         command = new CommandFile();
         serializer = new JSONSerializer();
 
+        source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
@@ -119,7 +114,7 @@ public class FileStorage extends CommonStorage {
                 BufferedOutputStream outStream = new BufferedOutputStream(conn.getOutputStream());) {
 
             command.setName("put");
-            command.setFilename(dest);
+            command.setFilename(json.getName());
 
             context.setContext("file");
             context.setCommand(command);
