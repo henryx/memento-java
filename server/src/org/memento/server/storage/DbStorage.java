@@ -257,7 +257,10 @@ public class DbStorage extends CommonStorage {
                 + " element_link,"
                 + " element_type,"
                 + " element_mtime,"
-                + " element_ctime FROM attrs WHERE element = ?");
+                + " element_ctime,"
+                + " element_perm,"
+                + " element_user,"
+                + " element_group FROM attrs WHERE element = ?");
 
         query.setString(1, name);
         res = query.executeQuery();
@@ -272,6 +275,12 @@ public class DbStorage extends CommonStorage {
         result.setType(res.getString(5));
         result.setMtime(res.getLong(6));
         result.setCtime(res.getLong(7));
+        
+        if (result.getOs().equals("linux")) {
+            result.setPosixPermission(res.getString(8));
+            result.setPosixOwner(res.getString(9));
+            result.setPosixGroup(res.getString(10));
+        }
 
         res.close();
         query.close();
