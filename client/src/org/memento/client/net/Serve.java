@@ -41,7 +41,7 @@ public class Serve implements AutoCloseable {
         HashMap inJSON;
         Socket connection;
 
-        connection = socket.accept();
+        connection = this.socket.accept();
 
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         context = new Context(connection);
