@@ -7,6 +7,8 @@
 
 package org.memento.json.commands;
 
+import org.memento.json.FileAttrs;
+
 /**
  *
  * @author enrico
@@ -17,8 +19,11 @@ public class CommandFile extends Command {
     private String[] directory;
     private boolean acl;
     
-    // For get/put command:
+    // For get/put commands:
     private String filename;
+    
+    // For put command:
+    private FileAttrs attrs;
 
     /**
      * @return the directory
@@ -60,5 +65,19 @@ public class CommandFile extends Command {
      */
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    /**
+     * @return the attrs
+     */
+    public FileAttrs getAttrs() {
+        return attrs;
+    }
+
+    /**
+     * @param attrs the attrs to set
+     */
+    public void setAttrs(FileAttrs attrs) {
+        this.attrs = attrs;
     }
 }
