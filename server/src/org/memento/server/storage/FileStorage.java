@@ -97,8 +97,7 @@ public class FileStorage extends CommonStorage {
         CommandFile command;
         File source;
         JSONSerializer serializer;
-        HashMap<String, String> respOne;
-        HashMap<String, String> respTwo;
+        HashMap<String, String> response;
         int read;
         byte[] buffer = new byte[8192];
 
@@ -116,6 +115,7 @@ public class FileStorage extends CommonStorage {
 
             command.setName("put");
             command.setFilename(json.getName());
+            command.setAttrs(json);
 
             context.setContext("file");
             context.setCommand(command);
@@ -123,19 +123,11 @@ public class FileStorage extends CommonStorage {
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
 
-            respOne = new JSONDeserializer<HashMap>().deserialize(in.readLine());
-
-            if (respOne.get("context").equals("restore") && respOne.get("result").equals("ok")) {
+            response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
+            if (response.get("context").equals("restore") && response.get("result").equals("ok")) {
                 while ((read = buff.read(buffer)) != -1) {
                     outStream.write(buffer, 0, read);
                     outStream.flush();
-                }
-
-                respTwo = new JSONDeserializer<HashMap>().deserialize(in.readLine());
-                if (respTwo.get("context").equals("restore") && respTwo.get("result").equals("ok")) {
-                    out.println(serializer.exclude("*.class").deepSerialize(context));
-                    out.flush();
-                    // TODO: manage file's metadata response?
                 }
             }
         }
