@@ -55,7 +55,7 @@ public class DbStorage extends CommonStorage {
         // TODO: Add more attributes returned by Windows client
         PreparedStatement insert;
 
-        insert = conn.prepareStatement("INSERT INTO attrs"
+        insert = this.conn.prepareStatement("INSERT INTO attrs"
                 + "(element, element_os, element_type, element_mtime, element_ctime, element_hash)"
                 + " VALUES (?, ?, ?, ?, ?, ?)");
 
@@ -73,7 +73,7 @@ public class DbStorage extends CommonStorage {
     private void addPosixAttrs(FileAttrs json) throws SQLException {
         PreparedStatement insert;
 
-        insert = conn.prepareStatement("INSERT INTO attrs"
+        insert = this.conn.prepareStatement("INSERT INTO attrs"
                 + "(element, element_os, element_user, element_group, element_type,"
                 + " element_link, element_mtime, element_ctime, element_hash, element_perm)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -117,7 +117,7 @@ public class DbStorage extends CommonStorage {
             @Override
             public boolean hasNext() {
                 try {
-                    if (res.next()) {
+                    if (this.res.next()) {
                         return true;
                     } else {
                         this.res.close();
