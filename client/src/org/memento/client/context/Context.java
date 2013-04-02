@@ -103,9 +103,6 @@ public class Context {
 
         out.println(serializer.exclude("*.class").serialize(result));
         cmd.receiveFile();
-        out.println(serializer.exclude("*.class").serialize(result));
-        cmd.receiveFileMeta();
-        
     }
 
     public boolean parseFile(HashMap command) throws IOException {
@@ -135,6 +132,7 @@ public class Context {
                 break;
             case "put":
                 this.cmdReceiveFile(command.get("filename").toString());
+                // TODO: Set file's metadata
                 break;
             default:
                 errMsg = new HashMap();
