@@ -156,6 +156,17 @@ public class PathName {
 
         return result;
     }
+    
+    public void setAttrs(FileAttrs attrs) throws IOException {
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            Files.setAttribute(this.path.toPath(), "dos:archive", attrs.getDosArchive());
+            Files.setAttribute(this.path.toPath(), "dos:hidden", attrs.getDosHidden());
+            Files.setAttribute(this.path.toPath(), "dos:readonly", attrs.getDosReadonly());
+            Files.setAttribute(this.path.toPath(), "dos:system", attrs.getDosSystem());
+        } else {
+            // TODO: set POSIX file attributes
+        }
+    }
 
     public ArrayList<FileAcl> getAcl() throws IOException {
         ArrayList<FileAcl> result;
