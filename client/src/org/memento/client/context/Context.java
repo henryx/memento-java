@@ -6,6 +6,7 @@
  */
 package org.memento.client.context;
 
+import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,8 +21,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.memento.PathName;
 import org.memento.client.Main;
 import org.memento.client.context.commands.CommandFile;
+import org.memento.json.FileAttrs;
 
 /**
  *
@@ -104,6 +107,16 @@ public class Context {
         out.println(serializer.exclude("*.class").serialize(result));
         cmd.receiveFile();
     }
+    
+    private void cmdSetAttrs(String attributes) throws IOException {
+        FileAttrs attrs;
+        PathName path;
+
+        attrs = new JSONDeserializer<FileAttrs>().deserialize(attributes, FileAttrs.class);
+        path = new PathName(new File(attrs.getName()));
+
+        path.setAttrs(attrs);
+    }
 
     public boolean parseFile(HashMap command) throws IOException {
         ArrayList paths;
@@ -132,7 +145,7 @@ public class Context {
                 break;
             case "put":
                 this.cmdReceiveFile(command.get("filename").toString());
-                // TODO: Set file's metadata
+                this.cmdSetAttrs(new JSONSerializer().serialize(command.get("attrs")));
                 break;
             default:
                 errMsg = new HashMap();
