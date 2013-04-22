@@ -11,11 +11,16 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Set;
 import org.memento.json.FileAcl;
 import org.memento.json.FileAttrs;
 
@@ -158,13 +163,28 @@ public class PathName {
     }
     
     public void setAttrs(FileAttrs attrs) throws IOException {
+        UserPrincipal posixOwner;
+        GroupPrincipal posixGroup;
+        Set<PosixFilePermission> posixPerms;
+
         if (System.getProperty("os.name").startsWith("Windows")) {
             Files.setAttribute(this.path.toPath(), "dos:archive", attrs.getDosArchive());
             Files.setAttribute(this.path.toPath(), "dos:hidden", attrs.getDosHidden());
             Files.setAttribute(this.path.toPath(), "dos:readonly", attrs.getDosReadonly());
             Files.setAttribute(this.path.toPath(), "dos:system", attrs.getDosSystem());
         } else {
-            // TODO: set POSIX file attributes
+            posixOwner = this.path.toPath().getFileSystem()
+                    .getUserPrincipalLookupService()
+                    .lookupPrincipalByName(attrs.getPosixOwner());
+            posixGroup = this.path.toPath().getFileSystem()
+                    .getUserPrincipalLookupService()
+                    .lookupPrincipalByGroupName(attrs.getPosixGroup());
+            posixPerms = PosixFilePermissions.fromString(attrs.getPosixPermission());
+
+            Files.setOwner(this.path.toPath(), posixOwner);
+            Files.getFileAttributeView(this.path.toPath(), PosixFileAttributeView.class)
+                    .setGroup(posixGroup);
+            Files.setPosixFilePermissions(this.path.toPath(), posixPerms);
         }
     }
 
