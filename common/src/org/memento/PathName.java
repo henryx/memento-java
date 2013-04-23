@@ -3,8 +3,7 @@
  Project       Memento
  Description   A backup system
  License       GPL version 2 (see GPL.txt for details)
-*/
-
+ */
 package org.memento;
 
 import java.io.*;
@@ -77,16 +76,26 @@ public class PathName {
         bri.close();
 
         /*
-        while ((line = bre.readLine()) != null) {
-            System.out.println(line);
-        }
-        bre.close();
-        */
+         while ((line = bre.readLine()) != null) {
+         System.out.println(line);
+         }
+         bre.close();
+         */
 
         p.waitFor();
         //p.exitValue()
 
         return result;
+    }
+
+    private void aclToWindows(ArrayList<FileAcl> acls) {
+        // TODO: write code for storing Windows ACL
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private void aclToLinux(ArrayList<FileAcl> acls) {
+        // TODO: write code for storing Linux ACL
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public String hash() throws NoSuchAlgorithmException, IOException {
@@ -161,7 +170,7 @@ public class PathName {
 
         return result;
     }
-    
+
     public void setAttrs(FileAttrs attrs) throws IOException {
         UserPrincipal posixOwner;
         GroupPrincipal posixGroup;
@@ -202,6 +211,14 @@ public class PathName {
         }
 
         return result;
+    }
+
+    public void setAcl(ArrayList<FileAcl> acls) {
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            this.aclToWindows(acls);
+        } else {
+            this.aclToLinux(acls);
+        }
     }
 
     public boolean isDirectory() throws IllegalArgumentException, FileNotFoundException {
