@@ -37,6 +37,12 @@ public class Main {
                 .withArgName("PORT")
                 .create("p"));
         this.opts.addOption(OptionBuilder
+                .withLongOpt("ssl")
+                .hasArg()
+                .withArgName("KEYSTORE")
+                .withDescription("Enable SSL connection using KEYSTORE as key file")
+                .create("S"));
+        this.opts.addOption(OptionBuilder
                 .withLongOpt("listen")
                 .withDescription("Set listen address")
                 .hasArg()
