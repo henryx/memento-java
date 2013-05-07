@@ -17,6 +17,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 import org.memento.client.context.Context;
 
 /**
@@ -87,6 +90,24 @@ public class Serve implements AutoCloseable {
             this.socket = new ServerSocket();
             this.socket.bind(new InetSocketAddress(this.address, this.port));
         }
+    }
+    
+    public void open(boolean ssl) throws IOException {
+        ServerSocketFactory factory;
+        SSLServerSocket socketSSL;
+        
+        factory = SSLServerSocketFactory.getDefault();
+        
+        if (this.address == null) {
+            socketSSL = (SSLServerSocket)factory.createServerSocket(this.port);
+            socketSSL.setNeedClientAuth(true);
+        } else {
+            socketSSL = (SSLServerSocket)factory.createServerSocket();
+            socketSSL.bind(new InetSocketAddress(this.address, this.port));
+            socketSSL.setNeedClientAuth(true);
+        }
+        
+        this.socket = socketSSL;
     }
 
     @Override
