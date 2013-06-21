@@ -13,6 +13,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.SSLException;
 import org.apache.commons.cli.*;
 import org.memento.client.net.Serve;
 
@@ -73,25 +74,28 @@ public class Main {
             this.printHelp(2);
         }
 
-        try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
-            if (cmd.hasOption("l")) {
-                serve.setAddress(cmd.getOptionValue("l"));
-            }
+        while (!exit) {
+            try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
+                if (cmd.hasOption("l")) {
+                    serve.setAddress(cmd.getOptionValue("l"));
+                }
 
-            if (cmd.hasOption("S")) {
-                serve.open(true);
-            } else {
-                serve.open(false);
-            }
-            while (!exit) {
+                if (cmd.hasOption("S")) {
+                    serve.open(true);
+                } else {
+                    serve.open(false);
+                }
                 exit = serve.listen();
+
+            } catch (BindException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
+            } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SSLException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (BindException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
-        } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
