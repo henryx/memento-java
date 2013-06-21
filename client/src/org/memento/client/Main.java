@@ -38,9 +38,7 @@ public class Main {
                 .create("p"));
         this.opts.addOption(OptionBuilder
                 .withLongOpt("ssl")
-                .hasArg()
-                .withArgName("KEYSTORE")
-                .withDescription("Enable SSL connection using KEYSTORE as key file")
+                .withDescription("Enable SSL connection")
                 .create("S"));
         this.opts.addOption(OptionBuilder
                 .withLongOpt("listen")
@@ -80,7 +78,11 @@ public class Main {
                 serve.setAddress(cmd.getOptionValue("l"));
             }
 
-            serve.open();
+            if (cmd.hasOption("S")) {
+                serve.open(true);
+            } else {
+                serve.open(false);
+            }
             while (!exit) {
                 exit = serve.listen();
             }

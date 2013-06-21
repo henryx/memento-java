@@ -83,31 +83,30 @@ public class Serve implements AutoCloseable {
         return exit;
     }
 
-    public void open() throws IOException {
-        if (this.address == null) {
-            this.socket = new ServerSocket(this.port);
-        } else {
-            this.socket = new ServerSocket();
-            this.socket.bind(new InetSocketAddress(this.address, this.port));
-        }
-    }
-    
     public void open(boolean ssl) throws IOException {
         ServerSocketFactory factory;
         SSLServerSocket socketSSL;
-        
-        factory = SSLServerSocketFactory.getDefault();
-        
-        if (this.address == null) {
-            socketSSL = (SSLServerSocket)factory.createServerSocket(this.port);
+
+        if (ssl) {
+            factory = SSLServerSocketFactory.getDefault();
+
+            if (this.address == null) {
+                socketSSL = (SSLServerSocket) factory.createServerSocket(this.port);
+            } else {
+                socketSSL = (SSLServerSocket) factory.createServerSocket();
+                socketSSL.bind(new InetSocketAddress(this.address, this.port));
+            }
             socketSSL.setNeedClientAuth(true);
+
+            this.socket = socketSSL;
         } else {
-            socketSSL = (SSLServerSocket)factory.createServerSocket();
-            socketSSL.bind(new InetSocketAddress(this.address, this.port));
-            socketSSL.setNeedClientAuth(true);
+            if (this.address == null) {
+                this.socket = new ServerSocket(this.port);
+            } else {
+                this.socket = new ServerSocket();
+                this.socket.bind(new InetSocketAddress(this.address, this.port));
+            }
         }
-        
-        this.socket = socketSSL;
     }
 
     @Override
