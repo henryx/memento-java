@@ -91,8 +91,6 @@ public class Main {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
             } catch (IllegalArgumentException | SocketException | UnknownHostException | NullPointerException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SSLException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }

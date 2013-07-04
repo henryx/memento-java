@@ -18,6 +18,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import org.memento.client.context.Context;
@@ -76,6 +77,10 @@ public class Serve implements AutoCloseable {
             } else {
                 errMsg.put("message", "Malformed command: " + ex.getMessage());
             }
+            exit = context.parseError(errMsg);
+        } catch (SSLException ex) {
+            errMsg = new HashMap();
+            errMsg.put("message", "Non SSL Connection: " + ex.getMessage());
             exit = context.parseError(errMsg);
         }
         connection.close();
