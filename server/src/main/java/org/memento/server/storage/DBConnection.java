@@ -17,42 +17,33 @@ import java.util.Iterator;
  */
 public class DBConnection {
 
-    private static DBConnection instance;
-    private static HashMap<String, Connection> connections;
+    private Connection conn;
 
-    private DBConnection() {
-        DBConnection.connections = new HashMap<>();
+    public DBConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
+        this.openConnection(params);
+
+        if (!this.checkSchemaExist()) {
+            this.createSchema();
+        }
     }
 
-    private void openConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
-        Connection conn;
-        Statement statement;
-        String sep;
+    private void openConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
         String url;
 
-        sep = System.getProperty("file.separator");
+        url = "jdbc:postgresql://" + params.get("host") + ":" + params.get("port") + "/" + params.get("dbname");
 
-        url = "jdbc:sqlite:" + dbLocation + sep + ".store.db";
-
-        Class.forName("org.sqlite.JDBC");
-        conn = DriverManager.getConnection(url);
-
-        statement = conn.createStatement();
-        statement.execute("PRAGMA synchronous = OFF;");
-        statement.execute("PRAGMA journal_mode = WAL;");
-        statement.close();
-
-        conn.setAutoCommit(Boolean.FALSE);
-        DBConnection.connections.put(area, conn);
+        Class.forName("org.postgresql.Driver");
+        this.conn = DriverManager.getConnection(url, params.get("user"), params.get("password"));
+        this.conn.setAutoCommit(Boolean.FALSE);
     }
 
-    private Boolean checkSchemaExist(String area) throws SQLException {
+    private Boolean checkSchemaExist() throws SQLException {
         DatabaseMetaData dbmd;
         ResultSet res;
         int counter;
 
         counter = 0;
-        dbmd = DBConnection.connections.get(area).getMetaData();
+        dbmd = this.conn.getMetaData();
 
         res = dbmd.getTables(null, null, null, new String[]{"TABLE"});
         while (res.next()) {
@@ -66,53 +57,53 @@ public class DBConnection {
         }
     }
 
-    private void createSchema(String area) throws SQLException {
+    private void createSchema() throws SQLException {
         Statement stmt;
         String[] data;
         String[] index;
         String[] tables;
 
-        if (!area.equals("system")) {
-            data = new String[]{}; // In non-system area, data is empty
-            index = new String[]{
-                "CREATE INDEX idx_store_1 ON attrs(element,"
-                + " element_hash)",
-                "CREATE INDEX idx_store_2 ON attrs(element_type)"
-            };
-            tables = new String[]{
-                "CREATE TABLE attrs (element VARCHAR(1024),"
-                    + " element_os VARCHAR(32),"
-                    + " element_user VARCHAR(50),"
-                    + " element_group VARCHAR(50),"
-                    + " element_type VARCHAR(9),"
-                    + " element_link VARCHAR(1024),"
-                    + " element_hash VARCHAR(32),"
-                    + " element_perm VARCHAR(32),"
-                    + " element_mtime INTEGER,"
-                    + " element_ctime INTEGER)",
-                "CREATE TABLE acls (element VARCHAR(1024),"
-                    + " name VARCHAR(50),"
-                    + " type VARCHAR(5),"
-                    + " perms VARCHAR(3))"
-            };
-        } else {
-            data = new String[]{
-                "INSERT INTO status VALUES('hour', 0, current_timestamp)",
-                "INSERT INTO status VALUES('day', 0, current_timestamp)",
-                "INSERT INTO status VALUES('week', 0, current_timestamp)",
-                "INSERT INTO status VALUES('month', 0, current_timestamp)"
-            };
+        index = new String[]{
+            "CREATE INDEX idx_store_1 ON attrs(area, grace, dataset)",
+            "CREATE INDEX idx_store_2 ON attrs(area, grace, dataset, element, hash)",
+            "CREATE INDEX idx_store_3 ON attrs(area, grace, dataset, type)"
+        };
+        tables = new String[]{
+            "CREATE TABLE status ("
+            + "grace VARCHAR(5),"
+            + " actual INTEGER,"
+            + " last_run TIMESTAMP)",
+            "CREATE TABLE attrs ("
+            + "area VARCHAR(30),"
+            + " grace VARCHAR(5),"
+            + " dataset INTEGER,"
+            + " element VARCHAR(1024),"
+            + " os VARCHAR(32),"
+            + " username VARCHAR(50),"
+            + " groupname VARCHAR(50),"
+            + " type VARCHAR(9),"
+            + " link VARCHAR(1024),"
+            + " hash VARCHAR(32),"
+            + " perms VARCHAR(32),"
+            + " mtime INTEGER,"
+            + " ctime INTEGER)",
+            "CREATE TABLE acls ("
+            + "area VARCHAR(30),"
+            + " grace VARCHAR(5),"
+            + " dataset INTEGER,"
+            + " element VARCHAR(1024),"
+            + " name VARCHAR(50),"
+            + " type VARCHAR(5),"
+            + " perms VARCHAR(3))"
+        };
+        data = new String[]{
+            "INSERT INTO status VALUES('hour', 0, now())",
+            "INSERT INTO status VALUES('day', 0, now())",
+            "INSERT INTO status VALUES('week', 0, now())",
+            "INSERT INTO status VALUES('month', 0, now())"
+        };
 
-            index = new String[]{}; // In system area, index is empty
-
-            tables = new String[]{
-                "CREATE TABLE status (grace VARCHAR(5),"
-                + " actual INTEGER,"
-                + " last_run TIMESTAMP)"
-            };
-        }
-
-        stmt = DBConnection.connections.get(area).createStatement();
+        stmt = this.conn.createStatement();
 
         for (String item : tables) {
             stmt.executeUpdate(item);
@@ -125,62 +116,19 @@ public class DBConnection {
         for (String item : data) {
             stmt.executeUpdate(item);
         }
-        
+
         stmt.close();
     }
 
-    public Connection getConnection(String area, String dbLocation) throws SQLException, ClassNotFoundException {
-
-        if (!DBConnection.connections.containsKey(area)) {
-            this.openConnection(area, dbLocation);
-        }
-
-        if (!this.checkSchemaExist(area)) {
-            this.createSchema(area);
-        }
-
-        return DBConnection.connections.get(area);
+    public Connection getConnection() throws SQLException, ClassNotFoundException {
+        return this.conn;
     }
 
-    public static DBConnection getInstance() {
-        if (instance == null) {
-            instance = new DBConnection();
+    public void closeConnection(Boolean commit) throws SQLException {
+        if (commit) {
+            this.conn.commit();
         }
 
-        return instance;
-    }
-
-    public ArrayList<String> getAreaList() {
-        Iterator it;
-        ArrayList<String> keys;
-
-
-        keys = new ArrayList<>();
-
-        it = DBConnection.connections.keySet().iterator();
-
-        while (it.hasNext()) {
-            keys.add(it.next().toString());
-        }
-
-        return keys;
-    }
-
-    public void closeConnection(String area, Boolean commit) throws SQLException {
-        Connection conn;
-        Statement stmt;
-
-        if (DBConnection.connections.containsKey(area)) {
-            conn = DBConnection.connections.get(area);
-            if (commit) {
-                conn.commit();
-             }
-            conn.setAutoCommit(true);
-
-            stmt = conn.createStatement();
-            stmt.execute("VACUUM");
-            
-            conn.close();
-        }
+        conn.close();
     }
 }
