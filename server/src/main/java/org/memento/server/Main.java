@@ -154,14 +154,6 @@ public class Main {
             manage.exec("restore");
         }
 
-        try {
-            Main.logger.debug("Closing all connections");
-            for (String item : DBConnection.getInstance().getAreaList()) {
-                DBConnection.getInstance().closeConnection(item, Boolean.TRUE);
-            }
-        } catch (SQLException ex) {
-        }
-
         Main.logger.info("Ended version " + VERSION);
     }
 
