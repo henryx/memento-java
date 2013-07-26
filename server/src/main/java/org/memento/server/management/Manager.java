@@ -15,10 +15,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -31,12 +31,20 @@ import org.memento.server.storage.FileStorage;
 
 public class Manager {
 
+    private HashMap<String, String> connData;
     private String grace;
-    private boolean reload;
     private Wini cfg;
+    private boolean reload;
 
     public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
+        
+        this.connData = new HashMap<>();
+        this.connData.put("host", this.cfg.get("database", "host"));
+        this.connData.put("port", this.cfg.get("database", "port"));
+        this.connData.put("dbname", this.cfg.get("database", "dbname"));
+        this.connData.put("user", this.cfg.get("database", "user"));
+        this.connData.put("password", this.cfg.get("database", "password"));
     }
 
     private Operation compute(String name) {
@@ -54,16 +62,15 @@ public class Manager {
 
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
-        Connection conn;
+        DBConnection dbm;
         Integer result;
         PreparedStatement pstmt;
         ResultSet res;
         final String SELECT = "SELECT actual FROM status WHERE grace = ?";
-
+        
         try {
-            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
-
-            pstmt = conn.prepareStatement(SELECT);
+            dbm = new DBConnection(this.connData);
+            pstmt = dbm.getConnection().prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
 
             res = pstmt.executeQuery();
@@ -73,6 +80,7 @@ public class Manager {
 
             res.close();
             pstmt.close();
+            dbm.closeConnection(false);
         } catch (SQLException | ClassNotFoundException ex) {
             Main.logger.debug("Problems to retrieve last dataset processed: ", ex);
             result = 0;
@@ -83,19 +91,20 @@ public class Manager {
 
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private void setLastDataset(Integer dataset) {
-        Connection conn;
+        DBConnection dbm;
         PreparedStatement pstmt;
         final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
 
         try {
-            conn = DBConnection.getInstance().getConnection("system", this.cfg.get("general", "repository"));
+            dbm = new DBConnection(this.connData);
 
-            pstmt = conn.prepareStatement(UPDATE);
+            pstmt = dbm.getConnection().prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
 
             pstmt.executeUpdate();
             pstmt.close();
+            dbm.closeConnection(true);
         } catch (SQLException | ClassNotFoundException ex) {
             Main.logger.error("Problems whe setting last dataset processed: " + ex.getMessage());
             Main.logger.debug("Problems whe setting last dataset processed", ex);
@@ -151,7 +160,7 @@ public class Manager {
         Main.logger.info("Dataset processed: " + dataset);
 
         for (String section : this.cfg.keySet()) {
-            if (!(section.equals("general") || section.equals("dataset"))) {
+            if (!(section.equals("general") || section.equals("dataset") || section.equals("database"))) {
                 Main.logger.info("About to execute section " + section);
 
                 fsStorage = new FileStorage(this.cfg);
