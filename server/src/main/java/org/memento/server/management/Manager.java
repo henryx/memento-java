@@ -62,14 +62,13 @@ public class Manager {
 
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
-        DBConnection dbm;
+        
         Integer result;
         PreparedStatement pstmt;
         ResultSet res;
         final String SELECT = "SELECT actual FROM status WHERE grace = ?";
         
-        try {
-            dbm = new DBConnection(this.connData);
+        try(DBConnection dbm = new DBConnection(this.connData, true)) {
             pstmt = dbm.getConnection().prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
 
@@ -80,7 +79,6 @@ public class Manager {
 
             res.close();
             pstmt.close();
-            dbm.closeConnection(false);
         } catch (SQLException | ClassNotFoundException ex) {
             Main.logger.debug("Problems to retrieve last dataset processed: ", ex);
             result = 0;
@@ -91,20 +89,16 @@ public class Manager {
 
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private void setLastDataset(Integer dataset) {
-        DBConnection dbm;
         PreparedStatement pstmt;
         final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
 
-        try {
-            dbm = new DBConnection(this.connData);
-
+        try(DBConnection dbm = new DBConnection(this.connData, true)) {
             pstmt = dbm.getConnection().prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
 
             pstmt.executeUpdate();
             pstmt.close();
-            dbm.closeConnection(true);
         } catch (SQLException | ClassNotFoundException ex) {
             Main.logger.error("Problems whe setting last dataset processed: " + ex.getMessage());
             Main.logger.debug("Problems whe setting last dataset processed", ex);
@@ -133,7 +127,7 @@ public class Manager {
         return this.reload;
     }
 
-    public void exec(String mode) throws IOException {
+    public void exec(String mode) throws IOException, SQLException, ClassNotFoundException {
         Integer dataset;
         Operation operation;
         FileStorage fsStorage;

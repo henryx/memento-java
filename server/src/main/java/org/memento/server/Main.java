@@ -88,7 +88,7 @@ public class Main {
         System.exit(0);
     }
 
-    public void go(String[] args) throws ParseException, IOException {
+    public void go(String[] args) throws ParseException, IOException, SQLException, ClassNotFoundException {
         CommandLine cmd;
         CommandLineParser parser;
         Manager manage;
@@ -168,7 +168,7 @@ public class Main {
 
         try {
             m.go(args);
-        } catch (ParseException | IOException ex) {
+        } catch (ParseException | IOException | SQLException | ClassNotFoundException ex) {
             Main.logger.fatal(ex);
             System.exit(2);
         }

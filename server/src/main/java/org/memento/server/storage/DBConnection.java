@@ -7,24 +7,25 @@
 package org.memento.server.storage;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  *
  * @author enrico
  */
-public class DBConnection {
+public class DBConnection implements AutoCloseable {
 
     private Connection conn;
+    private boolean commit;
 
-    public DBConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
+    public DBConnection(HashMap<String, String> params, boolean commit) throws SQLException, ClassNotFoundException {
         this.openConnection(params);
 
         if (!this.checkSchemaExist()) {
             this.createSchema();
         }
+
+        this.commit = commit;
     }
 
     private void openConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
@@ -124,11 +125,11 @@ public class DBConnection {
         return this.conn;
     }
 
-    public void closeConnection(Boolean commit) throws SQLException {
-        if (commit) {
+    @Override
+    public void close() throws SQLException {
+        if (this.commit) {
             this.conn.commit();
         }
-
-        conn.close();
+        this.conn.close();
     }
 }

@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import org.ini4j.Wini;
 import org.memento.json.FileAcl;
@@ -26,29 +27,43 @@ import org.memento.server.Main;
 public class DbStorage extends CommonStorage {
 
     private Connection conn;
-    private Connection oldConn;
 
-    public DbStorage(Wini cfg) {
+    public DbStorage(Wini cfg) throws SQLException, ClassNotFoundException {
         super(cfg);
+        
+        HashMap<String, String> connData;
+        
+        connData = new HashMap<>();
+        connData.put("host", this.cfg.get("database", "host"));
+        connData.put("port", this.cfg.get("database", "port"));
+        connData.put("dbname", this.cfg.get("database", "dbname"));
+        connData.put("user", this.cfg.get("database", "user"));
+        connData.put("password", this.cfg.get("database", "password"));        
+        
+        this.conn = new DBConnection(connData, true).getConnection();
     }
 
     private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {
         PreparedStatement insert;
 
         insert = this.conn.prepareStatement("INSERT INTO acls"
-                + "(element, name, type, perms)"
-                + " VALUES(?, ?, ?, ?)");
+                + "(area, grace, dataset, element, name, type, perms)"
+                + " VALUES(?, ?, ?, ?, ?, ?, ?)");
 
         for (FileAcl acl : acls) {
-            insert.setString(1, element);
-            insert.setString(2, acl.getName());
-            insert.setString(3, acl.getAclType());
-            insert.setString(4, acl.getAttrs());
+            insert.setString(1, this.getSection());
+            insert.setString(2, this.getGrace());
+            insert.setInt(3, this.getDataset());
+            insert.setString(4, element);
+            insert.setString(5, acl.getName());
+            insert.setString(6, acl.getAclType());
+            insert.setString(7, acl.getAttrs());
 
             insert.executeUpdate();
         }
 
         insert.close();
+        this.conn.commit();
     }
 
     private void addDosAttrs(FileAttrs json) throws SQLException {
@@ -56,45 +71,55 @@ public class DbStorage extends CommonStorage {
         PreparedStatement insert;
 
         insert = this.conn.prepareStatement("INSERT INTO attrs"
-                + "(element, element_os, element_type, element_mtime, element_ctime, element_hash)"
-                + " VALUES (?, ?, ?, ?, ?, ?)");
+                + "(area, grace, dataset, element, os, type, mtime, ctime, hash)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        insert.setString(1, json.getName());
-        insert.setString(2, json.getOs());
-        insert.setString(3, json.getType());
-        insert.setLong(4, json.getMtime());
-        insert.setLong(5, json.getCtime());
-        insert.setString(6, json.getHash());
+        insert.setString(1, this.getSection());
+        insert.setString(2, this.getGrace());
+        insert.setInt(3, this.getDataset());
+        insert.setString(4, json.getName());
+        insert.setString(5, json.getOs());
+        insert.setString(6, json.getType());
+        insert.setLong(7, json.getMtime());
+        insert.setLong(8, json.getCtime());
+        insert.setString(9, json.getHash());
 
         insert.executeUpdate();
         insert.close();
+        
+        this.conn.commit();
     }
 
     private void addPosixAttrs(FileAttrs json) throws SQLException {
         PreparedStatement insert;
 
         insert = this.conn.prepareStatement("INSERT INTO attrs"
-                + "(element, element_os, element_user, element_group, element_type,"
-                + " element_link, element_mtime, element_ctime, element_hash, element_perm)"
+                + "(area, grace, dataset, element, os, username, groupname, type,"
+                + " link, mtime, ctime, hash, perm)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        insert.setString(1, json.getName());
-        insert.setString(2, json.getOs());
-        insert.setString(3, json.getPosixOwner());
-        insert.setString(4, json.getPosixGroup());
-        insert.setString(5, json.getType());
+        insert.setString(1, this.getSection());
+        insert.setString(2, this.getGrace());
+        insert.setInt(3, this.getDataset());
+        insert.setString(4, json.getName());
+        insert.setString(5, json.getOs());
+        insert.setString(6, json.getPosixOwner());
+        insert.setString(7, json.getPosixGroup());
+        insert.setString(8, json.getType());
         if (json.getPosixSymlink()) {
-            insert.setString(6, json.getLinkTo());
+            insert.setString(9, json.getLinkTo());
         } else {
-            insert.setNull(6, Types.VARCHAR);
+            insert.setNull(9, Types.VARCHAR);
         }
-        insert.setLong(7, json.getMtime());
-        insert.setLong(8, json.getCtime());
-        insert.setString(9, json.getHash());
-        insert.setString(10, json.getPosixPermission());
+        insert.setLong(10, json.getMtime());
+        insert.setLong(11, json.getCtime());
+        insert.setString(12, json.getHash());
+        insert.setString(13, json.getPosixPermission());
 
         insert.executeUpdate();
         insert.close();
+        
+        this.conn.commit();
     }
 
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
@@ -169,13 +194,17 @@ public class DbStorage extends CommonStorage {
         ResultSet res;
 
         query = this.conn.prepareStatement("SELECT element,"
-                + " element_os,"
-                + " element_hash,"
-                + " element_link,"
-                + " element_mtime,"
-                + " element_ctime FROM attrs WHERE element_type = ?");
+                + " os,"
+                + " hash,"
+                + " link,"
+                + " mtime,"
+                + " ctime FROM attrs WHERE type = ?"
+                + "AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, itemType);
+        query.setString(2, this.getSection());
+        query.setString(3, this.getGrace());
+        query.setInt(4, this.getDataset());
         res = query.executeQuery();
 
         result = new DbItems();
@@ -189,17 +218,16 @@ public class DbStorage extends CommonStorage {
     public Boolean isItemExist(FileAttrs json) {
         ResultSet res;
 
-        if (!(this.oldConn instanceof Connection)) {
-            return Boolean.FALSE;
-        }
-
         res = null;
-
-        try (PreparedStatement select = this.oldConn.prepareStatement("SELECT count(*) FROM attrs"
-                        + " WHERE element = ? AND element_hash = ?")) {
+        try (PreparedStatement select = this.conn.prepareStatement("SELECT count(*) FROM attrs"
+                        + " WHERE element = ? AND hash = ?"
+                        + "AND area = ? AND grace = ? AND dataset = ?")) {
 
             select.setString(1, json.getName());
             select.setString(2, json.getHash());
+            select.setString(3, this.getSection());
+            select.setString(4, this.getGrace());
+            select.setInt(5, this.getDataset() - 1);
 
             res = select.executeQuery();
             res.next();
@@ -223,28 +251,6 @@ public class DbStorage extends CommonStorage {
         }
     }
 
-    /**
-     * @param section the section to set
-     */
-    @Override
-    public void setSection(String section) {
-        this.section = section;
-
-        try {
-            this.conn = DBConnection.getInstance().getConnection("cur_" + this.section,
-                    this.returnStructure(Boolean.FALSE));
-
-            if (this.getOperationType().equals("sync")) {
-                if (new File(this.returnStructure(Boolean.TRUE)).exists()) {
-                    this.oldConn = DBConnection.getInstance().getConnection("old_" + this.section,
-                            this.returnStructure(Boolean.TRUE));
-                }
-            }
-        } catch (SQLException | ClassNotFoundException ex) {
-            Main.logger.error("Error when opening database for section " + section, ex);
-        }
-    }
-
     public FileAttrs getFile(String name, boolean acl) throws SQLException {
         FileAttrs result;
         PreparedStatement query;
@@ -252,17 +258,21 @@ public class DbStorage extends CommonStorage {
 
         result = new FileAttrs();
         query = this.conn.prepareStatement("SELECT element,"
-                + " element_os,"
-                + " element_hash,"
-                + " element_link,"
-                + " element_type,"
-                + " element_mtime,"
-                + " element_ctime,"
-                + " element_perm,"
-                + " element_user,"
-                + " element_group FROM attrs WHERE element = ?");
+                + " os,"
+                + " hash,"
+                + " link,"
+                + " type,"
+                + " mtime,"
+                + " ctime,"
+                + " perm,"
+                + " username,"
+                + " groupname FROM attrs WHERE element = ?"
+                + "AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, name);
+        query.setString(2, this.getSection());
+        query.setString(3, this.getGrace());
+        query.setInt(4, this.getDataset());
         res = query.executeQuery();
 
         res.next();
