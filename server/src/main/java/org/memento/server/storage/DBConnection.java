@@ -86,8 +86,8 @@ public class DBConnection implements AutoCloseable {
             + " link VARCHAR(1024),"
             + " hash VARCHAR(32),"
             + " perms VARCHAR(32),"
-            + " mtime INTEGER,"
-            + " ctime INTEGER)",
+            + " mtime NUMERIC,"
+            + " ctime NUMERIC)",
             "CREATE TABLE acls ("
             + "area VARCHAR(30),"
             + " grace VARCHAR(5),"
