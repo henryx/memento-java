@@ -19,13 +19,13 @@ public class DBConnection implements AutoCloseable {
     private boolean autocommit;
 
     public DBConnection(HashMap<String, String> params, boolean autocommit) throws SQLException, ClassNotFoundException {
+        this.autocommit = autocommit;
+
         this.openConnection(params);
 
         if (!this.checkSchemaExist()) {
             this.createSchema();
         }
-
-        this.autocommit = autocommit;
     }
 
     private void openConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
@@ -119,6 +119,9 @@ public class DBConnection implements AutoCloseable {
         }
 
         stmt.close();
+        
+        // For security, force commit
+        this.conn.commit();
     }
 
     public Connection getConnection() throws SQLException, ClassNotFoundException {
