@@ -121,7 +121,9 @@ public class DBConnection implements AutoCloseable {
         stmt.close();
         
         // For security, force commit
-        this.conn.commit();
+        if (!this.conn.getAutoCommit()) {
+            this.conn.commit();
+        }
     }
 
     public Connection getConnection() throws SQLException, ClassNotFoundException {
