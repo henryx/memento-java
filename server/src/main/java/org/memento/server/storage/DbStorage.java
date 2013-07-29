@@ -95,8 +95,8 @@ public class DbStorage extends CommonStorage {
 
         insert = this.conn.prepareStatement("INSERT INTO attrs"
                 + "(area, grace, dataset, element, os, username, groupname, type,"
-                + " link, mtime, ctime, hash, perm)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                + " link, mtime, ctime, hash, perms)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, this.getSection());
         insert.setString(2, this.getGrace());
