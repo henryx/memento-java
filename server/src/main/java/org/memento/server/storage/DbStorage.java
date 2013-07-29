@@ -40,7 +40,7 @@ public class DbStorage extends CommonStorage {
         connData.put("user", this.cfg.get("database", "user"));
         connData.put("password", this.cfg.get("database", "password"));        
         
-        this.conn = new DBConnection(connData, true).getConnection();
+        this.conn = new DBConnection(connData, false).getConnection();
     }
 
     private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {

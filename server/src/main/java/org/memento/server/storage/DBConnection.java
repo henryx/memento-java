@@ -16,16 +16,16 @@ import java.util.HashMap;
 public class DBConnection implements AutoCloseable {
 
     private Connection conn;
-    private boolean commit;
+    private boolean autocommit;
 
-    public DBConnection(HashMap<String, String> params, boolean commit) throws SQLException, ClassNotFoundException {
+    public DBConnection(HashMap<String, String> params, boolean autocommit) throws SQLException, ClassNotFoundException {
         this.openConnection(params);
 
         if (!this.checkSchemaExist()) {
             this.createSchema();
         }
 
-        this.commit = commit;
+        this.autocommit = autocommit;
     }
 
     private void openConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
@@ -35,7 +35,7 @@ public class DBConnection implements AutoCloseable {
 
         Class.forName("org.postgresql.Driver");
         this.conn = DriverManager.getConnection(url, params.get("user"), params.get("password"));
-        this.conn.setAutoCommit(Boolean.FALSE);
+        this.conn.setAutoCommit(this.autocommit);
     }
 
     private Boolean checkSchemaExist() throws SQLException {
@@ -127,9 +127,6 @@ public class DBConnection implements AutoCloseable {
 
     @Override
     public void close() throws SQLException {
-        if (this.commit) {
-            this.conn.commit();
-        }
         this.conn.close();
     }
 }
