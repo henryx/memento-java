@@ -38,7 +38,7 @@ public class Manager {
 
     public Manager(Wini cfg) throws IOException {
         this.cfg = cfg;
-        
+
         this.connData = new HashMap<>();
         this.connData.put("host", this.cfg.get("database", "host"));
         this.connData.put("port", this.cfg.get("database", "port"));
@@ -62,13 +62,13 @@ public class Manager {
 
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private Integer getLastDataset() {
-        
+
         Integer result;
         PreparedStatement pstmt;
         ResultSet res;
         final String SELECT = "SELECT actual FROM status WHERE grace = ?";
-        
-        try(DBConnection dbm = new DBConnection(this.connData, true)) {
+
+        try (DBConnection dbm = new DBConnection(this.connData, true)) {
             pstmt = dbm.getConnection().prepareStatement(SELECT);
             pstmt.setString(1, this.grace);
 
@@ -92,7 +92,7 @@ public class Manager {
         PreparedStatement pstmt;
         final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
 
-        try(DBConnection dbm = new DBConnection(this.connData, true)) {
+        try (DBConnection dbm = new DBConnection(this.connData, true)) {
             pstmt = dbm.getConnection().prepareStatement(UPDATE);
             pstmt.setInt(1, dataset);
             pstmt.setString(2, this.grace);
@@ -217,9 +217,29 @@ public class Manager {
         }
 
         File directory;
+        PreparedStatement pstmt;
         String sep;
+        String[] delete;
 
         sep = System.getProperty("file.separator");
+        delete = new String[]{
+            "DELETE FROM attrs WHERE dataset = ?",
+            "DELETE FROM acls WHERE dataset = ?"
+        };
+
+        try (DBConnection dbm = new DBConnection(this.connData, true);) {
+
+            for (String item : delete) {
+                pstmt = dbm.getConnection().prepareStatement(item);
+                pstmt.setInt(1, dataset);
+                pstmt.execute();
+
+                pstmt.close();
+            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            Main.logger.error("Could not remove dataset: " + ex.getMessage());
+            Main.logger.debug("Could not remove dataset: ", ex);
+        }
 
         directory = new File(this.cfg.get("general", "repository")
                 + sep
