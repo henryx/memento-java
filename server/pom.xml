@@ -86,11 +86,9 @@
             <artifactId>postgresql</artifactId>
             <version>9.2-1003-jdbc4</version>
         </dependency>
-            
-            
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>memento-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
