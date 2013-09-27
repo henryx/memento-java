@@ -34,16 +34,26 @@ public class FileStorage extends CommonStorage {
         File source;
         File dest;
 
-        dest = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
-        if (!json.getPreviousDataset()) {
-            this.getRemoteFile(json.getName(), dest);
+        if (json.isCompressed()) {
+            dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
         } else {
-            source = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
+            dest = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
+        }
+
+        if (!json.getPreviousDataset()) {
+            this.getRemoteFile(json.getName(), dest, json.isCompressed());
+        } else {
+            if (json.isCompressed()) {
+                source = this.fileFromOS(this.returnStructure(true) + json.getName() + ".compressed", json.getOs());
+            } else {
+                source = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
+            }
+
             Files.createLink(dest.toPath(), source.toPath());
         }
     }
 
-    private void getRemoteFile(String source, File dest) throws UnknownHostException, IOException {
+    private void getRemoteFile(String source, File dest, Boolean compressed) throws UnknownHostException, IOException {
         Context context;
         CommandFile command;
         JSONSerializer serializer;
@@ -64,6 +74,7 @@ public class FileStorage extends CommonStorage {
             context.setContext("file");
             command.setName("get");
             command.setFilename(source);
+            command.setCompressed(compressed);
             context.setCommand(command);
 
             out.println(serializer.exclude("*.class").deepSerialize(context));

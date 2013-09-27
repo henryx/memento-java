@@ -71,8 +71,8 @@ public class DbStorage extends CommonStorage {
         PreparedStatement insert;
 
         insert = this.conn.prepareStatement("INSERT INTO attrs"
-                + "(area, grace, dataset, element, os, type, mtime, ctime, hash)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                + "(area, grace, dataset, element, os, type, mtime, ctime, hash, compressed)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, this.getSection());
         insert.setString(2, this.getGrace());
@@ -83,6 +83,7 @@ public class DbStorage extends CommonStorage {
         insert.setLong(7, json.getMtime());
         insert.setLong(8, json.getCtime());
         insert.setString(9, json.getHash());
+        insert.setBoolean(10, json.isCompressed());
 
         insert.executeUpdate();
         insert.close();
@@ -95,8 +96,8 @@ public class DbStorage extends CommonStorage {
 
         insert = this.conn.prepareStatement("INSERT INTO attrs"
                 + "(area, grace, dataset, element, os, username, groupname, type,"
-                + " link, mtime, ctime, hash, perms)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                + " link, mtime, ctime, hash, perms, compressed)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         insert.setString(1, this.getSection());
         insert.setString(2, this.getGrace());
@@ -115,6 +116,7 @@ public class DbStorage extends CommonStorage {
         insert.setLong(11, json.getCtime());
         insert.setString(12, json.getHash());
         insert.setString(13, json.getPosixPermission());
+        insert.setBoolean(14, json.isCompressed());
 
         insert.executeUpdate();
         insert.close();

@@ -47,7 +47,6 @@ public class FileOperation implements Operation {
     }
 
     private void backupFile(String context, BufferedReader in) throws ClassNotFoundException, SQLException, UnknownHostException, IOException {
-        FileAttrs inJSON;
         FileAttrs item;
         Iterator<FileAttrs> items;
         String line;
@@ -61,8 +60,15 @@ public class FileOperation implements Operation {
             }
 
             if (context.equals("file")) {
-                inJSON = new JSONDeserializer<FileAttrs>().deserialize(line);
-                this.dbstore.add(inJSON);
+                item = new JSONDeserializer<FileAttrs>().deserialize(line);
+                
+                if (Boolean.parseBoolean(cfg.get(this.section, "compress"))) {
+                    item.setCompressed(Boolean.TRUE);
+                } else {
+                    item.setCompressed(Boolean.FALSE);
+                }
+                
+                this.dbstore.add(item);
             }
         }
 
@@ -86,6 +92,13 @@ public class FileOperation implements Operation {
                 } else {
                     item.setPreviousDataset(Boolean.FALSE);
                 }
+                
+                if (Boolean.parseBoolean(cfg.get(this.section, "compress"))) {
+                    item.setCompressed(Boolean.TRUE);
+                } else {
+                    item.setCompressed(Boolean.FALSE);
+                }
+
                 this.fsstore.get(item);
             }
             Main.logger.debug("Files downloaded");
