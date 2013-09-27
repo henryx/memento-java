@@ -45,7 +45,7 @@ public class Context {
         cmd = new CommandFile(this.connection);
         path = new File(directory);
 
-        cmd.setFile(path);
+        cmd.setFileName(directory);
         cmd.setAcl(acl);
 
         if (path.isDirectory()) {
@@ -55,7 +55,7 @@ public class Context {
         }
     }
 
-    private void cmdSendFile(String fileName) throws FileNotFoundException, IOException {
+    private void cmdSendFile(String fileName, boolean compressed) throws FileNotFoundException, IOException {
         CommandFile cmd;
         File srcFile;
 
@@ -70,7 +70,8 @@ public class Context {
             throw new IllegalArgumentException(srcFile + " is not a file");
         }
 
-        cmd.setFile(srcFile);
+        cmd.setFileName(srcFile.getAbsolutePath());
+        cmd.setCompressed(compressed);
         cmd.sendFile();
     }
 
@@ -99,7 +100,7 @@ public class Context {
             destFile.mkdirs();
         }
 
-        cmd.setFile(destFile);
+        cmd.setFileName(destFile.getAbsolutePath());
 
         result.put("context", "restore");
         result.put("result", "ok");
@@ -141,7 +142,7 @@ public class Context {
                 }
                 break;
             case "get":
-                this.cmdSendFile(command.get("filename").toString());
+                this.cmdSendFile(command.get("filename").toString(), (Boolean)command.get("compressed"));
                 break;
             case "put":
                 this.cmdReceiveFile(command.get("filename").toString());
