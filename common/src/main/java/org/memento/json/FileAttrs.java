@@ -44,6 +44,7 @@ public class FileAttrs {
     // Other
     private String linkTo;
     private boolean previousDataset;
+    private boolean compressed;
     
     /**
      * @param name the name to set
@@ -295,5 +296,19 @@ public class FileAttrs {
      */
     public void setPreviousDataset(boolean previousDataset) {
         this.previousDataset = previousDataset;
+    }
+
+    /**
+     * @return the compressed
+     */
+    public boolean isCompressed() {
+        return compressed;
+    }
+
+    /**
+     * @param compressed the compressed to set
+     */
+    public void setCompressed(boolean compressed) {
+        this.compressed = compressed;
     }
 }
