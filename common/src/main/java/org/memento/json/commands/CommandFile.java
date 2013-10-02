@@ -25,9 +25,6 @@ public class CommandFile extends Command {
     // For put command:
     private FileAttrs attrs;
 
-    // Other
-    private boolean compressed;
-
     /**
      * @return the directory
      */
@@ -82,19 +79,5 @@ public class CommandFile extends Command {
      */
     public void setAttrs(FileAttrs attrs) {
         this.attrs = attrs;
-    }
-
-    /**
-     * @return the compressed
-     */
-    public boolean isCompressed() {
-        return this.compressed;
-    }
-
-    /**
-     * @param compressed the compressed to set
-     */
-    public void setCompressed(boolean compressed) {
-        this.compressed = compressed;
     }
 }
