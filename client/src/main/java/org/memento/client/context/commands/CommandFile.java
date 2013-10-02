@@ -23,8 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.memento.PathName;
 import org.memento.json.FileAttrs;
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.XZOutputStream;
 
 /**
  *
@@ -33,9 +31,8 @@ import org.tukaani.xz.XZOutputStream;
 public class CommandFile {
 
     private boolean acl;
-    private String fileName;
+    private File aFile;
     private Socket connection;
-    private boolean compressed;
 
     public CommandFile(Socket connection) {
         this.connection = connection;
@@ -84,47 +81,31 @@ public class CommandFile {
     }
 
     /**
-     * @return the fileName
+     * @return the aFile
      */
-    public String getFileName() {
-        return this.fileName;
+    public File getFile() {
+        return this.aFile;
     }
 
     /**
-     * @param fileName the object to set
+     * @param aFile the object to set
      */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * @return the compressed
-     */
-    public boolean isCompressed() {
-        return compressed;
-    }
-
-    /**
-     * @param compressed the compressed to set
-     */
-    public void setCompressed(boolean compressed) {
-        this.compressed = compressed;
+    public void setFile(File aFile) {
+        this.aFile = aFile;
     }
 
     public void walk() throws IllegalArgumentException, IOException {
         File child;
-        File parent;
         FileAttrs data;
         JSONSerializer serializer;
         PrintWriter writer;
         Stack<File> stack;
 
-        parent = new File(this.fileName);
         stack = new Stack<>();
         serializer = new JSONSerializer();
         writer = new PrintWriter(this.connection.getOutputStream(), true);
 
-        stack.push(parent);
+        stack.push(this.aFile);
         while (!stack.isEmpty()) {
             child = stack.pop();
 
@@ -146,44 +127,18 @@ public class CommandFile {
     }
 
     public void sendFile() throws FileNotFoundException, IOException {
-        File fileProcessed;
         byte[] buffer;
         int read;
 
-        fileProcessed = null;
         buffer = new byte[8192];
 
-        try {
-            if (this.isCompressed()) {
-                fileProcessed = File.createTempFile(new File(this.fileName).getName(), ".compressed");
-                try (FileInputStream in = new FileInputStream(this.fileName);
-                        XZOutputStream out = new XZOutputStream(new FileOutputStream(fileProcessed), new LZMA2Options())) {
+        try (FileInputStream fis = new FileInputStream(this.aFile);
+                BufferedInputStream buff = new BufferedInputStream(fis);
+                BufferedOutputStream outStream = new BufferedOutputStream(this.connection.getOutputStream());) {
 
-                    while ((read = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, read);
-                    }
-
-                    out.finish();
-                }
-
-            } else {
-                fileProcessed = new File(this.fileName);
-            }
-
-            try (FileInputStream fis = new FileInputStream(fileProcessed);
-                    BufferedInputStream buff = new BufferedInputStream(fis);
-                    BufferedOutputStream outStream = new BufferedOutputStream(this.connection.getOutputStream());) {
-
-                while ((read = buff.read(buffer)) != -1) {
-                    outStream.write(buffer, 0, read);
-                    outStream.flush();
-                }
-            }
-        } finally {
-            if (this.isCompressed()) {
-                if (fileProcessed instanceof File) {
-                    fileProcessed.delete();
-                }
+            while ((read = buff.read(buffer)) != -1) {
+                outStream.write(buffer, 0, read);
+                outStream.flush();
             }
         }
     }
@@ -193,7 +148,7 @@ public class CommandFile {
         int bytesRead = 0;
 
         try (InputStream in = this.connection.getInputStream();
-                FileOutputStream outFile = new FileOutputStream(new File(this.fileName));) {
+                FileOutputStream outFile = new FileOutputStream(this.aFile);) {
 
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
