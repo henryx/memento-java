@@ -19,6 +19,8 @@ import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.Main;
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.XZOutputStream;
 
 /**
  *
@@ -53,9 +55,10 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    private void getRemoteFile(String source, File dest, Boolean compressed) throws UnknownHostException, IOException {
+        private void getRemoteFile(String source, File dest, Boolean compressed) throws UnknownHostException, IOException {
         Context context;
         CommandFile command;
+        OutputStream outFile = null;
         JSONSerializer serializer;
 
         byte[] buf = new byte[8192];
@@ -68,22 +71,32 @@ public class FileStorage extends CommonStorage {
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
                         Integer.parseInt(this.cfg.get(this.section, "port")));
                 InputStream in = conn.getInputStream();
-                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
-                FileOutputStream outFile = new FileOutputStream(dest);) {
+                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);) {
 
             context.setContext("file");
             command.setName("get");
             command.setFilename(source);
-            command.setCompressed(compressed);
             context.setCommand(command);
 
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
-
+            
+            if (compressed) {
+                outFile = new XZOutputStream(new FileOutputStream(dest), new LZMA2Options());
+            } else {
+                outFile = new FileOutputStream(dest);
+            }
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
             outFile.flush();
+        } finally {
+            if (outFile instanceof XZOutputStream) {
+                ((XZOutputStream)outFile).finish();
+            }
+            if (outFile != null) {
+                outFile.close();
+            }
         }
     }
 
