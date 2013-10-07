@@ -302,4 +302,8 @@ public class DbStorage extends CommonStorage {
     public void commit() throws SQLException {
         this.conn.commit();
     }
+
+    public void rollback() throws SQLException {
+        this.conn.rollback();
+    }
 }
