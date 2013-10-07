@@ -63,7 +63,6 @@ public class DbStorage extends CommonStorage {
         }
 
         insert.close();
-        this.conn.commit();
     }
 
     private void addDosAttrs(FileAttrs json) throws SQLException {
@@ -87,8 +86,6 @@ public class DbStorage extends CommonStorage {
 
         insert.executeUpdate();
         insert.close();
-        
-        this.conn.commit();
     }
 
     private void addPosixAttrs(FileAttrs json) throws SQLException {
@@ -120,8 +117,6 @@ public class DbStorage extends CommonStorage {
 
         insert.executeUpdate();
         insert.close();
-        
-        this.conn.commit();
     }
 
     public void add(FileAttrs json) throws SQLException, ClassNotFoundException {
@@ -302,5 +297,9 @@ public class DbStorage extends CommonStorage {
         }
 
         return result;
+    }
+    
+    public void commit() throws SQLException {
+        this.conn.commit();
     }
 }

@@ -56,6 +56,7 @@ public class FileOperation implements Operation {
             line = in.readLine();
 
             if (line == null) {
+                this.dbstore.commit();
                 break;
             }
 
