@@ -30,16 +30,16 @@ public class DbStorage extends CommonStorage {
 
     public DbStorage(Wini cfg) throws SQLException, ClassNotFoundException {
         super(cfg);
-        
+
         HashMap<String, String> connData;
-        
+
         connData = new HashMap<>();
         connData.put("host", this.cfg.get("database", "host"));
         connData.put("port", this.cfg.get("database", "port"));
         connData.put("dbname", this.cfg.get("database", "dbname"));
         connData.put("user", this.cfg.get("database", "user"));
-        connData.put("password", this.cfg.get("database", "password"));        
-        
+        connData.put("password", this.cfg.get("database", "password"));
+
         this.conn = new DBConnection(connData, false).getConnection();
     }
 
@@ -217,8 +217,8 @@ public class DbStorage extends CommonStorage {
 
         res = null;
         try (PreparedStatement select = this.conn.prepareStatement("SELECT count(*) FROM attrs"
-                        + " WHERE element = ? AND hash = ?"
-                        + "AND area = ? AND grace = ? AND dataset = ?")) {
+                + " WHERE element = ? AND hash = ?"
+                + "AND area = ? AND grace = ? AND dataset = ?")) {
 
             select.setString(1, json.getName());
             select.setString(2, json.getHash());
@@ -282,7 +282,7 @@ public class DbStorage extends CommonStorage {
         result.setType(res.getString(5));
         result.setMtime(res.getLong(6));
         result.setCtime(res.getLong(7));
-        
+
         if (result.getOs().equals("linux")) {
             result.setPosixPermission(res.getString(8));
             result.setPosixOwner(res.getString(9));
@@ -291,19 +291,33 @@ public class DbStorage extends CommonStorage {
 
         res.close();
         query.close();
-        
+
         if (acl) {
             // TODO: Add code for ACL's extraction
         }
 
         return result;
     }
-    
+
     public void commit() throws SQLException {
         this.conn.commit();
     }
 
-    public void rollback() throws SQLException {
-        this.conn.rollback();
+    public void remove(String name) throws SQLException {
+        PreparedStatement delete;
+
+        for (String table : new String[]{"attrs", "acls"}) {
+            delete = this.conn.prepareStatement("DELETE FROM "
+                    + table
+                    + " WHERE element = ?"
+                    + "AND area = ? AND grace = ? AND dataset = ?");
+            delete.setString(1, name);
+            delete.setString(2, this.getSection());
+            delete.setString(3, this.getGrace());
+            delete.setInt(4, this.getDataset());
+
+            delete.executeUpdate();
+            delete.close();
+        }
     }
 }
