@@ -99,8 +99,15 @@ public class FileOperation implements Operation {
                 } else {
                     item.setCompressed(Boolean.FALSE);
                 }
-
-                this.fsstore.get(item);
+                
+                try {
+                    this.fsstore.get(item);
+                } catch (FileSystemException ex) {
+                    Main.logger.error("File error for host: " + this.section + ": " + ex.getMessage());
+                    Main.logger.debug("File error for host: " + this.section, ex);
+                    this.dbstore.remove(item.getName());
+                    this.dbstore.commit();
+                }
             }
             Main.logger.debug("Files downloaded");
 
@@ -288,9 +295,6 @@ public class FileOperation implements Operation {
         } catch (ConnectException ex) {
             Main.logger.error("Connect error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("Connect error for host: " + this.section, ex);
-        } catch (FileSystemException ex) {
-            Main.logger.error("File error for host: " + this.section + ": " + ex.getMessage());
-            Main.logger.debug("File error for host: " + this.section, ex);
         } catch (IOException ex) {
             Main.logger.error("I/O error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("I/O error for host: " + this.section, ex);
