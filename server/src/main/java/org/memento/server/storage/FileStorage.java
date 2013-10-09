@@ -31,34 +31,54 @@ public class FileStorage extends CommonStorage {
     public FileStorage(Wini cfg) {
         super(cfg);
     }
+    
+    private void compress(File source, File dest) throws FileNotFoundException, IOException {
+        byte[] buf = new byte[1024 * 1024];
+        int bytesRead = 0;
+
+        try (FileInputStream in = new FileInputStream(source);
+                FileOutputStream out = new FileOutputStream(dest);
+                XZOutputStream compressed = new XZOutputStream(out, new LZMA2Options());) {
+
+            while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
+                compressed.write(buf, 0, bytesRead);
+                compressed.flush();
+            }
+            compressed.finish();
+        }
+    }
 
     private void getFile(FileAttrs json) throws UnknownHostException, IOException {
+        File retrieved;
         File source;
         File dest;
 
-        if (json.isCompressed()) {
-            dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
-        } else {
-            dest = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
-        }
+        retrieved = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
 
         if (!json.getPreviousDataset()) {
-            this.getRemoteFile(json.getName(), dest, json.isCompressed());
+            this.getRemoteFile(json.getName(), retrieved);
+
+            if (json.isCompressed()) {
+                dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
+                this.compress(retrieved, dest);
+                retrieved.delete();
+            }
         } else {
             if (json.isCompressed()) {
                 source = this.fileFromOS(this.returnStructure(true) + json.getName() + ".compressed", json.getOs());
+                dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
             } else {
                 source = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
+                dest  = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
             }
 
             Files.createLink(dest.toPath(), source.toPath());
         }
     }
 
-        private void getRemoteFile(String source, File dest, Boolean compressed) throws UnknownHostException, IOException {
+    private void getRemoteFile(String source, File dest) throws UnknownHostException, IOException {
         Context context;
         CommandFile command;
-        OutputStream outFile = null;
         JSONSerializer serializer;
 
         byte[] buf = new byte[8192];
@@ -69,9 +89,10 @@ public class FileStorage extends CommonStorage {
         serializer = new JSONSerializer();
 
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
-                        Integer.parseInt(this.cfg.get(this.section, "port")));
+                Integer.parseInt(this.cfg.get(this.section, "port")));
                 InputStream in = conn.getInputStream();
-                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);) {
+                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
+                FileOutputStream outFile = new FileOutputStream(dest);) {
 
             context.setContext("file");
             command.setName("get");
@@ -80,23 +101,11 @@ public class FileStorage extends CommonStorage {
 
             out.println(serializer.exclude("*.class").deepSerialize(context));
             out.flush();
-            
-            if (compressed) {
-                outFile = new XZOutputStream(new FileOutputStream(dest), new LZMA2Options());
-            } else {
-                outFile = new FileOutputStream(dest);
-            }
+
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 outFile.write(buf, 0, bytesRead);
             }
             outFile.flush();
-        } finally {
-            if (outFile instanceof XZOutputStream) {
-                ((XZOutputStream)outFile).finish();
-            }
-            if (outFile != null) {
-                outFile.close();
-            }
         }
     }
 
@@ -131,7 +140,7 @@ public class FileStorage extends CommonStorage {
 
         source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
         try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
-                        Integer.parseInt(this.cfg.get(this.section, "port")));
+                Integer.parseInt(this.cfg.get(this.section, "port")));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
