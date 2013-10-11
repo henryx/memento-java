@@ -69,7 +69,7 @@ public class FileStorage extends CommonStorage {
                 dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
             } else {
                 source = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
-                dest  = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
+                dest  = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
             }
 
             Files.createLink(dest.toPath(), source.toPath());
