@@ -223,8 +223,8 @@ public class Manager {
 
         sep = System.getProperty("file.separator");
         delete = new String[]{
-            "DELETE FROM attrs WHERE dataset = ?",
-            "DELETE FROM acls WHERE dataset = ?"
+            "DELETE FROM attrs WHERE dataset = ? AND grace = ?",
+            "DELETE FROM acls WHERE dataset = ? AND grace = ?"
         };
 
         try (DBConnection dbm = new DBConnection(this.connData, true);) {
@@ -232,6 +232,7 @@ public class Manager {
             for (String item : delete) {
                 pstmt = dbm.getConnection().prepareStatement(item);
                 pstmt.setInt(1, dataset);
+                pstmt.setString(2, this.grace);
                 pstmt.execute();
 
                 pstmt.close();
