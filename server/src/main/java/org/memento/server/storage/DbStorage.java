@@ -6,7 +6,6 @@
  */
 package org.memento.server.storage;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -196,7 +195,7 @@ public class DbStorage extends CommonStorage {
                 + " link,"
                 + " mtime,"
                 + " ctime FROM attrs WHERE type = ?"
-                + "AND area = ? AND grace = ? AND dataset = ?");
+                + " AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, itemType);
         query.setString(2, this.getSection());
@@ -218,7 +217,7 @@ public class DbStorage extends CommonStorage {
         res = null;
         try (PreparedStatement select = this.conn.prepareStatement("SELECT count(*) FROM attrs"
                 + " WHERE element = ? AND hash = ?"
-                + "AND area = ? AND grace = ? AND dataset = ?")) {
+                + " AND area = ? AND grace = ? AND dataset = ?")) {
 
             select.setString(1, json.getName());
             select.setString(2, json.getHash());
@@ -264,7 +263,7 @@ public class DbStorage extends CommonStorage {
                 + " perm,"
                 + " username,"
                 + " groupname FROM attrs WHERE element = ?"
-                + "AND area = ? AND grace = ? AND dataset = ?");
+                + " AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, name);
         query.setString(2, this.getSection());
@@ -310,7 +309,7 @@ public class DbStorage extends CommonStorage {
             delete = this.conn.prepareStatement("DELETE FROM "
                     + table
                     + " WHERE element = ?"
-                    + "AND area = ? AND grace = ? AND dataset = ?");
+                    + " AND area = ? AND grace = ? AND dataset = ?");
             delete.setString(1, name);
             delete.setString(2, this.getSection());
             delete.setString(3, this.getGrace());
