@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystemException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import org.ini4j.Wini;
 import org.memento.json.Context;
@@ -61,15 +62,23 @@ public class FileOperation implements Operation {
             }
 
             if (context.equals("file")) {
-                item = new JSONDeserializer<FileAttrs>().deserialize(line);
-                
-                if (Boolean.parseBoolean(cfg.get(this.section, "compress"))) {
-                    item.setCompressed(Boolean.TRUE);
-                } else {
-                    item.setCompressed(Boolean.FALSE);
+                try {
+                    item = new JSONDeserializer<FileAttrs>().deserialize(line);
+
+                    if (Boolean.parseBoolean(cfg.get(this.section, "compress"))) {
+                        item.setCompressed(Boolean.TRUE);
+                    } else {
+                        item.setCompressed(Boolean.FALSE);
+                    }
+
+                    this.dbstore.add(item);
+                } catch (ClassCastException ex) {
+                    HashMap err = new JSONDeserializer<HashMap>().deserialize(line);
+                    if(err.containsKey("result") && err.get("result").equals("error")) {
+                        Main.logger.error("Metadata parsing error for host's item: " + this.section + ": " + err.get("message"));
+                    }
+                    Main.logger.debug("Metadata parsing error for host's item: " + this.section + ": " + line, ex);
                 }
-                
-                this.dbstore.add(item);
             }
         }
 
