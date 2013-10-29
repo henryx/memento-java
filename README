@@ -1,7 +1,7 @@
 Memento backup system
 ----------------------
 
-Link: https://github.com/henryx/mementobackup
+Link: https://bitbucket.org/ebianchi/mementobackup
 
 Description:
 ------------
@@ -23,18 +23,23 @@ Dependencies:
 -------------
 
  - Java 1.7;
+ - PostgreSQL 9.x or more;
 
 Installation:
 -------------
 
-Just extract code into a directory and use it
+ - Extract the archive into a directory.
+ - Create an empty database in PostgreSQL.
+ - Configure the [database] and the [general] sections into configuration file.
+ - Create machine section into configuration file (see the example below).
+ - Run
 
 Client usage:
 -------------
 
 Client usage is:
 
-    $ java -jar Memento_-_Client.jar -p <port>
+    $ java -jar memento-client.jar -p <port>
 
 Where `<port>` is port number which service listen requests from server
 
@@ -43,18 +48,18 @@ Server usage:
 
 Server usage is:
 
-    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -H # hour backup
-    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -D # day backup
-    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -W # week backup
-    $ java -jar Memento_-_Server.jar --cfg=<cfgfile> -M # month backup
+    $ java -jar memento-server.jar --cfg=<cfgfile> -H # hour backup
+    $ java -jar memento-server.jar --cfg=<cfgfile> -D # day backup
+    $ java -jar memento-server.jar --cfg=<cfgfile> -W # week backup
+    $ java -jar memento-server.jar --cfg=<cfgfile> -M # month backup
 
-Where `<cfgfile>` is a file structured like the `syncropy.cfg` reported in the
+Where `<cfgfile>` is a file structured like the `backup.cfg` reported in the
 archive. For other options, use `-h` switch. Some notes:
 
  - It is possible to have multiple configuration files, where each file has
    different parameters.
- - While general sections is global, it is possible to set any number
-   of sections, one per server.
+ - While [general] [dataset] and [database] sections are global, it is 
+   possible to add any number of sections, one per server.
 
 This is an example of configuration file:
 
@@ -63,6 +68,13 @@ This is an example of configuration file:
 
     log_file = logfile.log
     log_level = INFO
+
+    [database]
+    host = localhost
+    port = 5432
+    user = postgres
+    password = a_password
+    dbname = a_database
 
     [dataset]
     hour = 24
