@@ -13,15 +13,87 @@ import org.memento.server.storage.FileStorage;
  *
  * @author enrico
  */
-public interface Operation extends Properties, Runnable {
+public abstract class Operation extends Thread implements Properties {
 
-    public void setOperationType(String type);
-    public String getOperationType();
-    public void setDbStore(DbStorage dbstore);
-    public DbStorage getDbStore();
-    public void setFsStore(FileStorage fsstore);
-    public FileStorage getFsStore();
+    private Integer dataset;
+    private String grace;
+    private String operationType;
+    protected DbStorage dbstore;
+    protected FileStorage fsstore;
+    protected String section;
+    
+    /**
+     * @return the dataset
+     */
+    @Override
+    public Integer getDataset() {
+        return this.dataset;
+    }
+
+    /**
+     * @param dataset the dataset to set
+     */
+    @Override
+    public void setDataset(Integer dataset) {
+        this.dataset = dataset;
+    }
+
+    /**
+     * @return the grace
+     */
+    @Override
+    public String getGrace() {
+        return this.grace;
+    }
+
+    /**
+     * @param grace the grace to set
+     */
+    @Override
+    public void setGrace(String grace) {
+        this.grace = grace;
+    }
+
+    /**
+     * @return the section
+     */
+    @Override
+    public String getSection() {
+        return this.section;
+    }
+
+    /**
+     * @param section the section to set
+     */
+    @Override
+    public void setSection(String section) {
+        this.section = section;
+    }
+
+    public void setDbStore(DbStorage dbstore) {
+        this.dbstore = dbstore;
+    }
+
+    public DbStorage getDbStore() {
+        return this.dbstore;
+    }
+
+    public void setFsStore(FileStorage fsstore) {
+        this.fsstore = fsstore;
+    }
+
+    public FileStorage getFsStore() {
+        return this.fsstore;
+    }
+
+    public void setOperationType(String operationType) {
+        this.operationType = operationType;
+    }
+
+    public String getOperationType() {
+        return this.operationType;
+    }
 
     @Override
-    public void run();
+    public abstract void run();
 }

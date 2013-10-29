@@ -26,21 +26,13 @@ import org.memento.json.commands.CommandFile;
 import org.memento.json.commands.CommandSystem;
 import org.memento.server.Main;
 import org.memento.server.management.Operation;
-import org.memento.server.storage.DbStorage;
-import org.memento.server.storage.FileStorage;
 
 /**
  *
  * @author enrico
  */
-public class FileOperation implements Operation {
+public class FileOperation extends Operation {
 
-    private Integer dataset;
-    private DbStorage dbstore;
-    private FileStorage fsstore;
-    private String grace;
-    private String operationType;
-    private String section;
     private Wini cfg;
 
     public FileOperation(Wini cfg) {
@@ -182,84 +174,6 @@ public class FileOperation implements Operation {
 
             this.fsstore.put(this.dbstore.getFile(cfile.getFilename(), cfile.getAcl()));
         }
-    }
-
-    /**
-     * @return the dataset
-     */
-    @Override
-    public Integer getDataset() {
-        return this.dataset;
-    }
-
-    /**
-     * @param dataset the dataset to set
-     */
-    @Override
-    public void setDataset(Integer dataset) {
-        this.dataset = dataset;
-    }
-
-    /**
-     * @return the grace
-     */
-    @Override
-    public String getGrace() {
-        return this.grace;
-    }
-
-    /**
-     * @param grace the grace to set
-     */
-    @Override
-    public void setGrace(String grace) {
-        this.grace = grace;
-    }
-
-    /**
-     * @return the section
-     */
-    @Override
-    public String getSection() {
-        return this.section;
-    }
-
-    /**
-     * @param section the section to set
-     */
-    @Override
-    public void setSection(String section) {
-        this.section = section;
-    }
-
-    @Override
-    public void setDbStore(DbStorage dbstore) {
-        this.dbstore = dbstore;
-    }
-
-    @Override
-    public DbStorage getDbStore() {
-        return this.dbstore;
-    }
-
-    @Override
-    public void setFsStore(FileStorage fsstore) {
-        this.fsstore = fsstore;
-    }
-
-    @Override
-    public FileStorage getFsStore() {
-        return this.fsstore;
-    }
-
-    @Override
-    public void setOperationType(String operationType) {
-        this.operationType = operationType;
-    }
-
-    @Override
-    public String getOperationType() {
-        return this.operationType;
     }
 
     @Override
