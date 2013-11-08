@@ -90,7 +90,7 @@ public class Manager {
     // FIXME: Ugly. This is not a good place for getting last dataset from database
     private void setLastDataset(Integer dataset) {
         PreparedStatement pstmt;
-        final String UPDATE = "UPDATE status SET actual = ? WHERE grace = ?";
+        final String UPDATE = "UPDATE status SET actual = ?, last_run = now() WHERE grace = ?";
 
         try (DBConnection dbm = new DBConnection(this.connData, true)) {
             pstmt = dbm.getConnection().prepareStatement(UPDATE);
