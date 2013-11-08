@@ -7,6 +7,7 @@
 package org.memento.server.operation;
 
 import flexjson.JSONDeserializer;
+import flexjson.JSONException;
 import flexjson.JSONSerializer;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystemException;
 import java.sql.SQLException;
@@ -64,12 +66,19 @@ public class FileOperation extends Operation {
                     }
 
                     this.dbstore.add(item);
-                } catch (ClassCastException ex) {
-                    HashMap err = new JSONDeserializer<HashMap>().deserialize(line);
-                    if(err.containsKey("result") && err.get("result").equals("error")) {
-                        Main.logger.error("Metadata parsing error for host's item: " + this.section + ": " + err.get("message"));
+                } catch (ClassCastException | JSONException ex) {
+                    if (ex instanceof ClassCastException) {
+
+                        HashMap err = new JSONDeserializer<HashMap>().deserialize(line);
+                        if (err.containsKey("result") && err.get("result").equals("error")) {
+                            Main.logger.error("Metadata parsing error for host's item: " + this.section + ": " + err.get("message"));
+                        }
+                        Main.logger.debug("Metadata parsing error for host's item: " + this.section + ": " + line, ex);
                     }
-                    Main.logger.debug("Metadata parsing error for host's item: " + this.section + ": " + line, ex);
+
+                    if (ex instanceof JSONException) {
+                        throw new SocketException("Socket read error for host's item: " + this.section + ": " + ex);
+                    }
                 }
             }
         }
@@ -94,13 +103,13 @@ public class FileOperation extends Operation {
                 } else {
                     item.setPreviousDataset(Boolean.FALSE);
                 }
-                
+
                 if (Boolean.parseBoolean(cfg.get(this.section, "compress"))) {
                     item.setCompressed(Boolean.TRUE);
                 } else {
                     item.setCompressed(Boolean.FALSE);
                 }
-                
+
                 try {
                     this.fsstore.get(item);
                 } catch (FileSystemException ex) {
