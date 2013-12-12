@@ -213,6 +213,13 @@ public class DbStorage extends CommonStorage {
 
     public Boolean isItemExist(FileAttrs json) {
         ResultSet res;
+        int previousDataset;
+        
+        if (this.getDataset() -1 <= 0) {
+            previousDataset = Integer.decode(this.cfg.get("dataset", this.getGrace()));
+        } else {
+            previousDataset = this.getDataset() -1;
+        }
 
         res = null;
         try (PreparedStatement select = this.conn.prepareStatement("SELECT count(*) FROM attrs"
@@ -223,7 +230,7 @@ public class DbStorage extends CommonStorage {
             select.setString(2, json.getHash());
             select.setString(3, this.getSection());
             select.setString(4, this.getGrace());
-            select.setInt(5, this.getDataset() - 1);
+            select.setInt(5, previousDataset);
 
             res = select.executeQuery();
             res.next();
