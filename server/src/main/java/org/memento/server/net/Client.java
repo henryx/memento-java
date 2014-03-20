@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import org.ini4j.Wini;
 
 /**
  *
@@ -25,43 +26,16 @@ public class Client implements AutoCloseable {
     private String sslpass;
     private boolean ssl;
 
-    /**
-     * @param port the port to set
-     */
-    public void setPort(Integer port) {
-        this.port = port;
+    public Client(String section, Wini cfg) {
+        this.host = cfg.get(section, "host");
+        this.port = Integer.parseInt(cfg.get(section, "port"));
+        this.ssl = Boolean.getBoolean(cfg.get(section, "ssl"));
+        this.sslkey = cfg.get(section, "sslkey");
+        this.sslpass = cfg.get(section, "sslpass");
     }
 
-    /**
-     * @param host the host to set
-     */
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    /**
-     * @param ssl the ssl to set
-     */
-    public void setSSL(boolean ssl) {
-        this.ssl = ssl;
-    }
-
-    /**
-     * @param sslkey the sslkey to set
-     */
-    public void setSSLkey(String sslkey) {
-        this.sslkey = sslkey;
-    }
-
-    /**
-     * @param sslpass the sslpass to set
-     */
-    public void setSSLpass(String sslpass) {
-        this.sslpass = sslpass;
-    }
-
-    public Socket open() throws UnknownHostException, IOException {
-        if (this.ssl) {
+    private Socket open() throws UnknownHostException, IOException {
+        if (this.isSSL()) {
             System.setProperty("javax.net.ssl.trustStore", this.sslkey);
             System.setProperty("javax.net.ssl.trustStorePassword", this.sslpass);
 
@@ -72,6 +46,21 @@ public class Client implements AutoCloseable {
         }
 
         return this.socket;
+    }
+
+    /**
+     * @return the ssl
+     */
+    public boolean isSSL() {
+        return ssl;
+    }
+
+    public Socket socket() throws UnknownHostException, IOException {
+        if (this.socket instanceof Socket) {
+            return this.socket;
+        } else {
+            return this.open();
+        }
     }
 
     @Override

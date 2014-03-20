@@ -138,33 +138,20 @@ public class FileOperation extends Operation {
 
         serializer = new JSONSerializer();
 
-        try (Client client = new Client()) {
+        try (Client client = new Client(this.section, this.cfg);
+                BufferedReader in = new BufferedReader(new InputStreamReader(client.socket().getInputStream()));
+                PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true)) {
 
-            client.setHost(this.cfg.get(this.section, "host"));
-            client.setPort(Integer.parseInt(this.cfg.get(this.section, "port")));
+            Main.logger.debug("Connection for "
+                    + this.cfg.get(this.section, "host")
+                    + ":" + this.cfg.get(this.section, "port")
+                    + " is opened");
 
-            if (Boolean.parseBoolean(this.cfg.get(this.section, "ssl"))) {
-                client.setSSL(true);
-                client.setSSLkey(this.cfg.get(this.section, "sslkey"));
-                client.setSSLpass(this.cfg.get(this.section, "sslpass"));
-            }
+            out.println(serializer.exclude("*.class").deepSerialize(command));
+            out.flush();
 
-            conn = client.open();
-
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
-
-                Main.logger.debug("Connection for "
-                        + this.cfg.get(this.section, "host")
-                        + ":" + this.cfg.get(this.section, "port")
-                        + " is opened");
-
-                out.println(serializer.exclude("*.class").deepSerialize(command));
-                out.flush();
-
-                Main.logger.debug("About to parse " + command.getContext() + " command");
-                this.backupFile(command.getContext(), in);
-            }
+            Main.logger.debug("About to parse " + command.getContext() + " command");
+            this.backupFile(command.getContext(), in);
         }
     }
 
@@ -204,7 +191,7 @@ public class FileOperation extends Operation {
     public void run() {
         Context context;
         CommandSystem csystem;
-
+        
         context = new Context();
         try {
             if (!this.cfg.get(this.section, "pre_command").equals("")) {
