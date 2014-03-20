@@ -41,7 +41,7 @@ Client usage is:
 
     $ java -jar memento-client.jar -p <port>
 
-Where `<port>` is port number which service listen requests from server
+Where `<port>` is port number which service listen requests from server (use -h option for help)
 
 Server usage:
 -------------
@@ -64,9 +64,8 @@ archive. For other options, use `-h` switch. Some notes:
 This is an example of configuration file:
 
     [general]
-    repository = /var/backups/servers
-
-    log_file = logfile.log
+    repository = /full/path/to/store/backups
+    log_file = memento.log
     log_level = INFO
 
     [database]
@@ -82,17 +81,28 @@ This is an example of configuration file:
     week = 4
     month = 12
 
-    [server1]
-    host = 192.168.1.100
+    [a_server]
+    type = file
+    host = localhost
     port = 4444
-    path = /home
-    store_acl = yes
+    path = /full/path/to/backup
+    acl = true
+    compress = true
+    ssl = true
+    sslkey = /path/for/java/keystore.jks
+    sslpass = a_password
+    pre_command =
+    post_command =
 
-    [server2]
-    host = 192.168.1.101
-    port = 4444
-    path = /home/foo
-    store_acl = no
+SSL:
+----
+
+For SSL connection, it used a java keystore. For its creation, use this command:
+
+keytool -genkey -keyalg RSA -keystore <keystore.jks> -storepass <optional_password> -keyalg RSA
+
+In client app, use -S, --sslkey and --sslpass options for enable it. In server
+app, use the configuration file for enable it
 
 Caveats:
 --------
