@@ -39,6 +39,18 @@ public class Main {
                 .withDescription("Enable SSL connection")
                 .create("S"));
         this.opts.addOption(OptionBuilder
+                .withLongOpt("sslkey")
+                .withDescription("Set SSL Keystore")
+                .hasArg()
+                .withArgName("ADDRESS")
+                .create());
+        this.opts.addOption(OptionBuilder
+                .withLongOpt("sslpass")
+                .withDescription("Set SSL password")
+                .hasArg()
+                .withArgName("ADDRESS")
+                .create());
+        this.opts.addOption(OptionBuilder
                 .withLongOpt("listen")
                 .withDescription("Set listen address")
                 .hasArg()
@@ -77,10 +89,15 @@ public class Main {
             }
 
             if (cmd.hasOption("S")) {
-                serve.open(true);
-            } else {
-                serve.open(false);
+                serve.setSSL(true);
+                serve.setSSLkey(cmd.getOptionValue("sslkey"));
+                if (cmd.hasOption("sslpass")) {
+                    serve.setSSLpass(cmd.getOptionValue("sslpass"));
+                }
             }
+            
+            serve.open();
+            
             while (!exit) {
                 exit = serve.listen();
             }

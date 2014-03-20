@@ -32,9 +32,13 @@ public class Serve implements AutoCloseable {
     private Integer port;
     private ServerSocket socket;
     private String address;
+    private String sslkey;
+    private String sslpass;
+    private boolean ssl;
 
     public Serve(Integer port) {
         this.port = port;
+        this.sslpass = "";
     }
 
     public boolean listen() throws UnknownHostException, IOException {
@@ -88,20 +92,24 @@ public class Serve implements AutoCloseable {
         return exit;
     }
 
-    public void open(boolean ssl) throws IOException {
+    public void open() throws IOException {
         ServerSocketFactory factory;
         SSLServerSocket socketSSL;
 
-        if (ssl) {
-            factory = SSLServerSocketFactory.getDefault();
+        if (this.ssl) {
+            System.setProperty("javax.net.ssl.keyStore", this.sslkey);
+            System.setProperty("javax.net.ssl.keyStorePassword", this.sslpass);
 
+            factory = SSLServerSocketFactory.getDefault();
+            socketSSL = (SSLServerSocket) factory.createServerSocket();
+
+            //socketSSL.setNeedClientAuth(true);
             if (this.address == null) {
-                socketSSL = (SSLServerSocket) factory.createServerSocket(this.port);
+                socketSSL.bind(new InetSocketAddress(this.port));
             } else {
-                socketSSL = (SSLServerSocket) factory.createServerSocket();
+
                 socketSSL.bind(new InetSocketAddress(this.address, this.port));
             }
-            socketSSL.setNeedClientAuth(true);
 
             this.socket = socketSSL;
         } else {
@@ -121,5 +129,33 @@ public class Serve implements AutoCloseable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    /**
+     * @param sslkey the sslkey to set
+     */
+    public void setSSLkey(String sslkey) {
+        this.sslkey = sslkey;
+    }
+
+    /**
+     * @param sslpass the sslpass to set
+     */
+    public void setSSLpass(String sslpass) {
+        this.sslpass = sslpass;
+    }
+
+    /**
+     * @return the ssl
+     */
+    public boolean isSSL() {
+        return this.ssl;
+    }
+
+    /**
+     * @param ssl the ssl to set
+     */
+    public void setSSL(boolean ssl) {
+        this.ssl = ssl;
     }
 }
