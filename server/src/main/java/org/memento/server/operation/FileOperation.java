@@ -21,8 +21,6 @@ import java.nio.file.FileSystemException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
@@ -30,6 +28,7 @@ import org.memento.json.commands.CommandFile;
 import org.memento.json.commands.CommandSystem;
 import org.memento.server.Main;
 import org.memento.server.management.Operation;
+import org.memento.server.net.Client;
 
 /**
  *
@@ -139,32 +138,34 @@ public class FileOperation extends Operation {
 
         serializer = new JSONSerializer();
 
-        if (Boolean.parseBoolean(this.cfg.get(this.section, "ssl"))) {
-            System.setProperty("javax.net.ssl.trustStore", this.cfg.get(this.section, "sslkey"));
-            System.setProperty("javax.net.ssl.trustStorePassword", this.cfg.get(this.section, "sslpass"));
-            
-            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            conn = (SSLSocket) sslsocketfactory.createSocket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
-        } else {
-            conn = new Socket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
+        try (Client client = new Client()) {
+
+            client.setHost(this.cfg.get(this.section, "host"));
+            client.setPort(Integer.parseInt(this.cfg.get(this.section, "port")));
+
+            if (Boolean.parseBoolean(this.cfg.get(this.section, "ssl"))) {
+                client.setSSL(true);
+                client.setSSLkey(this.cfg.get(this.section, "sslkey"));
+                client.setSSLpass(this.cfg.get(this.section, "sslpass"));
+            }
+
+            conn = client.open();
+
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
+
+                Main.logger.debug("Connection for "
+                        + this.cfg.get(this.section, "host")
+                        + ":" + this.cfg.get(this.section, "port")
+                        + " is opened");
+
+                out.println(serializer.exclude("*.class").deepSerialize(command));
+                out.flush();
+
+                Main.logger.debug("About to parse " + command.getContext() + " command");
+                this.backupFile(command.getContext(), in);
+            }
         }
-
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
-
-            Main.logger.debug("Connection for "
-                    + this.cfg.get(this.section, "host")
-                    + ":" + this.cfg.get(this.section, "port")
-                    + " is opened");
-
-            out.println(serializer.exclude("*.class").deepSerialize(command));
-            out.flush();
-
-            Main.logger.debug("About to parse " + command.getContext() + " command");
-            this.backupFile(command.getContext(), in);
-        }
-
-        conn.close();
     }
 
     private void sync() throws ClassNotFoundException, ConnectException, SQLException, IOException, UnknownHostException {
