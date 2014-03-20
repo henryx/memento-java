@@ -9,7 +9,6 @@ package org.memento.server.storage;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import java.io.*;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,6 +18,7 @@ import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.Main;
+import org.memento.server.net.Client;
 import org.tukaani.xz.LZMA2Options;
 import org.tukaani.xz.XZOutputStream;
 
@@ -87,11 +87,10 @@ public class FileStorage extends CommonStorage {
         context = new Context();
         command = new CommandFile();
         serializer = new JSONSerializer();
-
-        try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
-                Integer.parseInt(this.cfg.get(this.section, "port")));
-                InputStream in = conn.getInputStream();
-                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
+        
+        try (Client client = new Client(this.section, this.cfg);
+                InputStream in = client.socket().getInputStream();
+                PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true);
                 FileOutputStream outFile = new FileOutputStream(dest);) {
 
             context.setContext("file");
@@ -139,12 +138,11 @@ public class FileStorage extends CommonStorage {
         serializer = new JSONSerializer();
 
         source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
-        try (Socket conn = new Socket(this.cfg.get(this.section, "host"),
-                Integer.parseInt(this.cfg.get(this.section, "port")));
-                PrintWriter out = new PrintWriter(conn.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        try (Client client = new Client(this.section, this.cfg);
+                PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(client.socket().getInputStream()));
                 BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
-                BufferedOutputStream outStream = new BufferedOutputStream(conn.getOutputStream());) {
+                BufferedOutputStream outStream = new BufferedOutputStream(client.socket().getOutputStream());) {
 
             command.setName("put");
             command.setFilename(json.getName());
@@ -187,14 +185,14 @@ public class FileStorage extends CommonStorage {
 
         switch (json.getType()) {
             case "directory":
-                path = fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
+                path = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
                 path.mkdirs();
                 break;
             case "file":
                 this.getFile(json);
                 break;
             case "symlink":
-                path = fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
+                path = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
                 Files.createSymbolicLink(path.toPath(), Paths.get(json.getLinkTo()));
                 break;
         }
