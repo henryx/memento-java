@@ -23,13 +23,13 @@ Dependencies:
 -------------
 
  - Java 1.7;
- - PostgreSQL 9.x or more;
+ - Firebird;
 
 Installation:
 -------------
 
  - Extract the archive into a directory.
- - Create an empty database in PostgreSQL.
+ - Create an empty database in Firebird.
  - Configure the [database] and the [general] sections into configuration file.
  - Create machine section into configuration file (see the example below).
  - Run
@@ -41,7 +41,8 @@ Client usage is:
 
     $ java -jar memento-client.jar -p <port>
 
-Where `<port>` is port number which service listen requests from server (use -h option for help)
+Where `<port>` is port number which service listen requests from server
+(use -h option for help)
 
 Server usage:
 -------------
@@ -70,10 +71,10 @@ This is an example of configuration file:
 
     [database]
     host = localhost
-    port = 5432
-    user = postgres
-    password = a_password
-    dbname = a_database
+    port = 3050
+    user = sysdba
+    password = masterkey
+    dbname = memento.fdb
 
     [dataset]
     hour = 24

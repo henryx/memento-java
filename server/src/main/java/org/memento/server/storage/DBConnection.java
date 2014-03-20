@@ -8,6 +8,7 @@ package org.memento.server.storage;
 
 import java.sql.*;
 import java.util.HashMap;
+import org.memento.server.Main;
 
 /**
  *
@@ -31,9 +32,9 @@ public class DBConnection implements AutoCloseable {
     private void openConnection(HashMap<String, String> params) throws SQLException, ClassNotFoundException {
         String url;
 
-        url = "jdbc:postgresql://" + params.get("host") + ":" + params.get("port") + "/" + params.get("dbname");
+        url = "jdbc:firebirdsql:" + params.get("host") + "/" + params.get("port") + ":" + params.get("dbname");
 
-        Class.forName("org.postgresql.Driver");
+        Class.forName("org.firebirdsql.jdbc.FBDriver");
         this.conn = DriverManager.getConnection(url, params.get("user"), params.get("password"));
         this.conn.setAutoCommit(this.autocommit);
     }
@@ -63,12 +64,17 @@ public class DBConnection implements AutoCloseable {
         String[] data;
         String[] index;
         String[] tables;
+        String[] domains;
+
+        domains = new String[]{
+            "CREATE DOMAIN BOOLEAN AS SMALLINT CHECK (value is null or value in (0, 1))"
+        };
 
         index = new String[]{
             "CREATE INDEX idx_attrs_1 ON attrs(area, grace, dataset)",
-            "CREATE INDEX idx_attrs_2 ON attrs(area, grace, dataset, element, hash)",
+            "CREATE INDEX idx_attrs_2 ON attrs(area, grace, dataset, hash)",
             "CREATE INDEX idx_attrs_3 ON attrs(area, grace, dataset, type)",
-            "CREATE INDEX idx_acls_1 ON acls(element, area, grace, dataset)"
+            "CREATE INDEX idx_acls_1 ON acls(area, grace, dataset)"
         };
         tables = new String[]{
             "CREATE TABLE status ("
@@ -87,8 +93,8 @@ public class DBConnection implements AutoCloseable {
             + " link VARCHAR(1024),"
             + " hash VARCHAR(32),"
             + " perms VARCHAR(32),"
-            + " mtime NUMERIC,"
-            + " ctime NUMERIC,"
+            + " mtime BIGINT,"
+            + " ctime BIGINT,"
             + "compressed BOOLEAN)",
             "CREATE TABLE acls ("
             + "area VARCHAR(30),"
@@ -100,13 +106,17 @@ public class DBConnection implements AutoCloseable {
             + " perms VARCHAR(3))"
         };
         data = new String[]{
-            "INSERT INTO status VALUES('hour', 0, now())",
-            "INSERT INTO status VALUES('day', 0, now())",
-            "INSERT INTO status VALUES('week', 0, now())",
-            "INSERT INTO status VALUES('month', 0, now())"
+            "INSERT INTO status VALUES('hour', 0, CURRENT_TIMESTAMP)",
+            "INSERT INTO status VALUES('day', 0, CURRENT_TIMESTAMP)",
+            "INSERT INTO status VALUES('week', 0, CURRENT_TIMESTAMP)",
+            "INSERT INTO status VALUES('month', 0, CURRENT_TIMESTAMP)"
         };
 
         stmt = this.conn.createStatement();
+
+        for (String item : domains) {
+            stmt.executeUpdate(item);
+        }
 
         for (String item : tables) {
             stmt.executeUpdate(item);
@@ -121,7 +131,7 @@ public class DBConnection implements AutoCloseable {
         }
 
         stmt.close();
-        
+
         // For security, force commit
         if (!this.conn.getAutoCommit()) {
             this.conn.commit();
