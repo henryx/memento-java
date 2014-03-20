@@ -21,6 +21,8 @@ import java.nio.file.FileSystemException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
@@ -133,11 +135,21 @@ public class FileOperation extends Operation {
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         JSONSerializer serializer;
+        Socket conn;
 
         serializer = new JSONSerializer();
 
-        try (Socket conn = new Socket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        if (Boolean.parseBoolean(this.cfg.get(this.section, "ssl"))) {
+            System.setProperty("javax.net.ssl.trustStore", this.cfg.get(this.section, "sslkey"));
+            System.setProperty("javax.net.ssl.trustStorePassword", this.cfg.get(this.section, "sslpass"));
+            
+            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            conn = (SSLSocket) sslsocketfactory.createSocket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
+        } else {
+            conn = new Socket(this.cfg.get(this.section, "host"), Integer.parseInt(this.cfg.get(this.section, "port")));
+        }
+
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 PrintWriter out = new PrintWriter(conn.getOutputStream(), true)) {
 
             Main.logger.debug("Connection for "
@@ -151,6 +163,8 @@ public class FileOperation extends Operation {
             Main.logger.debug("About to parse " + command.getContext() + " command");
             this.backupFile(command.getContext(), in);
         }
+
+        conn.close();
     }
 
     private void sync() throws ClassNotFoundException, ConnectException, SQLException, IOException, UnknownHostException {
