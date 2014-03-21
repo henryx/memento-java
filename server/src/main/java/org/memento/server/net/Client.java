@@ -29,7 +29,7 @@ public class Client implements AutoCloseable {
     public Client(String section, Wini cfg) {
         this.host = cfg.get(section, "host");
         this.port = Integer.parseInt(cfg.get(section, "port"));
-        this.ssl = Boolean.getBoolean(cfg.get(section, "ssl"));
+        this.ssl = Boolean.parseBoolean(cfg.get(section, "ssl"));
         this.sslkey = cfg.get(section, "sslkey");
         this.sslpass = cfg.get(section, "sslpass");
     }
