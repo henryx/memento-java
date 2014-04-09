@@ -267,7 +267,7 @@ public class DbStorage extends CommonStorage {
                 + " type,"
                 + " mtime,"
                 + " ctime,"
-                + " perm,"
+                + " perms,"
                 + " username,"
                 + " groupname FROM attrs WHERE element = ?"
                 + " AND area = ? AND grace = ? AND dataset = ?");
