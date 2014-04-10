@@ -41,7 +41,35 @@ public class DbStorage extends CommonStorage {
 
         this.conn = new DBConnection(connData, false).getConnection();
     }
-    
+
+    private ArrayList<FileAcl> getPosixAcl(String element) throws SQLException {
+        ArrayList<FileAcl> result;
+        
+        result = new ArrayList<>();
+        try(PreparedStatement query = this.conn.prepareStatement("SELECT name, type, perms"
+                + " FROM acls WHERE element = ? AND area = ? AND grace = ? AND dataset = ?");) {
+            
+            query.setString(1, element);
+            query.setString(2, this.getSection());
+            query.setString(3, this.getGrace());
+            query.setInt(4, this.getDataset());
+            
+            try (ResultSet res = query.executeQuery()) {
+                while(res.next()) {
+                    FileAcl acl = new FileAcl();
+                    
+                    acl.setName(res.getString(1));
+                    acl.setAclType(res.getString(2));
+                    acl.setAttrs(res.getString(3));
+                    
+                    result.add(acl);
+                }
+            }
+        }
+
+        return result;
+    }
+
     private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {
         PreparedStatement insert;
 
@@ -297,7 +325,7 @@ public class DbStorage extends CommonStorage {
         }
 
         if (acl) {
-            // TODO: Add code for ACL's extraction
+            result.setAcl(this.getPosixAcl(name));
         }
 
         return result;
