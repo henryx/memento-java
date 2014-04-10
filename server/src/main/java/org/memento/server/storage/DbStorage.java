@@ -41,7 +41,7 @@ public class DbStorage extends CommonStorage {
 
         this.conn = new DBConnection(connData, false).getConnection();
     }
-
+    
     private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {
         PreparedStatement insert;
 
@@ -256,11 +256,9 @@ public class DbStorage extends CommonStorage {
 
     public FileAttrs getFile(String name, boolean acl) throws SQLException {
         FileAttrs result;
-        PreparedStatement query;
-        ResultSet res;
 
         result = new FileAttrs();
-        query = this.conn.prepareStatement("SELECT element,"
+        try (PreparedStatement query = this.conn.prepareStatement("SELECT element,"
                 + " os,"
                 + " hash,"
                 + " link,"
@@ -270,33 +268,33 @@ public class DbStorage extends CommonStorage {
                 + " perms,"
                 + " username,"
                 + " groupname FROM attrs WHERE element = ?"
-                + " AND area = ? AND grace = ? AND dataset = ?");
+                + " AND area = ? AND grace = ? AND dataset = ?");) {
 
-        query.setString(1, name);
-        query.setString(2, this.getSection());
-        query.setString(3, this.getGrace());
-        query.setInt(4, this.getDataset());
-        res = query.executeQuery();
+            query.setString(1, name);
+            query.setString(2, this.getSection());
+            query.setString(3, this.getGrace());
+            query.setInt(4, this.getDataset());
+            
+            try (ResultSet res = query.executeQuery();) {
+                res.next();
 
-        res.next();
-        result.setName(res.getString(1));
-        result.setOs(res.getString(2));
-        result.setHash(res.getString(3));
-        if (!(res.getString(4) == null || res.getString(4).equals(""))) {
-            result.setLinkTo(res.getString(4));
+                result.setName(res.getString(1));
+                result.setOs(res.getString(2));
+                result.setHash(res.getString(3));
+                if (!(res.getString(4) == null || res.getString(4).equals(""))) {
+                    result.setLinkTo(res.getString(4));
+                }
+                result.setType(res.getString(5));
+                result.setMtime(res.getLong(6));
+                result.setCtime(res.getLong(7));
+
+                if (result.getOs().equals("linux")) {
+                    result.setPosixPermission(res.getString(8));
+                    result.setPosixOwner(res.getString(9));
+                    result.setPosixGroup(res.getString(10));
+                }
+            }
         }
-        result.setType(res.getString(5));
-        result.setMtime(res.getLong(6));
-        result.setCtime(res.getLong(7));
-
-        if (result.getOs().equals("linux")) {
-            result.setPosixPermission(res.getString(8));
-            result.setPosixOwner(res.getString(9));
-            result.setPosixGroup(res.getString(10));
-        }
-
-        res.close();
-        query.close();
 
         if (acl) {
             // TODO: Add code for ACL's extraction
