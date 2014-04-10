@@ -282,7 +282,7 @@ public class DbStorage extends CommonStorage {
         }
     }
 
-    public FileAttrs getFile(String name, boolean acl) throws SQLException {
+    public FileAttrs getFileAttrs(String name, boolean acl) throws SQLException {
         FileAttrs result;
 
         result = new FileAttrs();

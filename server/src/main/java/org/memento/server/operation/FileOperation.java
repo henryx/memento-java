@@ -183,7 +183,7 @@ public class FileOperation extends Operation {
                 cfile.setFilename(this.cfg.get(this.section, "path"));
             } // TODO: add code for a full restore
 
-            this.fsstore.put(this.dbstore.getFile(cfile.getFilename(), cfile.getAcl()));
+            this.fsstore.put(this.dbstore.getFileAttrs(cfile.getFilename(), cfile.getAcl()));
         }
     }
 
