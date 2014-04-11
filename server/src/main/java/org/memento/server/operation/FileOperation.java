@@ -173,17 +173,14 @@ public class FileOperation extends Operation {
     private void restore() throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         CommandFile cfile;
 
-        cfile = new CommandFile();
-        cfile.setName("put");
-
-        cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
-
         if (this.cfg.get(this.section, "type").equals("file")) {
-            if (!Boolean.getBoolean(this.cfg.get(this.section, "full"))) {
-                cfile.setFilename(this.cfg.get(this.section, "path"));
-            } // TODO: add code for a full restore
+            cfile = new CommandFile();
+            cfile.setName("put");
 
-            this.fsstore.put(this.dbstore.getFileAttrs(cfile.getFilename(), cfile.getAcl()));
+            cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
+            cfile.setFilename(this.cfg.get(this.section, "path"));
+            cfile.setAttrs(this.dbstore.getFileAttrs(cfile.getFilename(), cfile.getAcl()));
+            this.fsstore.put(cfile);
         }
     }
 
@@ -191,7 +188,7 @@ public class FileOperation extends Operation {
     public void run() {
         Context context;
         CommandSystem csystem;
-        
+
         context = new Context();
         try {
             if (!this.cfg.get(this.section, "pre_command").equals("")) {

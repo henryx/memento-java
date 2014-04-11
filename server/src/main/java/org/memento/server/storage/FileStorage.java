@@ -31,7 +31,7 @@ public class FileStorage extends CommonStorage {
     public FileStorage(Wini cfg) {
         super(cfg);
     }
-    
+
     private void compress(File source, File dest) throws FileNotFoundException, IOException {
         byte[] buf = new byte[1024 * 1024];
         int bytesRead = 0;
@@ -69,7 +69,7 @@ public class FileStorage extends CommonStorage {
                 dest = this.fileFromOS(this.returnStructure(false) + json.getName() + ".compressed", json.getOs());
             } else {
                 source = this.fileFromOS(this.returnStructure(true) + json.getName(), json.getOs());
-                dest  = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
+                dest = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
             }
 
             Files.createLink(dest.toPath(), source.toPath());
@@ -87,7 +87,7 @@ public class FileStorage extends CommonStorage {
         context = new Context();
         command = new CommandFile();
         serializer = new JSONSerializer();
-        
+
         try (Client client = new Client(this.section, this.cfg);
                 InputStream in = client.socket().getInputStream();
                 PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true);
@@ -124,46 +124,6 @@ public class FileStorage extends CommonStorage {
         return result;
     }
 
-    private void putFile(FileAttrs json) throws UnknownHostException, IOException {
-        Context context;
-        CommandFile command;
-        File source;
-        JSONSerializer serializer;
-        HashMap<String, String> response;
-        int read;
-        byte[] buffer = new byte[8192];
-
-        context = new Context();
-        command = new CommandFile();
-        serializer = new JSONSerializer();
-
-        source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getOs());
-        try (Client client = new Client(this.section, this.cfg);
-                PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(client.socket().getInputStream()));
-                BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
-                BufferedOutputStream outStream = new BufferedOutputStream(client.socket().getOutputStream());) {
-
-            command.setName("put");
-            command.setFilename(json.getName());
-            command.setAttrs(json);
-
-            context.setContext("file");
-            context.setCommand(command);
-
-            out.println(serializer.exclude("*.class").deepSerialize(context));
-            out.flush();
-
-            response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
-            if (response.get("context").equals("restore") && response.get("result").equals("ok")) {
-                while ((read = buff.read(buffer)) != -1) {
-                    outStream.write(buffer, 0, read);
-                    outStream.flush();
-                }
-            }
-        }
-    }
-
     /**
      * @param section the section to set
      */
@@ -197,18 +157,42 @@ public class FileStorage extends CommonStorage {
                 break;
         }
     }
+    
+    public void put(CommandFile json) throws UnknownHostException, IOException {
+        Context context;
+        File source;
+        JSONSerializer serializer;
+        HashMap<String, String> response;
+        int read;
+        byte[] buffer = new byte[8192];
 
-    public void put(FileAttrs json) throws UnknownHostException, IOException {
-        switch (json.getType()) {
-            case "directory":
-                // TODO: need to create directories?
-                break;
-            case "file":
-                this.putFile(json);
-                break;
-            case "symlink":
-                // TODO: need to create symlinks?
-                break;
+        context = new Context();
+        serializer = new JSONSerializer();
+
+        try (Client client = new Client(this.section, this.cfg);
+                PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(client.socket().getInputStream()));) {
+
+            context.setContext("file");
+            context.setCommand(json);
+
+            out.println(serializer.exclude("*.class").deepSerialize(context));
+            out.flush();
+
+            response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
+            if (json.getAttrs().getType().equals("file")) {
+                if (response.get("context").equals("restore") && response.get("result").equals("ok")) {
+                    source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getAttrs().getOs());
+                    try (BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
+                            BufferedOutputStream outStream = new BufferedOutputStream(client.socket().getOutputStream());) {
+
+                        while ((read = buff.read(buffer)) != -1) {
+                            outStream.write(buffer, 0, read);
+                            outStream.flush();
+                        }
+                    }
+                }
+            }
         }
     }
 }
