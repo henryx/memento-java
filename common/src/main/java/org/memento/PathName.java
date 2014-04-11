@@ -93,9 +93,25 @@ public class PathName {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private void aclToLinux(ArrayList<FileAcl> acls) {
-        // TODO: write code for storing Linux ACL
-        throw new UnsupportedOperationException("Not supported yet.");
+    private void aclToLinux(ArrayList<FileAcl> acls) throws IOException {
+        ArrayList<String> args;
+        Process p;
+        String acl;
+
+        for (FileAcl item : acls) {
+            if (item.getAclType().equals(FileAcl.OWNER)) {
+                acl = "u:" + item.getName() + ":" + item.getAttrs();
+            } else {
+                acl = "g:" + item.getName() + ":" + item.getAttrs();
+            }
+
+            args = new ArrayList<>();
+            args.add("setfacl");
+            args.add("-m " + acl);
+            args.add(this.path.getAbsolutePath());
+            
+            p = new ProcessBuilder(args).start(); // FIXME: doesn't work
+        }
     }
 
     public String hash() throws NoSuchAlgorithmException, IOException {
@@ -213,7 +229,7 @@ public class PathName {
         return result;
     }
 
-    public void setAcl(ArrayList<FileAcl> acls) {
+    public void setAcl(ArrayList<FileAcl> acls) throws IOException {
         if (System.getProperty("os.name").startsWith("Windows")) {
             this.aclToWindows(acls);
         } else {
