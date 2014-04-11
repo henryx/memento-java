@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.memento.PathName;
 import org.memento.client.Main;
 import org.memento.client.context.commands.CommandFile;
+import org.memento.json.FileAcl;
 import org.memento.json.FileAttrs;
 
 /**
@@ -74,7 +75,7 @@ public class Context {
         cmd.sendFile();
     }
 
-    private void cmdReceiveFile(String fileName) throws IOException {
+    private void cmdReceiveFile(String fileName, String type) throws IOException {
         CommandFile cmd;
         File destFile;
         File bakFile;
@@ -98,16 +99,40 @@ public class Context {
         if (!parent.exists()) {
             destFile.mkdirs();
         }
+        
+        if (type.equals("file")) {
 
-        cmd.setFile(destFile);
+            cmd.setFile(destFile);
 
-        result.put("context", "restore");
-        result.put("result", "ok");
+            result.put("context", "restore");
+            result.put("result", "ok");
 
-        out.println(serializer.exclude("*.class").serialize(result));
-        cmd.receiveFile();
+            out.println(serializer.exclude("*.class").serialize(result));
+            cmd.receiveFile();
+        } else {
+            destFile.mkdir();
+        }
     }
     
+    private void cmdSetAcls(String name, ArrayList<HashMap> acls) throws IOException {
+        ArrayList<FileAcl> items;
+        FileAcl acl;
+        PathName path;
+
+        items = new ArrayList<>();
+        for (HashMap item : acls) {
+            acl = new FileAcl();
+            acl.setName(item.get("name").toString());
+            acl.setAclType(item.get("aclType").toString());
+            acl.setAttrs(item.get("attrs").toString());
+            
+            items.add(acl);
+        }
+
+        path = new PathName(new File(name));
+        path.setAcl(items);
+    }
+
     private void cmdSetAttrs(String attributes) throws IOException {
         FileAttrs attrs;
         PathName path;
@@ -144,8 +169,15 @@ public class Context {
                 this.cmdSendFile(command.get("filename").toString());
                 break;
             case "put":
-                this.cmdReceiveFile(command.get("filename").toString());
+                this.cmdReceiveFile(command.get("filename").toString(), ((HashMap)command.get("attrs")).get("type").toString());
                 this.cmdSetAttrs(new JSONSerializer().serialize(command.get("attrs")));
+
+                if (Boolean.parseBoolean(command.get("acl").toString())) {
+                    if (((HashMap)command.get("attrs")).get("acl") instanceof ArrayList) {
+                        this.cmdSetAcls(command.get("filename").toString(),
+                                (ArrayList<HashMap>)((HashMap)command.get("attrs")).get("acl"));
+                    }
+                }                
                 break;
             default:
                 errMsg = new HashMap();
