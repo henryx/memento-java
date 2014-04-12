@@ -147,7 +147,7 @@ public class FileOperation extends Operation {
                     + ":" + this.cfg.get(this.section, "port")
                     + " is opened");
 
-            out.println(serializer.exclude("*.class").deepSerialize(command));
+            out.println(serializer.deepSerialize(command));
             out.flush();
 
             Main.logger.debug("About to parse " + command.getContext() + " command");

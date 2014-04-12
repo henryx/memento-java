@@ -98,7 +98,7 @@ public class FileStorage extends CommonStorage {
             command.setFilename(source);
             context.setCommand(command);
 
-            out.println(serializer.exclude("*.class").deepSerialize(context));
+            out.println(serializer.deepSerialize(context));
             out.flush();
 
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
@@ -176,7 +176,7 @@ public class FileStorage extends CommonStorage {
             context.setContext("file");
             context.setCommand(json);
 
-            out.println(serializer.exclude("*.class").deepSerialize(context));
+            out.println(serializer.deepSerialize(context));
             out.flush();
 
             response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
