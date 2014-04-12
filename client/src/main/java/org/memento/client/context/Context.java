@@ -26,6 +26,7 @@ import org.memento.client.Main;
 import org.memento.client.context.commands.CommandFile;
 import org.memento.json.FileAcl;
 import org.memento.json.FileAttrs;
+import org.memento.json.commands.CommandSystem;
 
 /**
  *
@@ -107,30 +108,18 @@ public class Context {
             result.put("context", "restore");
             result.put("result", "ok");
 
-            out.println(serializer.exclude("*.class").serialize(result));
+            out.println(serializer.serialize(result));
             cmd.receiveFile();
         } else {
             destFile.mkdir();
         }
     }
     
-    private void cmdSetAcls(String name, ArrayList<HashMap> acls) throws IOException {
-        ArrayList<FileAcl> items;
-        FileAcl acl;
+    private void cmdSetAcls(String name, ArrayList<FileAcl> acls) throws IOException {
         PathName path;
 
-        items = new ArrayList<>();
-        for (HashMap item : acls) {
-            acl = new FileAcl();
-            acl.setName(item.get("name").toString());
-            acl.setAclType(item.get("aclType").toString());
-            acl.setAttrs(item.get("attrs").toString());
-            
-            items.add(acl);
-        }
-
         path = new PathName(new File(name));
-        path.setAcl(items);
+        path.setAcl(acls);
     }
 
     private void cmdSetAttrs(String attributes) throws IOException {
@@ -143,40 +132,37 @@ public class Context {
         path.setAttrs(attrs);
     }
 
-    public boolean parseFile(HashMap command) throws IOException {
-        ArrayList paths;
+    public boolean parseFile(org.memento.json.commands.CommandFile command) throws IOException {
+        String[] paths;
         Context error;
         HashMap errMsg;
         boolean exit;
 
         exit = false;
-        switch (command.get("name").toString()) {
+        switch (command.getName()) {
             case "list":
                 try {
-                    paths = (ArrayList) command.get("directory");
-                    if (paths.isEmpty()) {
+                    paths = command.getDirectory();
+                    if (paths.length  == 0) {
                         throw new ClassCastException("List not definied");
                     }
 
-                    for (int item = 0; item < paths.size(); item++) {
-                        this.cmdListFile(paths.get(item).toString(), (boolean) command.get("acl"));
+                    for (String item : paths) {
+                        this.cmdListFile(item, command.getAcl());
                     }
                 } catch (ClassCastException ex) {
                     // TODO: manage exception
                 }
                 break;
             case "get":
-                this.cmdSendFile(command.get("filename").toString());
+                this.cmdSendFile(command.getFilename());
                 break;
             case "put":
-                this.cmdReceiveFile(command.get("filename").toString(), ((HashMap)command.get("attrs")).get("type").toString());
-                this.cmdSetAttrs(new JSONSerializer().serialize(command.get("attrs")));
+                this.cmdReceiveFile(command.getFilename(), command.getAttrs().getType());
+                this.cmdSetAttrs(new JSONSerializer().serialize(command.getAttrs()));
 
-                if (Boolean.parseBoolean(command.get("acl").toString())) {
-                    if (((HashMap)command.get("attrs")).get("acl") instanceof ArrayList) {
-                        this.cmdSetAcls(command.get("filename").toString(),
-                                (ArrayList<HashMap>)((HashMap)command.get("attrs")).get("acl"));
-                    }
+                if (command.getAcl()) {
+                    this.cmdSetAcls(command.getFilename(), command.getAttrs().getAcl());
                 }                
                 break;
             default:
@@ -192,7 +178,7 @@ public class Context {
         return exit;
     }
 
-    public boolean parseSystem(HashMap command) {
+    public boolean parseSystem(CommandSystem command) {
         BufferedReader bre;
         HashMap result;
         JSONSerializer serializer;
@@ -208,7 +194,7 @@ public class Context {
         exit = false;
         cmd = new String[3];
 
-        switch (command.get("name").toString()) {
+        switch (command.getName()) {
             case "exit":
                 exit = true;
                 break;
@@ -220,7 +206,7 @@ public class Context {
                     cmd[0] = "/bin/sh";
                     cmd[1] = "-c";
                 }
-                cmd[2] = command.get("value").toString();
+                cmd[2] = command.getValue();
 
                 try {
                     p = Runtime.getRuntime().exec(cmd);
@@ -248,7 +234,7 @@ public class Context {
 
                 try {
                     out = new PrintWriter(this.connection.getOutputStream(), true);
-                    out.println(serializer.exclude("*.class").serialize(result));
+                    out.println(serializer.serialize(result));
                 } catch (IOException ex) {
                     message = "Error when sending client version: " + ex.getMessage();
                 }
@@ -285,7 +271,7 @@ public class Context {
         serializer = new JSONSerializer();
 
         result.put("result", "error");
-        out.println(serializer.exclude("*.class").serialize(result));
+        out.println(serializer.serialize(result));
 
         return exit;
     }

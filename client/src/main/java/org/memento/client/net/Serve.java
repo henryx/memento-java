@@ -22,6 +22,8 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import org.memento.client.context.Context;
+import org.memento.json.commands.CommandFile;
+import org.memento.json.commands.CommandSystem;
 
 /**
  *
@@ -46,7 +48,7 @@ public class Serve implements AutoCloseable {
         boolean exit;
         BufferedReader in;
         HashMap errMsg;
-        HashMap inJSON;
+        org.memento.json.Context inJSON;
         Socket connection;
 
         connection = this.socket.accept();
@@ -54,13 +56,13 @@ public class Serve implements AutoCloseable {
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         context = new Context(connection);
         try {
-            inJSON = new JSONDeserializer<HashMap>().deserialize(in.readLine());
-            switch (inJSON.get("context").toString()) {
+            inJSON = new JSONDeserializer<org.memento.json.Context>().deserialize(in.readLine(), org.memento.json.Context.class);
+            switch (inJSON.getContext()) {
                 case "file":
-                    exit = context.parseFile((HashMap) inJSON.get("command"));
+                    exit = context.parseFile((CommandFile) inJSON.getCommand());
                     break;
                 case "system":
-                    exit = context.parseSystem((HashMap) inJSON.get("command"));
+                    exit = context.parseSystem((CommandSystem) inJSON.getCommand());
                     break;
                 default:
                     errMsg = new HashMap();
