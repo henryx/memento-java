@@ -172,15 +172,30 @@ public class FileOperation extends Operation {
 
     private void restore() throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         CommandFile cfile;
+        Iterator<FileAttrs> items;
+        FileAttrs itemAttrs;
+        String[] sections;
+        
+        cfile = new CommandFile();
+        cfile.setName("put");
+        cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
 
         if (this.cfg.get(this.section, "type").equals("file")) {
-            cfile = new CommandFile();
-            cfile.setName("put");
-
-            cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
             cfile.setFilename(this.cfg.get(this.section, "path"));
             cfile.setAttrs(this.dbstore.getFileAttrs(cfile.getFilename(), cfile.getAcl()));
             this.fsstore.put(cfile);
+        } else if (this.cfg.get(this.section, "type").equals("full")) {
+            sections = new String[]{"directory", "file", "symlink"};
+            for (String item : sections) {
+                items = this.dbstore.listItems(item);
+                while (items.hasNext()) {
+                    itemAttrs = items.next();
+                    
+                    cfile.setFilename(itemAttrs.getName());
+                    cfile.setAttrs(itemAttrs);
+                    this.fsstore.put(cfile);
+                }
+            }
         }
     }
 
