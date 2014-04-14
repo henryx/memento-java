@@ -44,30 +44,34 @@ public class DbStorage extends CommonStorage {
 
     private ArrayList<FileAcl> getPosixAcl(String element) throws SQLException {
         ArrayList<FileAcl> result;
-        
+
         result = new ArrayList<>();
-        try(PreparedStatement query = this.conn.prepareStatement("SELECT name, type, perms"
+        try (PreparedStatement query = this.conn.prepareStatement("SELECT name, type, perms"
                 + " FROM acls WHERE element = ? AND area = ? AND grace = ? AND dataset = ?");) {
-            
+
             query.setString(1, element);
             query.setString(2, this.getSection());
             query.setString(3, this.getGrace());
             query.setInt(4, this.getDataset());
-            
+
             try (ResultSet res = query.executeQuery()) {
-                while(res.next()) {
+                while (res.next()) {
                     FileAcl acl = new FileAcl();
-                    
+
                     acl.setName(res.getString(1));
                     acl.setAclType(res.getString(2));
                     acl.setAttrs(res.getString(3));
-                    
+
                     result.add(acl);
                 }
             }
         }
 
         return result;
+    }
+
+    private ArrayList<FileAcl> getDosAcl(String element) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void addPosixAcl(String element, ArrayList<FileAcl> acls) throws SQLException {
@@ -192,6 +196,8 @@ public class DbStorage extends CommonStorage {
                     json.setCtime(this.res.getLong(6));
                     json.setType(this.type);
 
+                    json.setAcl(getFileAcl(json.getName(), json.getOs()));
+
                     return json;
                 } catch (SQLException ex) {
                     Main.logger.debug("Iterator error", ex);
@@ -242,11 +248,11 @@ public class DbStorage extends CommonStorage {
     public Boolean isItemExist(FileAttrs json) {
         ResultSet res;
         int previousDataset;
-        
-        if (this.getDataset() -1 <= 0) {
+
+        if (this.getDataset() - 1 <= 0) {
             previousDataset = Integer.decode(this.cfg.get("dataset", this.getGrace()));
         } else {
-            previousDataset = this.getDataset() -1;
+            previousDataset = this.getDataset() - 1;
         }
 
         res = null;
@@ -302,7 +308,7 @@ public class DbStorage extends CommonStorage {
             query.setString(2, this.getSection());
             query.setString(3, this.getGrace());
             query.setInt(4, this.getDataset());
-            
+
             try (ResultSet res = query.executeQuery();) {
                 res.next();
 
@@ -325,7 +331,19 @@ public class DbStorage extends CommonStorage {
         }
 
         if (acl) {
-            result.setAcl(this.getPosixAcl(name));
+            result.setAcl(this.getFileAcl(name, result.getOs()));
+        }
+
+        return result;
+    }
+
+    public ArrayList<FileAcl> getFileAcl(String element, String os) throws SQLException {
+        ArrayList<FileAcl> result;
+
+        if (os.equals("linux")) {
+            result = this.getPosixAcl(element);
+        } else {
+            result = this.getDosAcl(element);
         }
 
         return result;
