@@ -88,12 +88,12 @@ public class PathName {
         return result;
     }
 
-    private void aclToWindows(ArrayList<FileAcl> acls) {
+    private void aclToWindows(ArrayList<FileAcl> acls) throws IOException, InterruptedException {
         // TODO: write code for storing Windows ACL
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private void aclToLinux(ArrayList<FileAcl> acls) throws IOException {
+    private void aclToLinux(ArrayList<FileAcl> acls) throws IOException, InterruptedException {
         ArrayList<String> args;
         Process p;
         String acl;
@@ -111,6 +111,7 @@ public class PathName {
             args.add(this.path.getAbsolutePath());
             
             p = new ProcessBuilder(args).start(); // FIXME: doesn't work
+            p.waitFor();
         }
     }
 
@@ -230,10 +231,13 @@ public class PathName {
     }
 
     public void setAcl(ArrayList<FileAcl> acls) throws IOException {
-        if (System.getProperty("os.name").startsWith("Windows")) {
-            this.aclToWindows(acls);
-        } else {
-            this.aclToLinux(acls);
+        try {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                this.aclToWindows(acls);
+            } else {
+                this.aclToLinux(acls);
+            }
+        } catch (InterruptedException ex) {
         }
     }
 
