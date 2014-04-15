@@ -107,10 +107,11 @@ public class PathName {
 
             args = new ArrayList<>();
             args.add("setfacl");
-            args.add("-m " + acl);
+            args.add("-m");
+            args.add(acl);
             args.add(this.path.getAbsolutePath());
             
-            p = new ProcessBuilder(args).start(); // FIXME: doesn't work
+            p = new ProcessBuilder(args).start();
             p.waitFor();
         }
     }
