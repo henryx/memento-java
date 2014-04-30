@@ -182,7 +182,7 @@ public class FileStorage extends CommonStorage {
             response = new JSONDeserializer<HashMap>().deserialize(in.readLine());
             if (json.getAttrs().getType().equals("file")) {
                 if (response.get("context").equals("restore") && response.get("result").equals("ok")) {
-                    source = this.fileFromOS(this.returnStructure(false) + json.getName(), json.getAttrs().getOs());
+                    source = this.fileFromOS(this.returnStructure(false) + json.getFilename(), json.getAttrs().getOs());
                     try (BufferedInputStream buff = new BufferedInputStream(new FileInputStream(source));
                             BufferedOutputStream outStream = new BufferedOutputStream(client.socket().getOutputStream());) {
 
