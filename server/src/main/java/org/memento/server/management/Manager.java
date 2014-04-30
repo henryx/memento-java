@@ -47,15 +47,16 @@ public class Manager {
         this.connData.put("password", this.cfg.get("database", "password"));
     }
 
-    private Operation compute(String name) {
+    private Operation compute(String section) {
         String type;
 
-        type = this.cfg.get(name, "type");
+        type = this.cfg.get(section, "type");
         switch (type) {
             case "file":
                 FileOperation result = new FileOperation(this.cfg);
                 return result;
             default:
+                // TODO: write specific system operations
                 throw new UnsupportedOperationException("type method not supported");
         }
     }
