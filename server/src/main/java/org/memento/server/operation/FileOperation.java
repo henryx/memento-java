@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystemException;
@@ -134,10 +133,8 @@ public class FileOperation extends Operation {
 
     private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
         JSONSerializer serializer;
-        Socket conn;
 
         serializer = new JSONSerializer();
-
         try (Client client = new Client(this.section, this.cfg);
                 BufferedReader in = new BufferedReader(new InputStreamReader(client.socket().getInputStream()));
                 PrintWriter out = new PrintWriter(client.socket().getOutputStream(), true)) {
@@ -180,11 +177,13 @@ public class FileOperation extends Operation {
         cfile.setName("put");
         cfile.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
 
-        if (this.cfg.get(this.section, "type").equals("file")) {
+        if (!this.cfg.get(this.section, "path").equals("")) {
+            Main.logger.info("Restoring path " + this.cfg.get(this.section, "path"));
             cfile.setFilename(this.cfg.get(this.section, "path"));
             cfile.setAttrs(this.dbstore.getFileAttrs(cfile.getFilename(), cfile.getAcl()));
             this.fsstore.put(cfile);
-        } else if (this.cfg.get(this.section, "type").equals("full")) {
+        } else {
+            Main.logger.info("No path selected, make a full restore");
             sections = new String[]{"directory", "file", "symlink"};
             for (String item : sections) {
                 items = this.dbstore.listItems(item);
