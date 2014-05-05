@@ -71,6 +71,7 @@ public class DbStorage extends CommonStorage {
     }
 
     private ArrayList<FileAcl> getDosAcl(String element) {
+        // TODO: write code for getting Dos ACL from database
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -166,6 +167,7 @@ public class DbStorage extends CommonStorage {
 
             private ResultSet res;
             private String type;
+            private boolean acl;
 
             @Override
             public boolean hasNext() {
@@ -196,7 +198,9 @@ public class DbStorage extends CommonStorage {
                     json.setCtime(this.res.getLong(6));
                     json.setType(this.type);
 
-                    json.setAcl(getFileAcl(json.getName(), json.getOs()));
+                    if (this.acl) {
+                        json.setAcl(getFileAcl(json.getName(), json.getOs()));
+                    }
 
                     return json;
                 } catch (SQLException ex) {
@@ -216,6 +220,10 @@ public class DbStorage extends CommonStorage {
 
             public void setType(String type) {
                 this.type = type;
+            }
+            
+            public void setAcl(boolean acl) {
+                this.acl = acl;
             }
         }
 
@@ -239,6 +247,7 @@ public class DbStorage extends CommonStorage {
 
         result = new DbItems();
 
+        result.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
         result.setType(itemType);
         result.setResult(res);
 
