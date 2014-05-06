@@ -193,9 +193,21 @@ public class DbStorage extends CommonStorage {
                     json.setName(this.res.getString(1));
                     json.setOs(this.res.getString(2));
                     json.setHash(this.res.getString(3));
-                    json.setLinkTo(this.res.getString(4));
+
+                    if (!(res.getString(4) == null || res.getString(4).equals(""))) {
+                        json.setLinkTo(this.res.getString(4));
+                    }
+
                     json.setMtime(this.res.getLong(5));
                     json.setCtime(this.res.getLong(6));
+                    
+                    // TODO: add DOS permissions
+                    if (json.getOs().equals("linux")) {
+                        json.setPosixPermission(this.res.getString(7));
+                        json.setPosixOwner(this.res.getString(8));
+                        json.setPosixGroup(section);
+                    }
+
                     json.setType(this.type);
 
                     if (this.acl) {
@@ -236,8 +248,12 @@ public class DbStorage extends CommonStorage {
                 + " hash,"
                 + " link,"
                 + " mtime,"
-                + " ctime FROM attrs WHERE type = ?"
-                + " AND area = ? AND grace = ? AND dataset = ?");
+                + " ctime,"
+                + " perms,"
+                + " username,"
+                + " groupname FROM attrs WHERE type = ?"
+                + " AND area = ? AND grace = ? AND dataset = ?"
+                + " ORDER BY 1");
 
         query.setString(1, itemType);
         query.setString(2, this.getSection());
