@@ -16,6 +16,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -193,6 +194,7 @@ public class PathName {
         UserPrincipal posixOwner;
         GroupPrincipal posixGroup;
         Set<PosixFilePermission> posixPerms;
+        UserPrincipalLookupService lookup;
 
         if (System.getProperty("os.name").startsWith("Windows")) {
             Files.setAttribute(this.path.toPath(), "dos:archive", attrs.getDosArchive());
@@ -200,12 +202,10 @@ public class PathName {
             Files.setAttribute(this.path.toPath(), "dos:readonly", attrs.getDosReadonly());
             Files.setAttribute(this.path.toPath(), "dos:system", attrs.getDosSystem());
         } else {
-            posixOwner = this.path.toPath().getFileSystem()
-                    .getUserPrincipalLookupService()
-                    .lookupPrincipalByName(attrs.getPosixOwner());
-            posixGroup = this.path.toPath().getFileSystem()
-                    .getUserPrincipalLookupService()
-                    .lookupPrincipalByGroupName(attrs.getPosixGroup());
+            lookup = this.path.toPath().getFileSystem().getUserPrincipalLookupService();
+
+            posixOwner = lookup.lookupPrincipalByName(attrs.getPosixOwner());
+            posixGroup = lookup.lookupPrincipalByGroupName(attrs.getPosixGroup());
             posixPerms = PosixFilePermissions.fromString(attrs.getPosixPermission());
 
             Files.setOwner(this.path.toPath(), posixOwner);
