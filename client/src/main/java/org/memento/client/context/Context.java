@@ -209,7 +209,7 @@ public class Context {
                 cmd[2] = command.getValue();
 
                 try {
-                    p = Runtime.getRuntime().exec(cmd);
+                    p = new ProcessBuilder(cmd).start();
                     status = p.waitFor();
 
                     if (status != 0) {
