@@ -43,18 +43,23 @@ public class PathName {
 
     private ArrayList<FileAcl> aclFromLinux() throws IOException, InterruptedException {
         // NOTE: Need to manage case when external command fail
+        ArrayList<String> args;
         BufferedReader bri;
         //BufferedReader bre;
         FileAcl acl;
         ArrayList<FileAcl> result;
         Process p;
-        String[] command;
         String line;
 
         result = new ArrayList<>();
 
-        command = new String[]{"getfacl", this.path.getAbsolutePath()};
-        p = Runtime.getRuntime().exec(command);
+        args = new ArrayList<>();
+        args.add("getfacl");
+        args.add(this.path.getAbsolutePath());
+            
+        p = new ProcessBuilder(args).start();
+        p.waitFor();
+        
         bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
         //bre = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
@@ -83,7 +88,6 @@ public class PathName {
          bre.close();
          */
 
-        p.waitFor();
         //p.exitValue()
 
         return result;
