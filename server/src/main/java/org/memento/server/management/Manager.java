@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.ini4j.Wini;
 import org.memento.server.Main;
 import org.memento.server.operation.FileOperation;
-import org.memento.server.storage.DBConnection;
+import org.memento.server.net.DBConnection;
 import org.memento.server.storage.DbStorage;
 import org.memento.server.storage.FileStorage;
 

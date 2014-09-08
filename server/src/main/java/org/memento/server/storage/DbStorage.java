@@ -6,6 +6,7 @@
  */
 package org.memento.server.storage;
 
+import org.memento.server.net.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
