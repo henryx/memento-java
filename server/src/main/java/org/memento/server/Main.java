@@ -9,11 +9,20 @@ package org.memento.server;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import org.apache.commons.cli.*;
-import org.apache.log4j.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.ini4j.Wini;
 import org.memento.server.management.Manager;
-import org.memento.server.storage.DBConnection;
 
 /**
  *
