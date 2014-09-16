@@ -6,13 +6,22 @@
  */
 package org.memento.client;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.ini4j.Profile.Section;
+import org.ini4j.Wini;
 import org.memento.client.net.Serve;
 
 /**
@@ -37,19 +46,9 @@ public class Main {
         this.opts.addOption(OptionBuilder
                 .withLongOpt("ssl")
                 .withDescription("Enable SSL connection")
+                .hasArg()
+                .withArgName("CFG")
                 .create("S"));
-        this.opts.addOption(OptionBuilder
-                .withLongOpt("sslkey")
-                .withDescription("Set SSL Keystore")
-                .hasArg()
-                .withArgName("ADDRESS")
-                .create());
-        this.opts.addOption(OptionBuilder
-                .withLongOpt("sslpass")
-                .withDescription("Set SSL password")
-                .hasArg()
-                .withArgName("ADDRESS")
-                .create());
         this.opts.addOption(OptionBuilder
                 .withLongOpt("listen")
                 .withDescription("Set listen address")
@@ -58,6 +57,12 @@ public class Main {
                 .create("l"));
     }
 
+    private Section getOptions(String section, String cfgFile) throws IOException {
+        Wini cfg = new Wini();
+        cfg.load(new FileInputStream(cfgFile));
+        return cfg.get(section);
+    }
+    
     public void printHelp(Integer code) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("Memento", this.opts);
@@ -89,10 +94,12 @@ public class Main {
             }
 
             if (cmd.hasOption("S")) {
+                Section section = this.getOptions("ssl", cmd.getOptionValue("S"));
                 serve.setSSL(true);
-                serve.setSSLkey(cmd.getOptionValue("sslkey"));
-                if (cmd.hasOption("sslpass")) {
-                    serve.setSSLpass(cmd.getOptionValue("sslpass"));
+                
+                serve.setSSLkey(section.get("key"));
+                if (section.containsKey("password")) {
+                    serve.setSSLpass(section.get("password"));
                 }
             }
             
