@@ -21,6 +21,7 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import org.memento.client.Main;
 import org.memento.client.context.Context;
 import org.memento.json.commands.CommandFile;
 import org.memento.json.commands.CommandSystem;
@@ -52,6 +53,7 @@ public class Serve implements AutoCloseable {
         Socket connection;
 
         connection = this.socket.accept();
+        Main.LOGGER.fine("Serve - Accepted connnection from " + connection.getInetAddress().getHostAddress());
 
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         context = new Context(connection);
@@ -59,12 +61,15 @@ public class Serve implements AutoCloseable {
             inJSON = new JSONDeserializer<org.memento.json.Context>().deserialize(in.readLine(), org.memento.json.Context.class);
             switch (inJSON.getContext()) {
                 case "file":
+                    Main.LOGGER.fine("Serve - Received file context command");
                     exit = context.parseFile((CommandFile) inJSON.getCommand());
                     break;
                 case "system":
+                    Main.LOGGER.fine("Serve - Received system context command");
                     exit = context.parseSystem((CommandSystem) inJSON.getCommand());
                     break;
                 default:
+                    Main.LOGGER.fine("Serve - Non received context command");
                     errMsg = new HashMap();
                     errMsg.put("message", "Command not found");
                     exit = context.parseError(errMsg);
@@ -73,6 +78,7 @@ public class Serve implements AutoCloseable {
         } catch (ClassCastException | FileNotFoundException | JSONException | IllegalArgumentException | NullPointerException ex) {
             errMsg = new HashMap();
 
+            Main.LOGGER.fine("Serve - ERROR: " + ex.getMessage());
             if (ex instanceof FileNotFoundException
                     || ex instanceof IllegalArgumentException) {
                 errMsg.put("message", "Context not found: " + ex.getMessage());
@@ -85,6 +91,7 @@ public class Serve implements AutoCloseable {
             }
             exit = context.parseError(errMsg);
         } catch (SSLException ex) {
+            Main.LOGGER.fine("Serve - ERROR: " + ex.getMessage());
             errMsg = new HashMap();
             errMsg.put("message", "Non SSL Connection: " + ex.getMessage());
             exit = context.parseError(errMsg);
@@ -99,6 +106,7 @@ public class Serve implements AutoCloseable {
         SSLServerSocket socketSSL;
 
         if (this.ssl) {
+            Main.LOGGER.fine("Serve - Open SSL connection");
             System.setProperty("javax.net.ssl.keyStore", this.sslkey);
             System.setProperty("javax.net.ssl.keyStorePassword", this.sslpass);
 
@@ -107,18 +115,21 @@ public class Serve implements AutoCloseable {
 
             //socketSSL.setNeedClientAuth(true);
             if (this.address == null) {
+                Main.LOGGER.fine("Serve - Bind SSL connection to port " + this.port);
                 socketSSL.bind(new InetSocketAddress(this.port));
             } else {
-
+                Main.LOGGER.fine("Serve - Bind SSL connection to address " + this.address + ":" + this.port);
                 socketSSL.bind(new InetSocketAddress(this.address, this.port));
             }
 
             this.socket = socketSSL;
         } else {
             if (this.address == null) {
+                Main.LOGGER.fine("Serve - Bind connection to port " + this.port);
                 this.socket = new ServerSocket(this.port);
             } else {
                 this.socket = new ServerSocket();
+                Main.LOGGER.fine("Serve - Bind connection to address " + this.address + ":" + this.port);
                 this.socket.bind(new InetSocketAddress(this.address, this.port));
             }
         }

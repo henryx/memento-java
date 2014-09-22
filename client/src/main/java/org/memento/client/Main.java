@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -32,6 +34,7 @@ public class Main {
 
     private Options opts;
     public static final String VERSION = "1.0";
+    public final static Logger LOGGER = Logger.getLogger("Memento");
 
     public Main() {
         this.opts = new Options();
@@ -55,6 +58,10 @@ public class Main {
                 .hasArg()
                 .withArgName("ADDRESS")
                 .create("l"));
+        this.opts.addOption(OptionBuilder
+                .withLongOpt("debug")
+                .withDescription("Set debug messages")
+                .create());
     }
 
     private Section getOptions(String section, String cfgFile) throws IOException {
@@ -83,26 +90,40 @@ public class Main {
             this.printHelp(0);
         }
 
+         if (cmd.hasOption("debug")) {
+            Handler console = new ConsoleHandler();
+            console.setLevel(Level.FINEST);
+
+            Main.LOGGER.addHandler(console);
+            Main.LOGGER.setLevel(Level.FINEST);
+        } else {
+            Main.LOGGER.setLevel(Level.OFF);
+        }
+
         if (!cmd.hasOption("p")) {
             System.out.println("No port defined!");
             this.printHelp(2);
         }
 
+        Main.LOGGER.fine("Main - Listen port " + cmd.getOptionValue("p"));
         try (Serve serve = new Serve(Integer.parseInt(cmd.getOptionValue("p")));) {
             if (cmd.hasOption("l")) {
+                Main.LOGGER.fine("Listen address " + cmd.getOptionValue("l"));
                 serve.setAddress(cmd.getOptionValue("l"));
             }
 
             if (cmd.hasOption("S")) {
+                Main.LOGGER.fine("Main - SSL enabled");
                 Section section = this.getOptions("ssl", cmd.getOptionValue("S"));
                 serve.setSSL(true);
                 
                 serve.setSSLkey(section.get("key"));
                 if (section.containsKey("password")) {
+                    Main.LOGGER.fine("Main - SSL key password exists");
                     serve.setSSLpass(section.get("password"));
                 }
             }
-            
+
             serve.open();
             
             while (!exit) {

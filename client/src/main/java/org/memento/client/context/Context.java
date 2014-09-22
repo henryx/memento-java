@@ -51,6 +51,7 @@ public class Context {
         cmd.setAcl(acl);
 
         if (path.isDirectory()) {
+            Main.LOGGER.fine("Context - extract metadata");
             cmd.walk();
         } else {
             throw new IllegalArgumentException("Directory cannot be read: " + path.toString());
@@ -100,7 +101,7 @@ public class Context {
         if (!parent.exists()) {
             destFile.mkdirs();
         }
-        
+
         if (type.equals("file")) {
 
             cmd.setFile(destFile);
@@ -114,7 +115,7 @@ public class Context {
             destFile.mkdir();
         }
     }
-    
+
     private void cmdSetAcls(String name, ArrayList<FileAcl> acls) throws IOException {
         PathName path;
 
@@ -141,9 +142,10 @@ public class Context {
         exit = false;
         switch (command.getName()) {
             case "list":
+                Main.LOGGER.fine("Context - Received list files command");
                 try {
                     paths = command.getDirectory();
-                    if (paths.length  == 0) {
+                    if (paths.length == 0) {
                         throw new ClassCastException("List not definied");
                     }
 
@@ -155,17 +157,20 @@ public class Context {
                 }
                 break;
             case "get":
+                Main.LOGGER.fine("Context - Received get file command");
                 this.cmdSendFile(command.getFilename());
                 break;
             case "put":
+                Main.LOGGER.fine("Context - Received put file command");
                 this.cmdReceiveFile(command.getFilename(), command.getAttrs().getType());
                 this.cmdSetAttrs(new JSONSerializer().serialize(command.getAttrs()));
 
                 if (command.getAcl()) {
                     this.cmdSetAcls(command.getFilename(), command.getAttrs().getAcl());
-                }                
+                }
                 break;
             default:
+                Main.LOGGER.fine("Context - no file command received");
                 errMsg = new HashMap();
                 error = new Context(this.connection);
 
@@ -196,9 +201,15 @@ public class Context {
 
         switch (command.getName()) {
             case "exit":
+                Main.LOGGER.fine("Context - Exit command");
                 exit = true;
                 break;
             case "exec":
+                // FIXME: it doesn't work if STDERR or STDOUT are too big.
+                //        Current workaround is redirect STDOUT and STDERR to
+                //        /dev/null (linux) or NUL (windows)
+                
+                Main.LOGGER.fine("Context - Exec command");
                 if (System.getProperty("os.name").startsWith("Windows")) {
                     cmd[0] = "cmd.exe";
                     cmd[1] = "/C";
@@ -211,6 +222,8 @@ public class Context {
                 try {
                     p = new ProcessBuilder(cmd).start();
                     status = p.waitFor();
+                    
+                    Main.LOGGER.fine("Context - command executed");
 
                     if (status != 0) {
                         message = "Error when executing external command:\n";
@@ -226,6 +239,7 @@ public class Context {
                 }
                 break;
             case "version":
+                Main.LOGGER.fine("Context - version command");
                 result = new HashMap();
                 serializer = new JSONSerializer();
 
