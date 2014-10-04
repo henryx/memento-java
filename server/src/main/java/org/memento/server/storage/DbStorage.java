@@ -253,8 +253,7 @@ public class DbStorage extends CommonStorage {
                 + " perms,"
                 + " username,"
                 + " groupname FROM attrs WHERE type = ?"
-                + " AND area = ? AND grace = ? AND dataset = ?"
-                + " ORDER BY 1");
+                + " AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, itemType);
         query.setString(2, this.getSection());
