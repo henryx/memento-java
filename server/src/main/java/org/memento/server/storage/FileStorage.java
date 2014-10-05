@@ -23,14 +23,13 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
 import org.ini4j.Wini;
 import org.memento.json.Context;
 import org.memento.json.FileAttrs;
 import org.memento.json.commands.CommandFile;
 import org.memento.server.Main;
 import org.memento.server.net.Client;
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.XZOutputStream;
 
 /**
  *
@@ -48,7 +47,7 @@ public class FileStorage extends CommonStorage {
 
         try (FileInputStream in = new FileInputStream(source);
                 FileOutputStream out = new FileOutputStream(dest);
-                XZOutputStream compressed = new XZOutputStream(out, new LZMA2Options());) {
+                GZIPOutputStream compressed = new GZIPOutputStream(out);) {
 
             while ((bytesRead = in.read(buf, 0, buf.length)) != -1) {
                 compressed.write(buf, 0, bytesRead);
