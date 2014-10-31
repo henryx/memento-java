@@ -220,7 +220,7 @@ public class Context {
                 cmd[2] = command.getValue();
 
                 try {
-                    p = new ProcessBuilder(cmd).start();
+                    p = new ProcessBuilder().inheritIO().command(cmd).start();
                     status = p.waitFor();
                     
                     Main.LOGGER.fine("Context - command executed");
