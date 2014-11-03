@@ -75,9 +75,10 @@ public class DBConnection implements AutoCloseable {
         };
 
         index = new String[]{
-            "CREATE INDEX idx_attrs_1 ON attrs(area, grace, dataset)",
-            "CREATE INDEX idx_attrs_2 ON attrs(area, grace, dataset, hash)",
-            "CREATE INDEX idx_attrs_3 ON attrs(area, grace, dataset, type)",
+            "CREATE INDEX idx_attrs_1 ON attrs(area, grace)",
+            "CREATE INDEX idx_attrs_2 ON attrs(area, grace, dataset)",
+            "CREATE INDEX idx_attrs_3 ON attrs(area, grace, dataset, hash)",
+            "CREATE INDEX idx_attrs_4 ON attrs(area, grace, dataset, type)",
             "CREATE INDEX idx_acls_1 ON acls(area, grace, dataset)"
         };
         tables = new String[]{
