@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystemException;
 import java.sql.SQLException;
@@ -131,7 +132,7 @@ public class FileOperation extends Operation {
         }
     }
 
-    private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException {
+    private void sendCommand(Context command) throws UnknownHostException, IOException, SQLException, ClassNotFoundException, SocketTimeoutException {
         JSONSerializer serializer;
 
         serializer = new JSONSerializer();
@@ -240,6 +241,9 @@ public class FileOperation extends Operation {
         } catch (ConnectException ex) {
             Main.logger.error("Connect error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("Connect error for host: " + this.section, ex);
+        } catch (SocketTimeoutException ex) {
+            Main.logger.error("Connect timeout for host: " + this.section + ": " + ex.getMessage());
+            Main.logger.debug("Connect timeout for host: " + this.section, ex);
         } catch (IOException ex) {
             Main.logger.error("I/O error for host: " + this.section + ": " + ex.getMessage());
             Main.logger.debug("I/O error for host: " + this.section, ex);

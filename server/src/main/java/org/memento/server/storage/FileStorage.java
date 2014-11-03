@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -57,7 +58,7 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    private void getFile(FileAttrs json) throws UnknownHostException, IOException {
+    private void getFile(FileAttrs json) throws UnknownHostException, IOException, SocketTimeoutException {
         File retrieved;
         File source;
         File dest;
@@ -85,7 +86,7 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    private void getRemoteFile(String source, File dest) throws UnknownHostException, IOException {
+    private void getRemoteFile(String source, File dest) throws UnknownHostException, IOException, SocketTimeoutException {
         Context context;
         CommandFile command;
         JSONSerializer serializer;
@@ -149,7 +150,7 @@ public class FileStorage extends CommonStorage {
         }
     }
 
-    public void get(FileAttrs json) throws UnknownHostException, IOException {
+    public void get(FileAttrs json) throws UnknownHostException, IOException, SocketTimeoutException {
         File path;
 
         switch (json.getType()) {
@@ -167,7 +168,7 @@ public class FileStorage extends CommonStorage {
         }
     }
     
-    public void put(CommandFile json) throws UnknownHostException, IOException {
+    public void put(CommandFile json) throws UnknownHostException, IOException, SocketTimeoutException {
         Context context;
         File source;
         JSONSerializer serializer;

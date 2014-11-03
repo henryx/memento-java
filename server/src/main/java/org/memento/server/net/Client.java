@@ -7,7 +7,9 @@
 package org.memento.server.net;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -34,16 +36,17 @@ public class Client implements AutoCloseable {
         this.sslpass = cfg.get(section, "sslpass");
     }
 
-    private Socket open() throws UnknownHostException, IOException {
+    private Socket open() throws UnknownHostException, IOException, SocketTimeoutException {
         if (this.isSSL()) {
             System.setProperty("javax.net.ssl.trustStore", this.sslkey);
             System.setProperty("javax.net.ssl.trustStorePassword", this.sslpass);
 
             SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            this.socket = (SSLSocket) sslsocketfactory.createSocket(this.host, this.port);
+            this.socket = (SSLSocket) sslsocketfactory.createSocket();
         } else {
-            this.socket = new Socket(this.host, this.port);
+            this.socket = new Socket();
         }
+        this.socket.connect(new InetSocketAddress(this.host, this.port), 30000);
 
         return this.socket;
     }
@@ -55,7 +58,7 @@ public class Client implements AutoCloseable {
         return ssl;
     }
 
-    public Socket socket() throws UnknownHostException, IOException {
+    public Socket socket() throws UnknownHostException, IOException, SocketTimeoutException {
         if (this.socket instanceof Socket) {
             return this.socket;
         } else {
