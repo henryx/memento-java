@@ -98,7 +98,7 @@ This is an example of configuration file:
 SSL:
 ----
 
-For SSL connection, it used a java keystore. For its creation, use this command:
+For SSL connection, it uses a java keystore. For its creation, use this command:
 
     keytool -genkey -keyalg RSA -keystore <keystore.jks> -storepass <optional_password> -keyalg RSA
 
