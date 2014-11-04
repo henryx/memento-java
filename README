@@ -100,13 +100,13 @@ SSL:
 
 For SSL connection, it used a java keystore. For its creation, use this command:
 
-keytool -genkey -keyalg RSA -keystore <keystore.jks> -storepass <optional_password> -keyalg RSA
+    keytool -genkey -keyalg RSA -keystore <keystore.jks> -storepass <optional_password> -keyalg RSA
 
 In client app, use -S <cfgfile> options for enable it. The <cfgfile> has this syntax:
 
-[ssl]
-key = /path/to/keystore.jks
-password = optional_password #optional
+    [ssl]
+    key = /path/to/keystore.jks
+    password = optional_password #optional
 
 In server app, use the configuration file for enable it
 
