@@ -193,20 +193,20 @@ public class DbStorage extends CommonStorage {
                 try {
                     json.setName(this.res.getString(1));
                     json.setOs(this.res.getString(2));
-                    json.setHash(this.res.getString(3));
+                    json.setHash(this.res.getString(6));
 
-                    if (!(res.getString(4) == null || res.getString(4).equals(""))) {
-                        json.setLinkTo(this.res.getString(4));
+                    if (!(res.getString(5) == null || res.getString(5).equals(""))) {
+                        json.setLinkTo(this.res.getString(5));
                     }
 
-                    json.setMtime(this.res.getLong(5));
-                    json.setCtime(this.res.getLong(6));
+                    json.setMtime(this.res.getLong(8));
+                    json.setCtime(this.res.getLong(9));
                     
                     // TODO: add DOS permissions
                     if (json.getOs().equals("linux")) {
                         json.setPosixPermission(this.res.getString(7));
-                        json.setPosixOwner(this.res.getString(8));
-                        json.setPosixGroup(section);
+                        json.setPosixOwner(this.res.getString(3));
+                        json.setPosixGroup(this.res.getString(4));
                     }
 
                     json.setType(this.type);
@@ -246,13 +246,14 @@ public class DbStorage extends CommonStorage {
 
         query = this.conn.prepareStatement("SELECT element,"
                 + " os,"
-                + " hash,"
-                + " link,"
-                + " mtime,"
-                + " ctime,"
-                + " perms,"
                 + " username,"
-                + " groupname FROM attrs WHERE type = ?"
+                + " groupname,"
+                + " link,"
+                + " hash,"
+                + " perms,"
+                + " mtime,"
+                + " ctime"
+                + " FROM attrs WHERE type = ?"
                 + " AND area = ? AND grace = ? AND dataset = ?");
 
         query.setString(1, itemType);
