@@ -163,7 +163,7 @@ public class DbStorage extends CommonStorage {
         }
     }
 
-    public Iterator<FileAttrs> listItems(String itemType) throws SQLException {
+    public Iterator<FileAttrs> listItems(String itemType, boolean acl) throws SQLException {
         class DbItems implements Iterator<FileAttrs> {
 
             private ResultSet res;
@@ -264,7 +264,7 @@ public class DbStorage extends CommonStorage {
 
         result = new DbItems();
 
-        result.setAcl(Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
+        result.setAcl(acl);
         result.setType(itemType);
         result.setResult(res);
 

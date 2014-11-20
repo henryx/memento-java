@@ -88,7 +88,7 @@ public class FileOperation extends Operation {
             Main.logger.debug("Al files metadata readed");
 
             Main.logger.debug("About to create directory structure");
-            items = this.dbstore.listItems("directory");
+            items = this.dbstore.listItems("directory", false);
             while (items.hasNext()) {
                 item = items.next();
                 this.fsstore.get(item);
@@ -96,7 +96,7 @@ public class FileOperation extends Operation {
             Main.logger.debug("Directory structure created");
 
             Main.logger.debug("About to download files from remote server");
-            items = this.dbstore.listItems("file");
+            items = this.dbstore.listItems("file", false);
             while (items.hasNext()) {
                 item = items.next();
                 if (this.dbstore.isItemExist(item)) {
@@ -123,7 +123,7 @@ public class FileOperation extends Operation {
             Main.logger.debug("Files downloaded");
 
             Main.logger.debug("About to create symlinks");
-            items = this.dbstore.listItems("symlink");
+            items = this.dbstore.listItems("symlink", false);
             while (items.hasNext()) {
                 item = items.next();
                 this.fsstore.get(item);
@@ -187,7 +187,7 @@ public class FileOperation extends Operation {
             Main.logger.info("No path selected, make a full restore");
             sections = new String[]{"directory", "file", "symlink"};
             for (String item : sections) {
-                items = this.dbstore.listItems(item);
+                items = this.dbstore.listItems(item, Boolean.parseBoolean(this.cfg.get(this.section, "acl")));
                 while (items.hasNext()) {
                     itemAttrs = items.next();
                     
