@@ -1,0 +1,5 @@
+2014-11-25: common-1.2
+ - Added Posix ACL support
+
+2013-10-29: common-1.0
+ - Initial release
