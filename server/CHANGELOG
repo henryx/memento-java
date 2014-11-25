@@ -1,0 +1,9 @@
+2014-11-25: server-2.0
+ - Added restore function
+ - Added ACLs restore function
+ - Changed compression method (from LZMA to Gzip)
+ - SSL improvements
+ - Small fixes
+
+2012-03-21: server-1.0
+ - Initial release
