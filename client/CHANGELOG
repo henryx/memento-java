@@ -1,0 +1,8 @@
+2014-11-25: client-2.0
+ - Added restore function
+ - Added ACLs restore function
+ - SSL improvements
+ - Small fixes
+
+2013-10-29: client-1.0
+ - Initial release
