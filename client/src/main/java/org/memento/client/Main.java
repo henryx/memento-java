@@ -33,7 +33,7 @@ import org.memento.client.net.Serve;
 public class Main {
 
     private Options opts;
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "2.0";
     public final static Logger LOGGER = Logger.getLogger("Memento");
 
     public Main() {
