@@ -127,7 +127,11 @@ public class Main {
             serve.open();
             
             while (!exit) {
-                exit = serve.listen();
+                try {
+                    exit = serve.listen();
+                } catch (SocketException ex) {
+                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, ex.getMessage());
+                }
             }
 
         } catch (BindException ex) {
