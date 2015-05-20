@@ -80,6 +80,9 @@ public class FileOperation extends Operation {
                     if (ex instanceof JSONException) {
                         throw new SocketException("Socket read error for host's item: " + this.section + ": " + ex);
                     }
+                } catch (SQLException ex) {
+                    // NOTE: this skip insert for file
+                    Main.logger.debug("Error saving metadata for item: " + this.section + ": " + line, ex);
                 }
             }
         }
