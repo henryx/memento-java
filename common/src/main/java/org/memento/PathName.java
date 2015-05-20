@@ -74,7 +74,7 @@ public class PathName {
                 }
 
                 acl.setName(line.split(":")[1]);
-                acl.setAttrs(line.split(":")[2]);
+                acl.setAttrs(line.split(":")[2].substring(0, 2));
 
                 result.add(acl);
             }
