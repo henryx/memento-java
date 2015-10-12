@@ -1,7 +1,7 @@
 Memento backup system
 ----------------------
 
-Link: https://bitbucket.org/ebianchi/mementobackup
+Link: https://github.com/henryx/memento-java
 
 Description:
 ------------
